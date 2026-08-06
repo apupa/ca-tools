@@ -48,11 +48,18 @@
         line: { dash: "dash" }, xaxis: "x2", yaxis: "y2", showlegend: false,
       });
     });
+    // Assi delle pulsazioni: scala logaritmica con una tacca per decade,
+    // etichettata in notazione 10^n (dtick=1 in scala log = un ordine di
+    // grandezza tra una tacca e la successiva).
+    const assePulsazioni = {
+      type: "log", title: "ω [rad/s]", gridcolor: "#e5e7eb",
+      dtick: 1, exponentformat: "power", minorticks: "",
+    };
     const layout = Object.assign({}, layoutBase, {
       grid: { rows: 2, columns: 1, pattern: "independent" },
-      xaxis: { type: "log", title: "ω [rad/s]", gridcolor: "#e5e7eb" },
+      xaxis: assePulsazioni,
       yaxis: { title: "ampiezza [dB]", gridcolor: "#e5e7eb" },
-      xaxis2: { type: "log", title: "ω [rad/s]", gridcolor: "#e5e7eb" },
+      xaxis2: Object.assign({}, assePulsazioni),
       yaxis2: { title: "fase [°]", gridcolor: "#e5e7eb" },
     });
     Plotly.newPlot(divId, tracce, layout, configBase);

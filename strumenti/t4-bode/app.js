@@ -240,11 +240,6 @@
     const pendenza = t.esponente * 40;
     const segnoFase = t.esponente * (t.zeta < 0 ? -1 : 1);
     const direzioneFase = segnoFase > 0 ? "0° a +180°" : "0° a −180°";
-    let notaRisonanza = "";
-    if (t.esponente < 0 && Math.abs(t.zeta) < 1 / Math.SQRT2 && t.zeta > 0) {
-      const MR = 1 / (2 * t.zeta * Math.sqrt(1 - t.zeta * t.zeta));
-      notaRisonanza = " Presenta un picco di risonanza ($M_R \\approx " + formattaNumero(MR) + "$).";
-    }
     return (
       tipoTxt + " complesso coniugato, $\\omega_n = " + formattaNumero(omegaN) + "$ rad/s, $\\delta = " +
       formattaNumero(t.zeta) + "$: ampiezza costante fino a $\\omega_n$, poi pendenza " +
@@ -253,7 +248,7 @@
       "larghezza di banda $4.81^{|\\delta|} = " + formattaNumero(larghezza) + "$: la fase varia tra $\\omega_a = " +
       "\\omega_n/4.81^{|\\delta|} = " + formattaNumero(omegaA) + "$ rad/s e $\\omega_b = \\omega_n \\cdot " +
       "4.81^{|\\delta|} = " + formattaNumero(omegaB) + "$ rad/s, passando per " +
-      (segnoFase > 0 ? "+90°" : "−90°") + " in $\\omega_n$." + notaRisonanza
+      (segnoFase > 0 ? "+90°" : "−90°") + " in $\\omega_n$."
     );
   }
 
