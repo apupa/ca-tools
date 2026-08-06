@@ -386,7 +386,13 @@
       mostraRisposta(numChiuso, denChiuso, K, tResp);
     }
 
-    function calcola(num, den, kMax, specStaticaVal, vincoli, tResp) {
+    function calcola(numCostruito, denCostruito, kMax, specStaticaVal, vincoli, tResp) {
+      // Semplifica eventuali coppie polo/zero coincidenti (tipico quando il
+      // compensatore C(s) cancella un polo dell'impianto G(s)): il luogo e le
+      // specifiche vanno calcolati sulla FdT ridotta, altrimenti resterebbe un
+      // polo "fantasma" fermo in quel punto per ogni K.
+      const { num, den } = CA.semplificaFdT(numCostruito, denCostruito);
+
       const poliAperti = CA.polyRoots(den);
       const zeriAperti = CA.polyRoots(num);
       if (poliAperti.length === 0) throw new Error(simboloL + "(s) deve avere almeno un polo");
@@ -401,7 +407,7 @@
       if (parseFloat(sliderK.value) > kMax) sliderK.value = "0";
       sliderKVal.textContent = formattaNumero(parseFloat(sliderK.value));
 
-      mostraFdT(num, den);
+      mostraFdT(numCostruito, denCostruito);
       mostraSpecifiche(den, specStaticaVal);
       disegnaGrafico(parseFloat(sliderK.value));
     }
@@ -456,11 +462,11 @@
 
   document.getElementById("btn-calcola").addEventListener("click", eseguiCalcolo);
 
-  // ---------- Esempio precaricato: G(s) = 1/(s(s+1)(s+2)), C'(s) = rete anticipatrice (s+2)/(s+10) ----------
+  // ---------- Esempio precaricato: G(s) = 1/(s(s+1)(s+2)), C'(s) = zero reale in s=-3 ----------
   function caricaEsempio() {
     campoGNum.value = "1";
     campoGDen.value = "1 3 2 0";
-    campoCNum.value = "1 2";
+    campoCNum.value = "1 1";
     campoCDen.value = "1 10";
     campoKMax.value = "50";
     campoTResp.value = "10";

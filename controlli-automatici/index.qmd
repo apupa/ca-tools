@@ -1,23 +1,127 @@
 ---
-title: "Controlli Automatici"
+pagetitle: "Controlli Automatici · Materiale interattivo"
+page-layout: full
 toc: false
+search: false
 ---
 
-Materiale di supporto interattivo per il corso di **Controlli Automatici**
-(Ingegneria Gestionale, UNIMORE).
+```{=html}
+<nav class="barra-sito">
+  <span class="barra-sito-brand">Controlli Automatici</span>
+  <div class="barra-sito-nav">
+    <a class="barra-sito-link attivo" href="./">Home</a>
+    <div class="barra-sito-dropdown">
+      <button type="button" class="barra-sito-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+        Strumenti <span class="freccia">&#9662;</span>
+      </button>
+      <div class="barra-sito-dropdown-menu">
+      <a href="strumenti/t1-convertitore/index.html">1. Conversione rappresentazioni</a>
+      <a href="strumenti/t2-risposta/index.html">2. Risposta nel tempo e modi</a>
+      <a href="strumenti/t3-elementari/index.html">3. Sistemi elementari (1°/2° ordine)</a>
+      <a href="strumenti/t4-bode/index.html">4. Diagrammi di Bode</a>
+      <a href="strumenti/t5-luogo/index.html">5. Luogo delle radici</a>
+      <a href="strumenti/t7-progettazione/index.html">6. Progettazione del controllore</a>
+      <a href="strumenti/t6-pid/index.html">7. Taratura PID</a>
+      </div>
+    </div>
+  </div>
+</nav>
+<script>
+(function () {
+  document.querySelectorAll('.barra-sito-dropdown-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var dd = btn.closest('.barra-sito-dropdown');
+      var giaAperto = dd.classList.contains('aperto');
+      document.querySelectorAll('.barra-sito-dropdown.aperto').forEach(function (d) {
+        d.classList.remove('aperto');
+        d.querySelector('.barra-sito-dropdown-toggle').setAttribute('aria-expanded', 'false');
+      });
+      if (!giaAperto) {
+        dd.classList.add('aperto');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.barra-sito-dropdown.aperto').forEach(function (d) {
+      d.classList.remove('aperto');
+      d.querySelector('.barra-sito-dropdown-toggle').setAttribute('aria-expanded', 'false');
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.barra-sito-dropdown.aperto').forEach(function (d) { d.classList.remove('aperto'); });
+    }
+  });
+})();
+</script>
+<div class="landing">
 
-## Strumenti interattivi
+  <div class="hero">
+    <img class="hero-photo" src="img/andrea-pupa.jpg" alt="Andrea Pupa" />
+    <div class="hero-body">
+      <h2 class="hero-title">Dalla teoria alla pratica</h2>
+      <p class="hero-sub">Materiale di supporto per il corso di Controlli Automatici (Ingegneria Gestionale, Università di Modena e Reggio Emilia).</p>
+      <p class="hero-author">
+        <a class="autore-nome" href="https://www.arscontrol.unimore.it/people/andrea-pupa/" target="_blank" rel="noopener">Andrea Pupa</a><span class="autore-titolo">, PhD</span><br>
+        <a class="autore-mail" href="mailto:andrea.pupa@unimore.it">andrea.pupa@unimore.it</a>
+      </p>
+    </div>
+  </div>
 
-- [Convertitore ISU ↔ IU ↔ FdT](strumenti/t1.qmd) — converti tra rappresentazione
-  di stato, ingresso-uscita e funzione di trasferimento.
-- [Risposta nel tempo e modi](strumenti/t2.qmd) — impulso, gradino, rampa,
-  sinusoide, e scomposizione nei modi.
-- [Sistemi elementari 1° e 2° ordine](strumenti/t3.qmd) — slider interattivi e
-  massa-molla-smorzatore animato.
-- [Diagrammi di Bode](strumenti/t4.qmd) — decomposizione automatica nei termini
-  elementari con grafico e spiegazione per ciascuno.
-- [Luogo delle radici](strumenti/t5.qmd) — tracciamento al variare di K con tutte
-  le regole.
-- [Progettazione del controllore](strumenti/t7.qmd) — da specifiche statiche e
-  dinamiche al luogo delle radici: controllore proporzionale vs. compensatore.
-- [Taratura PID](strumenti/t6.qmd) — regola Kp, Ti, Td e inietta disturbi.
+  <div class="intro">
+    <p>Questo sito raccoglie una serie di <strong>strumenti interattivi</strong> pensati per affiancare le lezioni del corso. L'idea è poter «toccare con mano» i concetti: inserire un modello e vederne subito rappresentazioni, risposte e diagrammi, invece di fermarsi alla sola teoria. Ogni strumento contiene un breve richiamo teorico e un esempio già pronto, così puoi iniziare a sperimentare in un attimo.</p>
+  </div>
+
+  <h2 class="section-title">Strumenti interattivi</h2>
+  <p class="section-hint">Clicca una scheda per aprire lo strumento a schermo intero.</p>
+
+  <div class="griglia-strumenti">
+
+    <a class="card-strumento" href="strumenti/t1-convertitore/index.html">
+      <span class="num">1</span>
+      <h3>Conversione rappresentazioni</h3>
+      <p>Passa tra rappresentazione di stato (ISU), ingresso-uscita (IU) e funzione di trasferimento.</p>
+    </a>
+
+    <a class="card-strumento" href="strumenti/t2-risposta/index.html">
+      <span class="num">2</span>
+      <h3>Risposta nel tempo e modi</h3>
+      <p>Impulso, gradino, rampa e sinusoide, con la scomposizione della risposta nei modi.</p>
+    </a>
+
+    <a class="card-strumento" href="strumenti/t3-elementari/index.html">
+      <span class="num">3</span>
+      <h3>Sistemi elementari 1° e 2° ordine</h3>
+      <p>Poli e zeri con slider interattivi, più il massa-molla-smorzatore animato.</p>
+    </a>
+
+    <a class="card-strumento" href="strumenti/t4-bode/index.html">
+      <span class="num">4</span>
+      <h3>Diagrammi di Bode</h3>
+      <p>Decomposizione automatica nei termini elementari, ciascuno con grafico e spiegazione.</p>
+    </a>
+
+    <a class="card-strumento" href="strumenti/t5-luogo/index.html">
+      <span class="num">5</span>
+      <h3>Luogo delle radici</h3>
+      <p>Tracciamento al variare di K con tutte le regole di costruzione.</p>
+    </a>
+
+    <a class="card-strumento" href="strumenti/t7-progettazione/index.html">
+      <span class="num">6</span>
+      <h3>Progettazione del controllore</h3>
+      <p>Dalle specifiche statiche e dinamiche al progetto: controllore proporzionale o compensatore.</p>
+    </a>
+
+    <a class="card-strumento" href="strumenti/t6-pid/index.html">
+      <span class="num">7</span>
+      <h3>Taratura PID</h3>
+      <p>Regola Kp, Ti, Td su un impianto e osserva l'effetto dei disturbi in retroazione.</p>
+    </a>
+
+  </div>
+
+</div>
+```

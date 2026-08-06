@@ -189,9 +189,84 @@
     return Cx.div(polyEvalC(num, s), polyEvalC(den, s));
   }
 
+  // ---------- Ricostruzione di un polinomio (coeff. reali) dalle sue radici ----------
+  // k * prod(s - r_i). Le radici complesse devono comparire in coppie coniugate
+  // (tipico di polinomi a coefficienti reali): la coppia viene ricomposta come
+  // fattore quadratico reale (s^2 - 2*Re(r)*s + |r|^2).
+  function polyFromRoots(roots, k) {
+    let poly = [k];
+    const usati = new Array(roots.length).fill(false);
+    for (let i = 0; i < roots.length; i++) {
+      if (usati[i]) continue;
+      const r = roots[i];
+      if (Math.abs(r.im) < 1e-9) {
+        poly = polyMul(poly, [1, -r.re]);
+        usati[i] = true;
+        continue;
+      }
+      let j = -1;
+      for (let k2 = i + 1; k2 < roots.length; k2++) {
+        if (usati[k2]) continue;
+        const scala = 1 + Cx.abs(r);
+        if (Math.abs(roots[k2].re - r.re) < 1e-6 * scala && Math.abs(roots[k2].im + r.im) < 1e-6 * scala) {
+          j = k2;
+          break;
+        }
+      }
+      if (j >= 0) {
+        const b = -2 * r.re;
+        const c = r.re * r.re + r.im * r.im;
+        poly = polyMul(poly, [1, b, c]);
+        usati[i] = true;
+        usati[j] = true;
+      } else {
+        // coniugato non trovato (caso limite numerico): usa solo la parte reale
+        poly = polyMul(poly, [1, -r.re]);
+        usati[i] = true;
+      }
+    }
+    return poly;
+  }
+
+  // ---------- Semplificazione di coppie polo/zero coincidenti in una FdT ----------
+  // Come accade quando un compensatore cancella (a meno di tolleranza numerica)
+  // un polo dell'impianto: la coppia si annulla algebricamente nella FdT, quindi
+  // va rimossa anche dal luogo delle radici (altrimenti resterebbe un "modo"
+  // fisso, non controllabile/osservabile, immobile in quel punto per ogni K).
+  // Ritorna {num, den} ridotti; se non c'e' nulla da semplificare, num/den
+  // originali (stessi riferimenti).
+  function semplificaFdT(num, den, tol) {
+    tol = tol || 1e-6;
+    const denS = polyStripLeadingZeros(den);
+    const numS = polyStripLeadingZeros(num);
+    const poli = polyRoots(denS);
+    const zeri = polyRoots(numS);
+
+    const poliRes = poli.slice();
+    const zeriRes = [];
+    let rimossi = 0;
+    zeri.forEach((z) => {
+      const scala = 1 + Cx.abs(z);
+      const i = poliRes.findIndex((p) => Cx.abs(Cx.sub(p, z)) < tol * scala);
+      if (i >= 0) {
+        poliRes.splice(i, 1);
+        rimossi++;
+      } else {
+        zeriRes.push(z);
+      }
+    });
+
+    if (rimossi === 0) return { num, den };
+
+    const denRid = poliRes.length > 0 ? polyFromRoots(poliRes, denS[0]) : [denS[0]];
+    const numRid = zeriRes.length > 0 ? polyFromRoots(zeriRes, numS[0]) : [numS[0]];
+    return { num: numRid, den: denRid };
+  }
+
   window.CA = {
     Cx, polyStripLeadingZeros, polyMul, polyAdd, polyDeriv, polyEvalC, polyRoots,
     matMul, matTrace, matIdent, matAddDiag,
     ssToTf, tfToSs, iuToTf, tfToIu, residues, simulate, freqResp,
+    polyFromRoots, semplificaFdT,
   };
 })();

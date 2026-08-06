@@ -7,32 +7,16 @@ project:
 
 website:
   title: "Controlli Automatici"
-  navbar:
-    left:
-      - href: index.qmd
-        text: Home
-      - text: "Strumenti"
-        menu:
-          - href: strumenti/t1.qmd
-            text: "1 · Convertitore ISU ↔ IU ↔ FdT"
-          - href: strumenti/t2.qmd
-            text: "2 · Risposta nel tempo e modi"
-          - href: strumenti/t3.qmd
-            text: "3 · Sistemi elementari (1°/2° ordine)"
-          - href: strumenti/t4.qmd
-            text: "4 · Diagrammi di Bode"
-          - href: strumenti/t5.qmd
-            text: "5 · Luogo delle radici"
-          - href: strumenti/t7.qmd
-            text: "6 · Progettazione del controllore"
-          - href: strumenti/t6.qmd
-            text: "7 · Taratura PID"
-      - href: about.qmd
-        text: "Info"
+  search: false
+  page-footer:
+    border: true
+    left: "© 2025 Andrea Pupa"
+    right: "Corso di Controlli Automatici"
 
 format:
   html:
     theme:
-      - cosmo
+      - darkly
     css: styles.css
     toc: true
+    anchor-sections: false   # niente icona-link automatica accanto ai titoli

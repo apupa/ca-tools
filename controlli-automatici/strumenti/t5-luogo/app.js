@@ -336,7 +336,7 @@
     html +=
       "<tr><th>6. Punti di diramazione</th><td>" +
       (regole.puntiDiramazione.length ? regole.puntiDiramazione.map((p) => formattaNumero(p)).join(", ") : "nessuno") +
-      '<br /><span style="font-size:0.8rem; color:#6b7280;">(formula non trattata a lezione — calcolo non richiesto)</span>' +
+      '<br /><span style="font-size:0.8rem; color:#b7bcc5;">(formula non trattata a lezione — calcolo non richiesto)</span>' +
       "</td></tr>";
 
     const partenzaTxt = regole.angoliPartenza.length
@@ -365,10 +365,15 @@
   function eseguiCalcolo() {
     divErrore.style.display = "none";
     try {
-      const num = leggiVettoreCoeff(campoNum.value);
-      const den = leggiVettoreCoeff(campoDen.value);
+      const numInserito = leggiVettoreCoeff(campoNum.value);
+      const denInserito = leggiVettoreCoeff(campoDen.value);
       const kMax = parseFloat(campoKMax.value);
       if (Number.isNaN(kMax) || kMax <= 0) throw new Error("K massimo deve essere un numero positivo");
+
+      // Semplifica eventuali coppie polo/zero coincidenti (es. compensatore che
+      // cancella un polo dell'impianto): il luogo va tracciato sulla FdT ridotta,
+      // altrimenti resterebbe un polo "fantasma" fermo in quel punto per ogni K.
+      const { num, den } = CA.semplificaFdT(numInserito, denInserito);
 
       const poliAperti = CA.polyRoots(den);
       const zeriAperti = CA.polyRoots(num);
@@ -385,7 +390,7 @@
       if (parseFloat(sliderK.value) > kMax) sliderK.value = "0";
       sliderKVal.textContent = formattaNumero(parseFloat(sliderK.value));
 
-      mostraFdT(num, den);
+      mostraFdT(numInserito, denInserito);
       disegnaGrafico(parseFloat(sliderK.value));
       mostraRegole(regole, kCritico);
     } catch (e) {

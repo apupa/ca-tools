@@ -1,11 +1,12 @@
 // ===== ca-plot.js — helper di plotting su Plotly (grafici statici) =====
 (function () {
-  // Layout comune: font di sistema, margini contenuti, sfondo trasparente.
+  // Layout comune: font di sistema, margini contenuti, sfondo bianco
+  // (i grafici restano leggibili anche col tema scuro del sito).
   const layoutBase = {
-    font: { family: "-apple-system, Segoe UI, Roboto, Arial, sans-serif", size: 12 },
+    font: { family: "-apple-system, Segoe UI, Roboto, Arial, sans-serif", size: 12, color: "#1f2937" },
     margin: { l: 55, r: 20, t: 30, b: 45 },
-    paper_bgcolor: "rgba(0,0,0,0)",
-    plot_bgcolor: "rgba(0,0,0,0)",
+    paper_bgcolor: "#ffffff",
+    plot_bgcolor: "#ffffff",
     legend: { orientation: "h", x: 0, y: 1.15 },
   };
   const configBase = { responsive: true, displaylogo: false };
