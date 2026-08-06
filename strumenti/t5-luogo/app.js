@@ -336,7 +336,7 @@
     html +=
       "<tr><th>6. Punti di diramazione</th><td>" +
       (regole.puntiDiramazione.length ? regole.puntiDiramazione.map((p) => formattaNumero(p)).join(", ") : "nessuno") +
-      '<br /><span style="font-size:0.8rem; color:#6b7280;">(formula non trattata a lezione — calcolo non richiesto)</span>' +
+      '<br /><span style="font-size:0.8rem; color:#b7bcc5;">(formula non trattata a lezione — calcolo non richiesto)</span>' +
       "</td></tr>";
 
     const partenzaTxt = regole.angoliPartenza.length

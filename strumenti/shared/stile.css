@@ -299,11 +299,6 @@ th {
   white-space: nowrap;
 }
 
-.barra-sito-brand:hover {
-  color: var(--colore-primario, var(--ca-primario));
-  text-decoration: none;
-}
-
 .barra-sito-nav {
   display: flex;
   align-items: center;
@@ -427,6 +422,27 @@ canvas#massa-canvas {
   background: #ffffff;
   border-radius: 8px;
   display: block;
+}
+
+/* Contenitore per diagrammi/schemi disegnati con colori "chiari"
+   (es. lo schema a blocchi del PID): li ospita su sfondo bianco cosi'
+   restano leggibili anche col tema scuro del sito. */
+.diagramma-bianco {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 0.8rem;
+}
+
+/* ---------- Grafici su mobile: consenti lo zoom con due dita ----------
+   Plotly intercetta i gesti touch per il proprio pan/zoom e questo, come
+   effetto collaterale, blocca lo zoom nativo del browser (pinch-to-zoom)
+   quando le dita toccano il grafico. Qui lo lasciamo passare al browser. */
+.js-plotly-plot,
+.js-plotly-plot .plot-container,
+.js-plotly-plot .svg-container,
+.js-plotly-plot .draglayer,
+.js-plotly-plot .drag {
+  touch-action: pan-y pinch-zoom !important;
 }
 
 /* ---------- Responsive ---------- */

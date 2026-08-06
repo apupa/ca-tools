@@ -21,26 +21,26 @@
     .campo-slider label { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
     .campo-slider input[type="range"] { width: 100%; }
     #massa-canvas { width: 100%; max-width: 100%; height: 180px; display: block; background: #f7f8fa; border: 1px solid var(--colore-bordo); border-radius: 8px; }
-    .stato-molla { font-size: 0.85rem; color: #6b7280; margin-top: 0.4rem; }
+    .stato-molla { font-size: 0.85rem; color: #b7bcc5; margin-top: 0.4rem; }
   </style>
 </head>
 <body>
 <nav class="barra-sito">
-  <a class="barra-sito-brand" href="../../index.html">Controlli Automatici</a>
+  <span class="barra-sito-brand">Controlli Automatici</span>
   <div class="barra-sito-nav">
-    <a class="barra-sito-link" href="../../index.html">Home</a>
+    <a class="barra-sito-link" href="../../">Home</a>
     <div class="barra-sito-dropdown">
       <button type="button" class="barra-sito-dropdown-toggle attivo" aria-haspopup="true" aria-expanded="false">
         Strumenti <span class="freccia">&#9662;</span>
       </button>
       <div class="barra-sito-dropdown-menu">
-      <a href="../t1-convertitore/index.html">1 · Conversione rappresentazioni</a>
-      <a href="../t2-risposta/index.html">2 · Risposta nel tempo e modi</a>
-      <a href="../t3-elementari/index.html" class="attivo">3 · Sistemi elementari (1°/2° ordine)</a>
-      <a href="../t4-bode/index.html">4 · Diagrammi di Bode</a>
-      <a href="../t5-luogo/index.html">5 · Luogo delle radici</a>
-      <a href="../t7-progettazione/index.html">6 · Progettazione del controllore</a>
-      <a href="../t6-pid/index.html">7 · Taratura PID</a>
+      <a href="../t1-convertitore/index.html">1. Conversione rappresentazioni</a>
+      <a href="../t2-risposta/index.html">2. Risposta nel tempo e modi</a>
+      <a href="../t3-elementari/index.html" class="attivo">3. Sistemi elementari (1°/2° ordine)</a>
+      <a href="../t4-bode/index.html">4. Diagrammi di Bode</a>
+      <a href="../t5-luogo/index.html">5. Luogo delle radici</a>
+      <a href="../t7-progettazione/index.html">6. Progettazione del controllore</a>
+      <a href="../t6-pid/index.html">7. Taratura PID</a>
       </div>
     </div>
   </div>
@@ -128,7 +128,7 @@
 
       <div class="pannello">
         <h2>Risposta al gradino</h2>
-        <p style="font-size:0.85rem; color:#6b7280;">
+        <p style="font-size:0.85rem; color:#b7bcc5;">
           La finestra temporale $T$ è fissa (non si adatta a $\tau$): a parità di $T$, un sistema più lento mostra
           la curva salire più lentamente e magari non raggiungere il regime entro il grafico.
         </p>
@@ -173,7 +173,7 @@
 
       <div class="pannello">
         <h2>Risposta al gradino</h2>
-        <p style="font-size:0.85rem; color:#6b7280;">
+        <p style="font-size:0.85rem; color:#b7bcc5;">
           La finestra temporale $T$ è fissa (non si adatta a $\omega_n$, $\delta$): a parità di $T$ si vede subito se
           il sistema è diventato più lento o più veloce.
         </p>
@@ -192,7 +192,7 @@
           <tr><th>Tempo di picco $T_p$</th><td id="b-tp-testo"></td></tr>
           <tr><th>Tempo di assestamento $T_a \approx 3/(\delta\omega_n)$</th><td id="b-ta-testo"></td></tr>
         </tbody></table>
-        <p id="b-nota-poli" style="font-size:0.85rem; color:#6b7280;"></p>
+        <p id="b-nota-poli" style="font-size:0.85rem; color:#b7bcc5;"></p>
       </div>
     </div>
 
