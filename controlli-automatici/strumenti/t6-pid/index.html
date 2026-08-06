@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taratura PID — Controlli Automatici</title>
+  <link rel="stylesheet" href="../shared/stile.css" />
+  <script>
+    // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    .sezione-impianto { display: none; }
+    .sezione-impianto.attiva { display: block; }
+    .campo-slider { margin-bottom: 1rem; }
+    .campo-slider label { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+    .campo-slider input[type="range"] { width: 100%; }
+    fieldset.disturbo { border: 1px solid var(--colore-bordo); border-radius: 8px; padding: 0.8rem 1rem; margin-bottom: 1rem; }
+    fieldset.disturbo legend { font-weight: 600; padding: 0 0.4rem; }
+    .campo-inline { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+    .campo-inline label { font-weight: normal; font-size: 0.9rem; white-space: nowrap; }
+    .campo-inline input[type="text"] { width: 90px; }
+  </style>
+</head>
+<body>
+  <div class="contenitore">
+    <a class="link-hub" href="../index.html">← Torna agli strumenti</a>
+    <h1>Taratura PID</h1>
+    <p class="sottotitolo">Regola Kp, Ti, Td su un impianto e inietta disturbi per vederne l'effetto sull'anello chiuso.</p>
+
+    <details class="teoria">
+      <summary>Teoria in breve</summary>
+      <p>
+        Il controllore PID combina tre azioni sull'errore $e(t)=r(t)-y(t)$:
+        $$u(t) = K_p\left(e(t) + T_d\,\dot e(t) + \frac{1}{T_i}\int_0^t e(\tau)\,d\tau\right)$$
+      </p>
+      <ul>
+        <li><strong>Proporzionale</strong>: maggiore è l'errore, maggiore è l'azione di controllo.</li>
+        <li><strong>Integrale</strong>: introduce un polo nell'origine nel guadagno d'anello, annullando l'errore a
+          regime per riferimenti e disturbi costanti — indispensabile per specifiche statiche.</li>
+        <li><strong>Derivativa</strong>: azione "preventiva" basata sul rapporto incrementale, anticipa la fase; per
+          essere fisicamente realizzabile si usa filtrata, $T_d s/(1+\frac{T_d}{N}s)$ con $N\approx5$–$20$.</li>
+      </ul>
+      <p>
+        Un regolatore <strong>P</strong> ($T_i=\infty$, $T_d=0$) lascia in generale un errore a regime; un
+        <strong>PI</strong> ($T_d=0$) lo annulla grazie all'azione integrale, al costo di uno zero che limita la
+        velocità di assestamento; un <strong>PD</strong> ($T_i=\infty$) non annulla l'errore ma velocizza la
+        risposta; il <strong>PID</strong> combina i tre effetti.
+      </p>
+      <p class="riferimento">Riferimento: Lezione CA08.</p>
+    </details>
+
+    <div class="pannello">
+      <h2>Impianto</h2>
+      <div class="campo" style="max-width:260px;">
+        <label for="impianto-tipo">Tipo di impianto</label>
+        <select id="impianto-tipo">
+          <option value="massa" selected>Massa-molla-smorzatore</option>
+          <option value="generico">FdT generica</option>
+        </select>
+      </div>
+      <div id="sezione-impianto-massa" class="sezione-impianto attiva">
+        <div class="campo-slider">
+          <label for="p-m">Massa $m$ = <span id="p-m-val">1</span> kg</label>
+          <input type="range" id="p-m" min="0.1" max="5" step="0.1" value="1" />
+        </div>
+        <div class="campo-slider">
+          <label for="p-b">Smorzamento $b$ = <span id="p-b-val">1</span> N·s/m</label>
+          <input type="range" id="p-b" min="0" max="5" step="0.1" value="1" />
+        </div>
+        <div class="campo-slider">
+          <label for="p-k">Rigidezza $k$ = <span id="p-k-val">1</span> N/m</label>
+          <input type="range" id="p-k" min="0.1" max="10" step="0.1" value="1" />
+        </div>
+      </div>
+      <div id="sezione-impianto-generico" class="sezione-impianto">
+        <div class="riga-campi">
+          <div class="campo">
+            <label for="p-num">Numeratore</label>
+            <input type="text" id="p-num" value="1" />
+          </div>
+          <div class="campo">
+            <label for="p-den">Denominatore</label>
+            <input type="text" id="p-den" value="1 1 1" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pannello">
+      <h2>Funzione di trasferimento dell'impianto</h2>
+      <div id="fdt-testo" style="overflow-x:auto;"></div>
+    </div>
+
+    <div class="pannello">
+      <h2>Regolatore</h2>
+      <div class="barra-azioni">
+        <button id="preset-p" class="secondario">Preset P</button>
+        <button id="preset-pi" class="secondario">Preset PI</button>
+        <button id="preset-pd" class="secondario">Preset PD</button>
+        <button id="preset-pid" class="secondario">Preset PID</button>
+      </div>
+      <div class="campo-slider">
+        <label for="c-kp">Guadagno proporzionale $K_p$ = <span id="c-kp-val">1</span></label>
+        <input type="range" id="c-kp" min="0.1" max="20" step="0.1" value="1" />
+      </div>
+      <div class="campo-inline">
+        <input type="checkbox" id="c-azione-i" />
+        <label for="c-azione-i">Azione integrale (I)</label>
+      </div>
+      <div class="campo-slider">
+        <label for="c-ti">Costante di tempo integrale $T_i$ = <span id="c-ti-val">1</span> s ($K_i=K_p/T_i$ = <span id="c-ki-val">1</span>)</label>
+        <input type="range" id="c-ti" min="0.1" max="20" step="0.1" value="1" />
+      </div>
+      <div class="campo-inline">
+        <input type="checkbox" id="c-azione-d" />
+        <label for="c-azione-d">Azione derivativa (D)</label>
+      </div>
+      <div class="campo-slider">
+        <label for="c-td">Costante di tempo derivativa $T_d$ = <span id="c-td-val">0.1</span> s ($K_d=K_p\,T_d$ = <span id="c-kd-val">0.1</span>)</label>
+        <input type="range" id="c-td" min="0" max="5" step="0.05" value="0.1" />
+      </div>
+    </div>
+
+    <div class="pannello">
+      <h2>Funzione di trasferimento ad anello chiuso</h2>
+      <p style="font-size:0.85rem; color:#6b7280;">Per i parametri del regolatore e dell'impianto scelti sopra, retroazione unitaria:</p>
+      <div id="geq-testo" style="overflow-x:auto;"></div>
+    </div>
+
+    <div class="pannello">
+      <h2>Riferimento e simulazione</h2>
+      <div class="riga-campi">
+        <div class="campo">
+          <label for="c-r-ampiezza">Ampiezza gradino di riferimento $r$</label>
+          <input type="text" id="c-r-ampiezza" value="1" />
+        </div>
+        <div class="campo">
+          <label for="c-tend">Finestra di simulazione $T$ [s]</label>
+          <input type="text" id="c-tend" value="20" />
+        </div>
+      </div>
+    </div>
+
+    <div class="pannello">
+      <h2>Schema a blocchi</h2>
+      <p style="font-size:0.85rem; color:#6b7280;">
+        Dove entrano in gioco i disturbi nell'anello: $d_u$ si somma all'uscita del regolatore (agisce come un
+        ingresso spurio sull'impianto), $d_y$ si somma direttamente all'uscita dell'impianto, $n$ si somma solo
+        sul segnale di misura usato per calcolare l'errore (non altera l'uscita vera $y(t)$, ma "inganna" il
+        regolatore).
+      </p>
+      <div style="overflow-x:auto;">
+        <svg viewBox="0 0 860 270" style="width:100%; max-width:860px; height:auto; font-family:inherit;">
+          <defs>
+            <marker id="freccia" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#1f2937" />
+            </marker>
+          </defs>
+          <g fill="none" stroke="#1f2937" stroke-width="1.6">
+            <!-- r(t) in ingresso -->
+            <line x1="14" y1="120" x2="76" y2="120" marker-end="url(#freccia)" />
+            <!-- sommatore 1 (errore) -->
+            <circle cx="95" cy="120" r="16" fill="#ffffff" stroke="#2563eb" stroke-width="2" />
+            <!-- sommatore1 -> C(s) -->
+            <line x1="111" y1="120" x2="170" y2="120" marker-end="url(#freccia)" />
+            <!-- C(s) -->
+            <rect x="170" y="95" width="86" height="50" rx="6" fill="#f0f4ff" stroke="#2563eb" stroke-width="1.6" />
+            <!-- C(s) -> sommatore2 -->
+            <line x1="256" y1="120" x2="322" y2="120" marker-end="url(#freccia)" />
+            <!-- sommatore 2 (d_u) -->
+            <circle cx="340" cy="120" r="16" fill="#ffffff" stroke="#2563eb" stroke-width="2" />
+            <line x1="340" y1="58" x2="340" y2="103" marker-end="url(#freccia)" stroke="#b45309" />
+            <!-- sommatore2 -> G(s), segnale u(t) -->
+            <line x1="356" y1="120" x2="428" y2="120" marker-end="url(#freccia)" />
+            <!-- G(s) -->
+            <rect x="428" y="95" width="86" height="50" rx="6" fill="#f0f4ff" stroke="#2563eb" stroke-width="1.6" />
+            <!-- G(s) -> sommatore3 -->
+            <line x1="514" y1="120" x2="578" y2="120" marker-end="url(#freccia)" />
+            <!-- sommatore 3 (d_y) -->
+            <circle cx="596" cy="120" r="16" fill="#ffffff" stroke="#2563eb" stroke-width="2" />
+            <line x1="596" y1="58" x2="596" y2="103" marker-end="url(#freccia)" stroke="#b45309" />
+            <!-- sommatore3 -> uscita y(t), con nodo di diramazione -->
+            <line x1="612" y1="120" x2="720" y2="120" marker-end="url(#freccia)" />
+            <circle cx="676" cy="120" r="3.5" fill="#1f2937" stroke="none" />
+            <!-- retroazione: giù dal nodo, fino al sommatore rumore -->
+            <line x1="676" y1="120" x2="676" y2="205" />
+            <line x1="676" y1="205" x2="612" y2="205" marker-end="url(#freccia)" />
+            <!-- sommatore n (rumore) -->
+            <circle cx="596" cy="205" r="14" fill="#ffffff" stroke="#2563eb" stroke-width="2" />
+            <line x1="596" y1="248" x2="596" y2="220" marker-end="url(#freccia)" stroke="#b45309" />
+            <!-- prosegue verso il sommatore 1, segnale "misura" -->
+            <line x1="582" y1="205" x2="95" y2="205" />
+            <line x1="95" y1="205" x2="95" y2="137" marker-end="url(#freccia)" />
+          </g>
+          <g font-size="15" fill="#1f2937" text-anchor="middle" font-weight="600">
+            <text x="213" y="125">C(s)</text>
+            <text x="471" y="125">G(s)</text>
+          </g>
+          <g font-size="13" fill="#1f2937" text-anchor="middle">
+            <text x="40" y="110">r(t)</text>
+            <text x="140" y="110">e(t)</text>
+            <text x="392" y="110">u(t)</text>
+            <text x="95" y="103">+</text>
+            <text x="82" y="140">−</text>
+            <text x="333" y="103">+</text>
+            <text x="589" y="103">+</text>
+            <text x="608" y="197">+</text>
+          </g>
+          <g font-size="13" fill="#b45309" text-anchor="middle">
+            <text x="340" y="50">d<tspan baseline-shift="sub" font-size="10">u</tspan>(t)</text>
+            <text x="596" y="50">d<tspan baseline-shift="sub" font-size="10">y</tspan>(t)</text>
+            <text x="596" y="262">n(t)</text>
+          </g>
+          <g font-size="13" fill="#1f2937" text-anchor="middle" font-weight="600">
+            <text x="745" y="110">y(t)</text>
+          </g>
+          <g font-size="12" fill="#6b7280" text-anchor="middle">
+            <text x="340" y="197">misura (retroazione)</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="pannello">
+      <h2>Disturbi</h2>
+      <fieldset class="disturbo">
+        <legend>Disturbo di carico $d_u$ (sull'ingresso dell'impianto)</legend>
+        <div class="campo-inline">
+          <input type="checkbox" id="du-attivo" />
+          <label for="du-attivo">Attivo</label>
+          <label for="du-ampiezza">ampiezza</label>
+          <input type="text" id="du-ampiezza" value="1" />
+          <label for="du-istante">a partire da t=</label>
+          <input type="text" id="du-istante" value="10" />
+          <label for="du-istante">s</label>
+        </div>
+      </fieldset>
+      <fieldset class="disturbo">
+        <legend>Disturbo sull'uscita $d_y$</legend>
+        <div class="campo-inline">
+          <input type="checkbox" id="dy-attivo" />
+          <label for="dy-attivo">Attivo</label>
+          <label for="dy-ampiezza">ampiezza</label>
+          <input type="text" id="dy-ampiezza" value="1" />
+          <label for="dy-istante">a partire da t=</label>
+          <input type="text" id="dy-istante" value="10" />
+          <label for="dy-istante">s</label>
+        </div>
+      </fieldset>
+      <fieldset class="disturbo">
+        <legend>Rumore in retroazione $n$ (sulla misura)</legend>
+        <div class="campo-inline">
+          <input type="checkbox" id="n-attivo" />
+          <label for="n-attivo">Attivo</label>
+          <select id="n-tipo">
+            <option value="gradino">gradino</option>
+            <option value="sinusoide">sinusoide</option>
+          </select>
+          <label for="n-ampiezza">ampiezza</label>
+          <input type="text" id="n-ampiezza" value="0.05" />
+          <label for="n-istante">a partire da t=</label>
+          <input type="text" id="n-istante" value="10" />
+          <label for="n-istante">s</label>
+          <span id="n-omega-campo" style="display:none;">
+            <label for="n-omega">ω</label>
+            <input type="text" id="n-omega" value="10" />
+          </span>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="pannello">
+      <div class="barra-azioni">
+        <button id="btn-esempio" class="secondario">Carica esempio</button>
+      </div>
+      <p id="messaggio-errore" style="color:#b91c1c; display:none;"></p>
+    </div>
+
+    <div class="pannello">
+      <h2>Risposta dell'anello chiuso</h2>
+      <div id="grafico-risposta" style="width:100%; height:360px;"></div>
+    </div>
+
+    <div class="pannello">
+      <h2>Segnale di controllo $u(t)$</h2>
+      <p style="font-size:0.85rem; color:#6b7280;">
+        Uscita del regolatore verso l'impianto (comprensiva di $d_u$ quando attivo) — utile per verificare lo
+        sforzo di controllo richiesto, ad esempio per individuare saturazioni dell'attuatore.
+      </p>
+      <div id="grafico-controllo" style="width:100%; height:280px;"></div>
+    </div>
+
+    <div class="pannello">
+      <h2>Parametri</h2>
+      <div id="parametri-testo"></div>
+    </div>
+  </div>
+
+  <script src="../shared/ca-core.js"></script>
+  <script src="../shared/ca-plot.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

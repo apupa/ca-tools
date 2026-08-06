@@ -1,0 +1,38 @@
+project:
+  type: website
+  resources:
+    - strumenti/**            # copia tutti gli strumenti nel sito generato
+  render:
+    - "*.qmd"                 # renderizza SOLO i .qmd, non gli .html degli strumenti
+
+website:
+  title: "Controlli Automatici"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - text: "Strumenti"
+        menu:
+          - href: strumenti/t1.qmd
+            text: "1 · Convertitore ISU ↔ IU ↔ FdT"
+          - href: strumenti/t2.qmd
+            text: "2 · Risposta nel tempo e modi"
+          - href: strumenti/t3.qmd
+            text: "3 · Sistemi elementari (1°/2° ordine)"
+          - href: strumenti/t4.qmd
+            text: "4 · Diagrammi di Bode"
+          - href: strumenti/t5.qmd
+            text: "5 · Luogo delle radici"
+          - href: strumenti/t7.qmd
+            text: "6 · Progettazione del controllore"
+          - href: strumenti/t6.qmd
+            text: "7 · Taratura PID"
+      - href: about.qmd
+        text: "Info"
+
+format:
+  html:
+    theme:
+      - cosmo
+    css: styles.css
+    toc: true

@@ -1,0 +1,7 @@
+```{ojs}
+viewof tau = Inputs.range([0.2, 5], {value: 1, step: 0.1, label: "τ [s]"})
+
+dati = d3.range(0, 10, 0.05).map(t => ({t, y: 1 - Math.exp(-t / tau)}))
+
+Plot.line(dati, {x: "t", y: "y"}).plot({y: {domain: [0, 1.1]}})
+```

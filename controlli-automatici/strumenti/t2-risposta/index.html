@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Risposta nel tempo e modi — Controlli Automatici</title>
+  <link rel="stylesheet" href="../shared/stile.css" />
+  <script>
+    // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    #campo-omega { display: none; }
+  </style>
+</head>
+<body>
+  <div class="contenitore">
+    <a class="link-hub" href="../index.html">← Torna agli strumenti</a>
+    <h1>Risposta nel tempo e modi</h1>
+    <p class="sottotitolo">Calcola la risposta a impulso, gradino, rampa o sinusoide e scomponi l'uscita nei modi del sistema.</p>
+
+    <details class="teoria">
+      <summary>Teoria in breve</summary>
+      <p>
+        L'antitrasformata di ciascun fratto semplice in cui si decompone $G(s)$ è associata a un <strong>modo</strong>
+        del sistema: un contributo elementare della dinamica nel tempo, che dipende solo dai poli.
+      </p>
+      <ul>
+        <li><strong>Polo reale semplice</strong> $p=\sigma$: modo $e^{\sigma t}$ — convergente se $\sigma<0$, divergente se $\sigma>0$, costante se $\sigma=0$.</li>
+        <li><strong>Coppia complessa coniugata</strong> $p=\sigma\pm j\omega$: modo oscillatorio $e^{\sigma t}\cos(\omega t+\varphi)$, con oscillazioni contenute nell'inviluppo $\pm e^{\sigma t}$ — smorzata se $\sigma<0$, divergente se $\sigma>0$, persistente se $\sigma=0$.</li>
+        <li><strong>Poli multipli</strong> (molteplicità $h+1$): compare un fattore $t^h$ che moltiplica il modo base.</li>
+      </ul>
+      <p>
+        Un sistema LTI è <strong>asintoticamente stabile</strong> se e solo se tutti i poli hanno parte reale negativa
+        (tutti i modi sono convergenti); questo implica anche la stabilità BIBO (ingresso limitato ⇒ uscita limitata).
+      </p>
+      <p>
+        Per la risposta al gradino, il <strong>guadagno statico</strong> (se il sistema non ha poli nell'origine) è
+        il valore di regime a cui tende l'uscita:
+        $$G(0) = \lim_{s\to0} G(s) = \lim_{t\to\infty} y(t)$$
+      </p>
+      <p class="riferimento">Riferimento: Lezioni CA03, CA04.</p>
+    </details>
+
+    <div class="pannello">
+      <div class="riga-campi">
+        <div class="campo">
+          <label for="fdt-num">Numeratore</label>
+          <input type="text" id="fdt-num" placeholder="es. 1" value="1" />
+        </div>
+        <div class="campo">
+          <label for="fdt-den">Denominatore</label>
+          <input type="text" id="fdt-den" placeholder="es. 1 1" value="1 1" />
+        </div>
+      </div>
+
+      <div class="riga-campi">
+        <div class="campo">
+          <label for="tipo-ingresso">Ingresso</label>
+          <select id="tipo-ingresso">
+            <option value="impulso">Impulso</option>
+            <option value="gradino" selected>Gradino</option>
+            <option value="rampa">Rampa</option>
+            <option value="sinusoide">Sinusoide</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="ampiezza-ingresso">Ampiezza $A$</label>
+          <input type="text" id="ampiezza-ingresso" value="1" />
+        </div>
+        <div class="campo" id="campo-omega">
+          <label for="omega-sinusoide">Pulsazione $\omega$ [rad/s]</label>
+          <input type="text" id="omega-sinusoide" value="1" />
+        </div>
+      </div>
+
+      <div class="campo" style="max-width:200px;">
+        <label for="t-end">Istante finale $t_{fin}$ [s]</label>
+        <input type="text" id="t-end" value="5" />
+      </div>
+
+      <div class="barra-azioni">
+        <button id="btn-calcola">Calcola</button>
+        <button id="btn-esempio" class="secondario">Carica esempio</button>
+        <button id="btn-ultima-fdt" class="secondario">Usa l'ultima FdT</button>
+      </div>
+      <p id="messaggio-errore" style="color:#b91c1c; display:none;"></p>
+    </div>
+
+    <div class="pannello">
+      <h2>Risposta nel tempo</h2>
+      <div id="grafico-risposta" style="width:100%; height:400px;"></div>
+      <p id="nota-ingresso" style="font-size:0.85rem; color:#6b7280;"></p>
+    </div>
+
+    <div class="pannello">
+      <h2>Modi del sistema</h2>
+      <div id="tabella-modi"></div>
+    </div>
+  </div>
+
+  <script src="../shared/ca-core.js"></script>
+  <script src="../shared/ca-plot.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

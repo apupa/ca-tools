@@ -1,0 +1,294 @@
+/* ===== stile.css — stile comune per gli strumenti di Controlli Automatici ===== */
+
+:root {
+  --colore-testo: #1f2937;
+  --colore-sfondo: #f7f8fa;
+  --colore-superficie: #ffffff;
+  --colore-bordo: #e2e5ea;
+  --colore-primario: #2563eb;
+  --colore-primario-scuro: #1d4ed8;
+  --colore-accento: #f0f4ff;
+  --raggio-bordo: 10px;
+  --ombra: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 1.5rem 1rem 3rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--colore-testo);
+  background: var(--colore-sfondo);
+  line-height: 1.5;
+}
+
+.contenitore {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 1.7rem;
+  margin-bottom: 0.3rem;
+}
+
+h1 .sottotitolo,
+p.sottotitolo {
+  color: #6b7280;
+  font-weight: normal;
+  font-size: 1rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}
+
+a {
+  color: var(--colore-primario);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Hub: griglia di card ---------- */
+.griglia-strumenti {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.card-strumento {
+  display: block;
+  background: var(--colore-superficie);
+  border: 1px solid var(--colore-bordo);
+  border-radius: var(--raggio-bordo);
+  box-shadow: var(--ombra);
+  padding: 1.2rem;
+  color: var(--colore-testo);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.card-strumento:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  border-color: var(--colore-primario);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+}
+
+.card-strumento h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+  color: var(--colore-primario-scuro);
+}
+
+.card-strumento p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #4b5563;
+}
+
+/* ---------- Sezioni generiche ---------- */
+.pannello {
+  background: var(--colore-superficie);
+  border: 1px solid var(--colore-bordo);
+  border-radius: var(--raggio-bordo);
+  box-shadow: var(--ombra);
+  padding: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+details.teoria {
+  background: var(--colore-accento);
+  border: 1px solid var(--colore-bordo);
+  border-radius: var(--raggio-bordo);
+  padding: 0.8rem 1.1rem;
+  margin-bottom: 1.2rem;
+}
+
+details.teoria summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--colore-primario-scuro);
+}
+
+details.teoria .riferimento {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* ---------- Form / campi input ---------- */
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--colore-bordo);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: var(--colore-superficie);
+  color: var(--colore-testo);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--colore-primario);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+input[readonly],
+input:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.campo {
+  margin-bottom: 0.9rem;
+}
+
+.riga-campi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.riga-campi > .campo {
+  flex: 1 1 160px;
+}
+
+/* Griglia editabile per matrici (ISU) */
+.griglia-matrice {
+  display: inline-grid;
+  gap: 0.3rem;
+  margin: 0.4rem 0;
+}
+
+.griglia-matrice input {
+  width: 4.5rem;
+  text-align: center;
+}
+
+/* ---------- Bottoni ---------- */
+button {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 6px;
+  border: 1px solid var(--colore-primario);
+  background: var(--colore-primario);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+button:hover {
+  background: var(--colore-primario-scuro);
+}
+
+button.secondario {
+  background: var(--colore-superficie);
+  color: var(--colore-primario);
+}
+
+button.secondario:hover {
+  background: var(--colore-accento);
+}
+
+.barra-azioni {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+/* ---------- Tabelle ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.8rem 0;
+  font-size: 0.92rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--colore-bordo);
+}
+
+th {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* ---------- Tab (schede) ---------- */
+.schede-intestazione {
+  display: flex;
+  gap: 0.3rem;
+  border-bottom: 1px solid var(--colore-bordo);
+  margin-bottom: 1rem;
+}
+
+.scheda-bottone {
+  background: none;
+  border: none;
+  color: #6b7280;
+  padding: 0.6rem 1rem;
+  border-radius: 6px 6px 0 0;
+  box-shadow: none;
+}
+
+.scheda-bottone:hover {
+  background: var(--colore-accento);
+  color: var(--colore-primario-scuro);
+}
+
+.scheda-bottone.attiva {
+  color: var(--colore-primario-scuro);
+  border-bottom: 2px solid var(--colore-primario);
+  font-weight: 600;
+}
+
+.scheda-contenuto {
+  display: none;
+}
+
+.scheda-contenuto.attiva {
+  display: block;
+}
+
+/* ---------- Link "torna al hub" ---------- */
+.link-hub {
+  display: inline-block;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 600px) {
+  body {
+    padding: 1rem 0.7rem 2rem;
+  }
+  .riga-campi {
+    flex-direction: column;
+  }
+}

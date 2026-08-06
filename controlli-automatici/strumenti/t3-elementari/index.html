@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistemi elementari 1°/2° ordine — Controlli Automatici</title>
+  <link rel="stylesheet" href="../shared/stile.css" />
+  <script>
+    // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    .campo-slider { margin-bottom: 1.1rem; }
+    .campo-slider label { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+    .campo-slider input[type="range"] { width: 100%; }
+    #massa-canvas { width: 100%; max-width: 100%; height: 180px; display: block; background: #f7f8fa; border: 1px solid var(--colore-bordo); border-radius: 8px; }
+    .stato-molla { font-size: 0.85rem; color: #6b7280; margin-top: 0.4rem; }
+  </style>
+</head>
+<body>
+  <div class="contenitore">
+    <a class="link-hub" href="../index.html">← Torna agli strumenti</a>
+    <h1>Sistemi elementari 1° e 2° ordine</h1>
+    <p class="sottotitolo">Esplora con gli slider il primo e il secondo ordine, e prova il massa-molla-smorzatore animato.</p>
+
+    <details class="teoria">
+      <summary>Teoria in breve</summary>
+      <p>
+        Un sistema del <strong>primo ordine</strong> ha FdT $G(s) = \dfrac{\mu}{1+\tau s}$, con $\tau$ costante di tempo.
+        La risposta al gradino è $y(t) = \mu(1-e^{-t/\tau})$: raggiunge il 63,2% del valore finale a $t=\tau$, il 95% a
+        $t=3\tau$, non presenta mai sovraelongazione, e il tempo di assestamento (banda ±5%) è $T_a\approx3\tau$.
+      </p>
+      <p>
+        Un sistema del <strong>secondo ordine</strong> con poli complessi coniugati ha FdT
+        $G(s) = \dfrac{\mu\,\omega_n^2}{s^2+2\delta\omega_n s+\omega_n^2}$, con $\omega_n$ pulsazione naturale e $\delta$
+        smorzamento. I poli sono $p_{1,2}=-\delta\omega_n \pm j\omega_n\sqrt{1-\delta^2}$, a distanza $\omega_n$
+        dall'origine: al variare di $\delta$ (a $\omega_n$ fissata) si muovono lungo un arco di raggio $\omega_n$.
+        Per $\delta<1$ la risposta è oscillante smorzata, con sovraelongazione
+        $S\% = 100\,e^{-\delta\pi/\sqrt{1-\delta^2}}$: più $\delta$ è piccolo, più l'oscillazione è marcata.
+      </p>
+      <p>
+        I <strong>poli dominanti</strong> (quelli più vicini all'asse immaginario) determinano la dinamica lenta del
+        sistema: la risposta può spesso essere approssimata con quella di un sistema del primo o secondo ordine che
+        possieda solo quei poli e lo stesso guadagno statico.
+      </p>
+      <p class="riferimento">Riferimento: Lezione CA04.</p>
+    </details>
+
+    <div class="schede-intestazione">
+      <button class="scheda-bottone attiva" data-scheda="primo">Primo ordine</button>
+      <button class="scheda-bottone" data-scheda="secondo">Secondo ordine</button>
+      <button class="scheda-bottone" data-scheda="massa">Massa-molla-smorzatore</button>
+    </div>
+
+    <!-- ===================== SCHEDA A: PRIMO ORDINE ===================== -->
+    <div id="scheda-primo" class="scheda-contenuto attiva">
+      <div class="pannello">
+        <div class="campo-slider">
+          <label for="a-mu">Guadagno $\mu$ = <span id="a-mu-val">2</span></label>
+          <input type="range" id="a-mu" min="-5" max="5" step="0.1" value="2" />
+        </div>
+        <div class="campo-slider">
+          <label for="a-tau">Costante di tempo $\tau$ = <span id="a-tau-val">1</span> s</label>
+          <input type="range" id="a-tau" min="0.1" max="5" step="0.1" value="1" />
+        </div>
+        <div class="campo" style="max-width:200px;">
+          <label for="a-tend">Finestra del grafico $T$ [s]</label>
+          <input type="text" id="a-tend" value="20" />
+        </div>
+        <button id="a-btn-esempio" class="secondario">Carica esempio</button>
+      </div>
+
+      <div class="pannello">
+        <h2>Risposta al gradino</h2>
+        <p style="font-size:0.85rem; color:#6b7280;">
+          La finestra temporale $T$ è fissa (non si adatta a $\tau$): a parità di $T$, un sistema più lento mostra
+          la curva salire più lentamente e magari non raggiungere il regime entro il grafico.
+        </p>
+        <div id="a-grafico-risposta" style="width:100%; height:320px;"></div>
+      </div>
+      <div class="pannello">
+        <h2>Polo nel piano complesso</h2>
+        <div id="a-grafico-polo" style="width:100%; height:320px;"></div>
+      </div>
+      <div class="pannello">
+        <h2>Parametri</h2>
+        <table><tbody>
+          <tr><th>FdT</th><td id="a-fdt-testo"></td></tr>
+          <tr><th>Polo</th><td id="a-polo-testo"></td></tr>
+          <tr><th>Valore di regime $y_\infty=\mu$</th><td id="a-regime-testo"></td></tr>
+          <tr><th>Tempo di assestamento $T_a \approx 3\tau$</th><td id="a-ta-testo"></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+
+    <!-- ===================== SCHEDA B: SECONDO ORDINE ===================== -->
+    <div id="scheda-secondo" class="scheda-contenuto">
+      <div class="pannello">
+        <div class="campo-slider">
+          <label for="b-mu">Guadagno $\mu$ = <span id="b-mu-val">1</span></label>
+          <input type="range" id="b-mu" min="-5" max="5" step="0.1" value="1" />
+        </div>
+        <div class="campo-slider">
+          <label for="b-omegan">Pulsazione naturale $\omega_n$ = <span id="b-omegan-val">2</span> rad/s</label>
+          <input type="range" id="b-omegan" min="0.1" max="5" step="0.1" value="2" />
+        </div>
+        <div class="campo-slider">
+          <label for="b-zeta">Smorzamento $\delta$ = <span id="b-zeta-val">1</span></label>
+          <input type="range" id="b-zeta" min="0" max="2" step="0.05" value="1" />
+        </div>
+        <div class="campo" style="max-width:200px;">
+          <label for="b-tend">Finestra del grafico $T$ [s]</label>
+          <input type="text" id="b-tend" value="20" />
+        </div>
+        <button id="b-btn-esempio" class="secondario">Carica esempio</button>
+      </div>
+
+      <div class="pannello">
+        <h2>Risposta al gradino</h2>
+        <p style="font-size:0.85rem; color:#6b7280;">
+          La finestra temporale $T$ è fissa (non si adatta a $\omega_n$, $\delta$): a parità di $T$ si vede subito se
+          il sistema è diventato più lento o più veloce.
+        </p>
+        <div id="b-grafico-risposta" style="width:100%; height:320px;"></div>
+      </div>
+      <div class="pannello">
+        <h2>Poli nel piano complesso</h2>
+        <div id="b-grafico-poli" style="width:100%; height:320px;"></div>
+      </div>
+      <div class="pannello">
+        <h2>Parametri</h2>
+        <table><tbody>
+          <tr><th>FdT</th><td id="b-fdt-testo"></td></tr>
+          <tr><th>Poli</th><td id="b-poli-testo"></td></tr>
+          <tr><th>Sovraelongazione $S\%$</th><td id="b-s-testo"></td></tr>
+          <tr><th>Tempo di picco $T_p$</th><td id="b-tp-testo"></td></tr>
+          <tr><th>Tempo di assestamento $T_a \approx 3/(\delta\omega_n)$</th><td id="b-ta-testo"></td></tr>
+        </tbody></table>
+        <p id="b-nota-poli" style="font-size:0.85rem; color:#6b7280;"></p>
+      </div>
+    </div>
+
+    <!-- ===================== SCHEDA C: MASSA-MOLLA-SMORZATORE ===================== -->
+    <div id="scheda-massa" class="scheda-contenuto">
+      <div class="pannello">
+        <div class="campo-slider">
+          <label for="c-m">Massa $m$ = <span id="c-m-val">1</span> kg</label>
+          <input type="range" id="c-m" min="0.1" max="5" step="0.1" value="1" />
+        </div>
+        <div class="campo-slider">
+          <label for="c-b">Smorzamento $b$ = <span id="c-b-val">1</span> N·s/m</label>
+          <input type="range" id="c-b" min="0" max="5" step="0.1" value="1" />
+        </div>
+        <div class="campo-slider">
+          <label for="c-k">Rigidezza $k$ = <span id="c-k-val">1</span> N/m</label>
+          <input type="range" id="c-k" min="0.1" max="10" step="0.1" value="1" />
+        </div>
+        <div class="riga-campi">
+          <div class="campo">
+            <label for="c-forza-tipo">Forza applicata $F$</label>
+            <select id="c-forza-tipo">
+              <option value="gradino" selected>Gradino</option>
+              <option value="impulso">Impulso</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="c-forza-ampiezza">Ampiezza $F$ [N]</label>
+            <input type="text" id="c-forza-ampiezza" value="1" />
+          </div>
+        </div>
+        <div class="campo" style="max-width:200px;">
+          <label for="c-tend">Finestra del grafico $T$ [s]</label>
+          <input type="text" id="c-tend" value="20" />
+        </div>
+        <button id="c-btn-esempio" class="secondario">Carica esempio</button>
+      </div>
+
+      <div class="pannello">
+        <h2>Animazione</h2>
+        <canvas id="massa-canvas" width="800" height="180"></canvas>
+        <div class="barra-azioni">
+          <button id="c-btn-play">Play</button>
+          <button id="c-btn-pausa" class="secondario">Pausa</button>
+          <button id="c-btn-reset" class="secondario">Reset</button>
+        </div>
+        <p class="stato-molla">
+          Il blocco trasla orizzontalmente secondo x(t); molla e smorzatore collegano il blocco alla parete.
+          La scala dell'animazione è fissa (finestra visibile da −2 a 10 m): a parità di scala, forze o
+          rigidezze diverse producono spostamenti realmente diversi. Se lo spostamento supera questa
+          finestra, il blocco esce semplicemente dalla scena.
+        </p>
+      </div>
+
+      <div class="pannello">
+        <h2>Risposta x(t)</h2>
+        <div id="c-grafico-risposta" style="width:100%; height:320px;"></div>
+      </div>
+      <div class="pannello">
+        <h2>Parametri</h2>
+        <table><tbody>
+          <tr><th>FdT (posizione/forza)</th><td id="c-fdt-testo"></td></tr>
+          <tr><th>Pulsazione naturale $\omega_n=\sqrt{k/m}$</th><td id="c-omegan-testo"></td></tr>
+          <tr><th>Smorzamento $\delta=b/(2\sqrt{km})$</th><td id="c-zeta-testo"></td></tr>
+          <tr><th>Regime</th><td id="c-tipo-testo"></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/ca-core.js"></script>
+  <script src="../shared/ca-plot.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

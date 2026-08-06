@@ -1,0 +1,23 @@
+---
+title: "Controlli Automatici"
+toc: false
+---
+
+Materiale di supporto interattivo per il corso di **Controlli Automatici**
+(Ingegneria Gestionale, UNIMORE).
+
+## Strumenti interattivi
+
+- [Convertitore ISU ↔ IU ↔ FdT](strumenti/t1.qmd) — converti tra rappresentazione
+  di stato, ingresso-uscita e funzione di trasferimento.
+- [Risposta nel tempo e modi](strumenti/t2.qmd) — impulso, gradino, rampa,
+  sinusoide, e scomposizione nei modi.
+- [Sistemi elementari 1° e 2° ordine](strumenti/t3.qmd) — slider interattivi e
+  massa-molla-smorzatore animato.
+- [Diagrammi di Bode](strumenti/t4.qmd) — decomposizione automatica nei termini
+  elementari con grafico e spiegazione per ciascuno.
+- [Luogo delle radici](strumenti/t5.qmd) — tracciamento al variare di K con tutte
+  le regole.
+- [Progettazione del controllore](strumenti/t7.qmd) — da specifiche statiche e
+  dinamiche al luogo delle radici: controllore proporzionale vs. compensatore.
+- [Taratura PID](strumenti/t6.qmd) — regola Kp, Ti, Td e inietta disturbi.
