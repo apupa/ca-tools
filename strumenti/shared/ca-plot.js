@@ -48,19 +48,45 @@
         line: { dash: "dash" }, xaxis: "x2", yaxis: "y2", showlegend: false,
       });
     });
-    // Assi delle pulsazioni: scala logaritmica con una tacca per decade,
-    // etichettata in notazione 10^n (dtick=1 in scala log = un ordine di
-    // grandezza tra una tacca e la successiva).
-    const assePulsazioni = {
-      type: "log", title: "ω [rad/s]", gridcolor: "#e5e7eb",
-      dtick: 1, exponentformat: "power", minorticks: "",
+    // Assi delle pulsazioni: scala logaritmica, SOLO potenze di dieci come
+    // tacche/etichette (niente 2, 5, ecc. intermedi). Tacche calcolate a mano
+    // invece di affidarsi al tick automatico di Plotly, che altrimenti
+    // inserisce anche le cifre intermedie all'interno di ogni decade.
+    function tacchePotenzeDiDieci(valori) {
+      const minV = Math.min.apply(null, valori);
+      const maxV = Math.max.apply(null, valori);
+      const eMin = Math.floor(Math.log10(minV));
+      const eMax = Math.ceil(Math.log10(maxV));
+      const tickvals = [], ticktext = [];
+      for (let e = eMin; e <= eMax; e++) {
+        tickvals.push(Math.pow(10, e));
+        ticktext.push("10<sup>" + e + "</sup>");
+      }
+      return { tickvals, ticktext };
+    }
+    const { tickvals, ticktext } = tacchePotenzeDiDieci(w);
+    // Stile "carta millimetrata da libro di testo": griglia a due livelli
+    // (fitta e chiara per le suddivisioni intermedie, più marcata sulle
+    // tacche principali) e assi a "L" (solo sinistra/basso, senza riquadro).
+    const assiStileQuaderno = {
+      showline: true, linecolor: "#374151", linewidth: 1, mirror: false, zeroline: false,
     };
+    const assePulsazioni = Object.assign({}, assiStileQuaderno, {
+      type: "log", title: "ω [rad/s]",
+      tickmode: "array", tickvals, ticktext,
+      gridcolor: "#d1d5db", gridwidth: 1,
+      minor: { showgrid: true, dtick: "D1", gridcolor: "#eef0f2", gridwidth: 1, ticks: "" },
+    });
+    const assiVerticali = Object.assign({}, assiStileQuaderno, {
+      gridcolor: "#d1d5db", gridwidth: 1,
+      minor: { showgrid: true, gridcolor: "#eef0f2", gridwidth: 1, ticks: "" },
+    });
     const layout = Object.assign({}, layoutBase, {
       grid: { rows: 2, columns: 1, pattern: "independent" },
       xaxis: assePulsazioni,
-      yaxis: { title: "ampiezza [dB]", gridcolor: "#e5e7eb" },
+      yaxis: Object.assign({ title: "ampiezza [dB]" }, assiVerticali),
       xaxis2: Object.assign({}, assePulsazioni),
-      yaxis2: { title: "fase [°]", gridcolor: "#e5e7eb" },
+      yaxis2: Object.assign({ title: "fase [°]" }, assiVerticali),
     });
     Plotly.newPlot(divId, tracce, layout, configBase);
   }
