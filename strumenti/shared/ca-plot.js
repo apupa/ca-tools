@@ -71,11 +71,17 @@
     const assiStileQuaderno = {
       showline: true, linecolor: "#374151", linewidth: 1, mirror: false, zeroline: false,
     };
-    const assePulsazioni = Object.assign({}, assiStileQuaderno, {
-      type: "log", title: "ω [rad/s]",
+    const assePulsazioniBase = Object.assign({}, assiStileQuaderno, {
+      type: "log",
       tickmode: "array", tickvals, ticktext,
       gridcolor: "#d1d5db", gridwidth: 1,
       minor: { showgrid: true, dtick: "D1", gridcolor: "#eef0f2", gridwidth: 1, ticks: "" },
+    });
+    // Asse ω condiviso da ampiezza e fase (sono impilati, stessa scala):
+    // l'etichetta si mette solo sul grafico in basso (fase), non ripetuta su quello in alto.
+    const assePulsazioniSenzaEtichetta = Object.assign({}, assePulsazioniBase, { title: "" });
+    const assePulsazioniConEtichetta = Object.assign({}, assePulsazioniBase, {
+      title: "log₁₀(ω)  [decadi]",
     });
     const assiVerticali = Object.assign({}, assiStileQuaderno, {
       gridcolor: "#d1d5db", gridwidth: 1,
@@ -83,9 +89,9 @@
     });
     const layout = Object.assign({}, layoutBase, {
       grid: { rows: 2, columns: 1, pattern: "independent" },
-      xaxis: assePulsazioni,
+      xaxis: assePulsazioniSenzaEtichetta,
       yaxis: Object.assign({ title: "ampiezza [dB]" }, assiVerticali),
-      xaxis2: Object.assign({}, assePulsazioni),
+      xaxis2: assePulsazioniConEtichetta,
       yaxis2: Object.assign({ title: "fase [°]" }, assiVerticali),
     });
     Plotly.newPlot(divId, tracce, layout, configBase);
