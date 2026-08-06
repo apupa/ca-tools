@@ -221,6 +221,7 @@
       const omega0 = 1 / tau;
       const omegaA = omega0 / 10; // una decade prima del punto di rottura
       const omegaB = omega0 * 10; // una decade dopo
+      const log10Omega0 = Math.log10(omega0);
       const pendenza = t.esponente * 20;
       const segnoFase = t.esponente * (t.T < 0 ? -1 : 1);
       const direzioneFase = segnoFase > 0 ? "0° a +90°" : "0° a −90°";
@@ -230,7 +231,10 @@
         (pendenza > 0 ? "+" : "") + pendenza + " dB/dec. " +
         "Fase da " + direzioneFase + ": l'approssimazione asintotica la fa variare linearmente tra una decade prima " +
         "($\\omega_a = \\omega_0/10 = " + formattaNumero(omegaA) + "$ rad/s) e una decade dopo ($\\omega_b = " +
-        "\\omega_0 \\cdot 10 = " + formattaNumero(omegaB) + "$ rad/s), passando per $\\pm45$° in $\\omega_0$."
+        "\\omega_0 \\cdot 10 = " + formattaNumero(omegaB) + "$ rad/s), passando per $\\pm45$° in $\\omega_0$. " +
+        "Equivalentemente, in scala logaritmica: $\\log_{10}\\omega_a = \\log_{10}\\omega_0 - 1 = " +
+        formattaNumero(log10Omega0 - 1) + "$ e $\\log_{10}\\omega_b = \\log_{10}\\omega_0 + 1 = " +
+        formattaNumero(log10Omega0 + 1) + "$ (una decade = ±1 in $\\log_{10}\\omega$)."
       );
     }
     const omegaN = t.omegan;
