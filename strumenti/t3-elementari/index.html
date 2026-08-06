@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistemi elementari 1°/2° ordine — Controlli Automatici</title>
+  <title>Sistemi elementari 1°/2° ordine · Controlli Automatici</title>
   <link rel="stylesheet" href="../shared/stile.css" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
@@ -25,8 +25,57 @@
   </style>
 </head>
 <body>
+<nav class="barra-sito">
+  <a class="barra-sito-brand" href="../../index.html">Controlli Automatici</a>
+  <div class="barra-sito-nav">
+    <a class="barra-sito-link" href="../../index.html">Home</a>
+    <div class="barra-sito-dropdown">
+      <button type="button" class="barra-sito-dropdown-toggle attivo" aria-haspopup="true" aria-expanded="false">
+        Strumenti <span class="freccia">&#9662;</span>
+      </button>
+      <div class="barra-sito-dropdown-menu">
+      <a href="../t1-convertitore/index.html">1 · Conversione rappresentazioni</a>
+      <a href="../t2-risposta/index.html">2 · Risposta nel tempo e modi</a>
+      <a href="../t3-elementari/index.html" class="attivo">3 · Sistemi elementari (1°/2° ordine)</a>
+      <a href="../t4-bode/index.html">4 · Diagrammi di Bode</a>
+      <a href="../t5-luogo/index.html">5 · Luogo delle radici</a>
+      <a href="../t7-progettazione/index.html">6 · Progettazione del controllore</a>
+      <a href="../t6-pid/index.html">7 · Taratura PID</a>
+      </div>
+    </div>
+  </div>
+</nav>
+<script>
+(function () {
+  document.querySelectorAll('.barra-sito-dropdown-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var dd = btn.closest('.barra-sito-dropdown');
+      var giaAperto = dd.classList.contains('aperto');
+      document.querySelectorAll('.barra-sito-dropdown.aperto').forEach(function (d) {
+        d.classList.remove('aperto');
+        d.querySelector('.barra-sito-dropdown-toggle').setAttribute('aria-expanded', 'false');
+      });
+      if (!giaAperto) {
+        dd.classList.add('aperto');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.barra-sito-dropdown.aperto').forEach(function (d) {
+      d.classList.remove('aperto');
+      d.querySelector('.barra-sito-dropdown-toggle').setAttribute('aria-expanded', 'false');
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.barra-sito-dropdown.aperto').forEach(function (d) { d.classList.remove('aperto'); });
+    }
+  });
+})();
+</script>
   <div class="contenitore">
-    <a class="link-hub" href="../index.html">← Torna agli strumenti</a>
     <h1>Sistemi elementari 1° e 2° ordine</h1>
     <p class="sottotitolo">Esplora con gli slider il primo e il secondo ordine, e prova il massa-molla-smorzatore animato.</p>
 

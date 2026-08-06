@@ -1,15 +1,17 @@
-/* ===== stile.css — stile comune per gli strumenti di Controlli Automatici ===== */
+/* ===== stile.css — stile comune per gli strumenti di Controlli Automatici =====
+   Tema scuro (grigio) con accento giallo muto. */
 
 :root {
-  --colore-testo: #1f2937;
-  --colore-sfondo: #f7f8fa;
-  --colore-superficie: #ffffff;
-  --colore-bordo: #e2e5ea;
-  --colore-primario: #2563eb;
-  --colore-primario-scuro: #1d4ed8;
-  --colore-accento: #f0f4ff;
+  --colore-testo: #e7e9ec;
+  --colore-sfondo: #1b1e23;
+  --colore-superficie: #262a31;
+  --colore-bordo: #363b44;
+  --colore-primario: #d9b24c;        /* giallo muto */
+  --colore-primario-scuro: #e8c66a;  /* giallo piu chiaro per testo su fondo scuro */
+  --colore-accento: rgba(217, 178, 76, .14);
+  --colore-muted: #9aa1ab;
   --raggio-bordo: 10px;
-  --ombra: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --ombra: 0 1px 3px rgba(0, 0, 0, .40), 0 1px 2px rgba(0, 0, 0, .30);
 }
 
 * {
@@ -37,7 +39,7 @@ h1 {
 
 h1 .sottotitolo,
 p.sottotitolo {
-  color: #6b7280;
+  color: var(--colore-muted);
   font-weight: normal;
   font-size: 1rem;
 }
@@ -79,7 +81,7 @@ a:hover {
   text-decoration: none;
   transform: translateY(-2px);
   border-color: var(--colore-primario);
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 
 .card-strumento h3 {
@@ -91,7 +93,7 @@ a:hover {
 .card-strumento p {
   margin: 0;
   font-size: 0.92rem;
-  color: #4b5563;
+  color: var(--colore-testo);
 }
 
 /* ---------- Sezioni generiche ---------- */
@@ -121,7 +123,7 @@ details.teoria summary {
 details.teoria .riferimento {
   margin-top: 0.6rem;
   font-size: 0.85rem;
-  color: #6b7280;
+  color: var(--colore-muted);
 }
 
 /* ---------- Form / campi input ---------- */
@@ -141,7 +143,7 @@ textarea {
   border: 1px solid var(--colore-bordo);
   border-radius: 6px;
   font-size: 0.95rem;
-  background: var(--colore-superficie);
+  background: #1f232a;
   color: var(--colore-testo);
 }
 
@@ -150,13 +152,13 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--colore-primario);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3px rgba(217, 178, 76, 0.25);
 }
 
 input[readonly],
 input:disabled {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: #21252c;
+  color: var(--colore-muted);
   cursor: not-allowed;
 }
 
@@ -194,7 +196,8 @@ button {
   border-radius: 6px;
   border: 1px solid var(--colore-primario);
   background: var(--colore-primario);
-  color: #fff;
+  color: #1b1e23;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.12s ease;
 }
@@ -235,7 +238,7 @@ td {
 }
 
 th {
-  color: #6b7280;
+  color: var(--colore-muted);
   font-weight: 600;
   font-size: 0.85rem;
 }
@@ -251,10 +254,11 @@ th {
 .scheda-bottone {
   background: none;
   border: none;
-  color: #6b7280;
+  color: var(--colore-muted);
   padding: 0.6rem 1rem;
   border-radius: 6px 6px 0 0;
   box-shadow: none;
+  font-weight: 500;
 }
 
 .scheda-bottone:hover {
@@ -276,11 +280,153 @@ th {
   display: block;
 }
 
-/* ---------- Link "torna al hub" ---------- */
-.link-hub {
-  display: inline-block;
-  margin-bottom: 1rem;
+/* ---------- Barra di navigazione (identica su home e strumenti) ---------- */
+.barra-sito {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 0.8rem 1.2rem;
+  background: rgba(21, 24, 29, .92);
+  border-bottom: 1px solid var(--colore-bordo, var(--ca-bordo));
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.barra-sito-brand {
+  font-weight: 700;
+  color: var(--colore-testo, var(--ca-testo));
+  white-space: nowrap;
+}
+
+.barra-sito-brand:hover {
+  color: var(--colore-primario, var(--ca-primario));
+  text-decoration: none;
+}
+
+.barra-sito-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  margin-left: auto;
+}
+
+.barra-sito-link {
+  color: var(--colore-muted, var(--ca-muted));
+  font-size: 0.92rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.barra-sito-link:hover {
+  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
+  text-decoration: none;
+}
+
+.barra-sito-link.attivo {
+  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
+  border-bottom: 2px solid var(--colore-primario, var(--ca-primario));
+  padding-bottom: 2px;
+}
+
+/* Menu a tendina "Strumenti" */
+.barra-sito-dropdown {
+  position: relative;
+}
+
+.barra-sito-dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--colore-muted, var(--ca-muted));
+  cursor: pointer;
+}
+
+.barra-sito-dropdown-toggle .freccia {
+  font-size: 0.65em;
+  transition: transform 0.15s ease;
+}
+
+.barra-sito-dropdown-toggle:hover,
+.barra-sito-dropdown.aperto .barra-sito-dropdown-toggle {
+  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
+}
+
+.barra-sito-dropdown.aperto .freccia {
+  transform: rotate(180deg);
+}
+
+.barra-sito-dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.7rem);
+  min-width: 280px;
+  background: var(--colore-superficie, var(--ca-superficie));
+  border: 1px solid var(--colore-bordo, var(--ca-bordo));
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+  padding: 0.4rem;
+}
+
+.barra-sito-dropdown.aperto .barra-sito-dropdown-menu {
+  display: block;
+}
+
+.barra-sito-dropdown-menu a {
+  display: block;
+  padding: 0.55rem 0.7rem;
+  border-radius: 6px;
+  color: var(--colore-testo, var(--ca-testo));
   font-size: 0.9rem;
+}
+
+.barra-sito-dropdown-menu a:hover {
+  background: var(--colore-accento, var(--ca-accento));
+  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
+  text-decoration: none;
+}
+
+.barra-sito-dropdown-menu a.attivo {
+  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
+  font-weight: 600;
+  background: var(--colore-accento, var(--ca-accento));
+}
+
+@media (max-width: 640px) {
+  .barra-sito {
+    gap: 1rem;
+  }
+  .barra-sito-nav {
+    gap: 1rem;
+  }
+  .barra-sito-dropdown-menu {
+    right: -0.8rem;
+    min-width: 240px;
+  }
+}
+
+/* ---------- Grafici (Plotly) e animazioni (canvas): sfondo bianco ----------
+   Il layout dei grafici Plotly e' gia' impostato su bianco in ca-plot.js;
+   qui diamo lo stesso trattamento al riquadro che li contiene (bordi
+   arrotondati) cosi' risultano leggibili anche sul tema scuro del sito. */
+div[id*="grafico"],
+div[id*="-plot"] {
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+canvas#massa-canvas {
+  background: #ffffff;
+  border-radius: 8px;
+  display: block;
 }
 
 /* ---------- Responsive ---------- */
