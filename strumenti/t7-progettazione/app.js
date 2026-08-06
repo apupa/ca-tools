@@ -247,7 +247,7 @@
         html +=
           " Specifica statica (" + ETICHETTA_SPEC_STATICA[specStaticaVal] + "): " +
           '<span class="' + (soddisfatta ? "verdetto-ok" : "verdetto-no") + '">' +
-          (soddisfatta ? "SODDISFATTA" : "NON SODDISFATTA — serve almeno tipo " + richiesto) + "</span>.";
+          (soddisfatta ? "SODDISFATTA" : "NON SODDISFATTA: serve almeno tipo " + richiesto) + "</span>.";
       } else {
         html += " Nessuna specifica statica richiesta.";
       }
@@ -265,7 +265,7 @@
         "Specifiche dinamiche per questo $K$: " +
         '<span class="' + (tutteDentro ? "verdetto-ok" : "verdetto-no") + '">' +
         (tutteDentro ? "SODDISFATTE" : "NON SODDISFATTE") +
-        "</span> — criterio: tutti i poli ad anello chiuso devono cadere nella regione gialla.";
+        "</span>. Criterio: tutti i poli ad anello chiuso devono cadere nella regione gialla.";
       typeset(divSpecificheDinamiche);
     }
 
