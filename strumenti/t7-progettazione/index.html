@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Progettazione del controllore — Controlli Automatici</title>
+  <link rel="stylesheet" href="../shared/stile.css" />
+  <script>
+    // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    fieldset.specifica { border: 1px solid var(--colore-bordo); border-radius: 8px; padding: 0.8rem 1rem; margin-bottom: 1rem; }
+    fieldset.specifica legend { font-weight: 600; padding: 0 0.4rem; }
+    .campo-inline { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+    .campo-inline label { font-weight: normal; font-size: 0.9rem; white-space: nowrap; }
+    .campo-inline input[type="text"] { width: 90px; }
+    .verdetto-ok { color: #15803d; font-weight: 600; }
+    .verdetto-no { color: #b91c1c; font-weight: 600; }
+    h2.titolo-sezione { border-bottom: 2px solid var(--colore-primario); padding-bottom: 0.4rem; margin-top: 2.5rem; }
+  </style>
+</head>
+<body>
+  <div class="contenitore">
+    <a class="link-hub" href="../index.html">← Torna agli strumenti</a>
+    <h1>Progettazione del controllore</h1>
+    <p class="sottotitolo">
+      Parti dalle specifiche, verifica se un controllore proporzionale le soddisfa e, se serve, progetta un
+      controllore $C'(s)$ da inserire in serie all'impianto.
+    </p>
+
+    <details class="teoria">
+      <summary>Teoria in breve</summary>
+      <p>
+        Le <strong>specifiche statiche</strong> impongono un errore a regime nullo per un dato tipo di
+        riferimento (gradino, rampa, parabola): richiedono che $L(s)$ abbia almeno un certo numero di poli
+        nell'origine (il "tipo" del sistema). Un guadagno $K$ non cambia il tipo: se l'impianto non ha
+        abbastanza poli in $s=0$, serve un controllore che li aggiunga (es. un'azione integrale).
+      </p>
+      <p>
+        Le <strong>specifiche dinamiche</strong> (tempo di assestamento $T_a$, sovraelongazione $S\%$) si
+        traducono in vincoli sulla posizione dei poli dominanti ad anello chiuso: $T_a\approx3/\sigma$ impone
+        $\text{Re}(s) < -3/T_a$; $S\%$ impone uno smorzamento minimo $\zeta_{min}$, cioè i poli devono restare
+        entro un cono di semiapertura $\arccos(\zeta_{min})$ attorno al semiasse reale negativo. La regione
+        gialla nei grafici è l'intersezione di questi vincoli.
+      </p>
+      <p>
+        Il luogo delle radici di $L(s)=K\cdot G(s)$ (solo guadagno proporzionale) mostra se le specifiche sono
+        raggiungibili senza controllore. Se i rami non entrano mai nella regione gialla, serve un
+        controllore $C(s)=K\cdot C'(s)$ che sposti poli/zeri ad anello aperto — il secondo luogo mostra
+        l'effetto di $C'(s)$ scelto.
+      </p>
+      <p class="riferimento">Riferimento: Lezione CA07.</p>
+    </details>
+
+    <div class="pannello">
+      <h2>Impianto $G(s)$</h2>
+      <div class="riga-campi">
+        <div class="campo">
+          <label for="g-num">Numeratore</label>
+          <input type="text" id="g-num" placeholder="es. 1" value="1" />
+        </div>
+        <div class="campo">
+          <label for="g-den">Denominatore</label>
+          <input type="text" id="g-den" placeholder="es. 1 3 2 0" value="1 3 2 0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="pannello">
+      <h2>Specifiche di progetto</h2>
+      <fieldset class="specifica">
+        <legend>Errore a regime (specifica statica)</legend>
+        <div class="campo" style="max-width:340px;">
+          <label for="spec-statica">Tipo di riferimento con errore a regime nullo</label>
+          <select id="spec-statica">
+            <option value="nessuna" selected>Nessuna specifica</option>
+            <option value="posizione">Gradino (errore di posizione nullo)</option>
+            <option value="velocita">Rampa (errore di velocità nullo)</option>
+            <option value="accelerazione">Parabola (errore di accelerazione nullo)</option>
+          </select>
+        </div>
+      </fieldset>
+      <fieldset class="specifica">
+        <legend>Specifiche dinamiche</legend>
+        <div class="campo-inline">
+          <input type="checkbox" id="ta-attivo" />
+          <label for="ta-attivo">Tempo di assestamento massimo $T_a$ ≤</label>
+          <input type="text" id="ta-valore" value="5" />
+          <label for="ta-valore">s</label>
+        </div>
+        <div class="campo-inline">
+          <input type="checkbox" id="s-attivo" />
+          <label for="s-attivo">Sovraelongazione massima $S\%$ ≤</label>
+          <input type="text" id="s-valore" value="20" />
+          <label for="s-valore">%</label>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="pannello">
+      <h2>Controllore $C(s) = K\cdot C'(s)$</h2>
+      <p style="font-size:0.85rem; color:#6b7280;">
+        Scrivi solo la <strong>forma</strong> $C'(s)$ del controllore da inserire in serie all'impianto (il
+        guadagno $K$ viene fatto variare dal luogo delle radici, non va incluso qui). Es. un guadagno puro "1",
+        una rete anticipatrice "1 2" / "1 10", un'azione integrale "1" / "1 0"...
+      </p>
+      <div class="riga-campi">
+        <div class="campo">
+          <label for="c-num">Numeratore di $C'(s)$</label>
+          <input type="text" id="c-num" placeholder="es. 1 2" value="1 2" />
+        </div>
+        <div class="campo">
+          <label for="c-den">Denominatore di $C'(s)$</label>
+          <input type="text" id="c-den" placeholder="es. 1 10" value="1 10" />
+        </div>
+      </div>
+      <div class="riga-campi">
+        <div class="campo" style="max-width:260px;">
+          <label for="k-max">$K$ massimo tracciato (in entrambi i grafici)</label>
+          <input type="text" id="k-max" value="50" />
+        </div>
+        <div class="campo" style="max-width:260px;">
+          <label for="t-risposta">Finestra risposta al gradino $T$ [s]</label>
+          <input type="text" id="t-risposta" value="10" />
+        </div>
+      </div>
+      <div class="barra-azioni">
+        <button id="btn-calcola">Calcola</button>
+        <button id="btn-esempio" class="secondario">Carica esempio</button>
+      </div>
+      <p id="messaggio-errore" style="color:#b91c1c; display:none;"></p>
+    </div>
+
+    <h2 class="titolo-sezione">Controllore proporzionale — $L(s)=K\cdot G(s)$</h2>
+    <div class="pannello">
+      <div id="fdt-testo-prima" style="overflow-x:auto;"></div>
+      <div id="specifiche-testo-prima" style="margin-top:0.6rem; font-size:0.9rem;"></div>
+    </div>
+    <div class="pannello">
+      <div class="campo-slider">
+        <label for="k-slider-prima">Poli ad anello chiuso per $K$ = <span id="k-slider-val-prima">0</span></label>
+        <input type="range" id="k-slider-prima" min="0" max="50" step="0.05" value="0" style="width:100%;" />
+      </div>
+      <div id="grafico-luogo-prima" style="width:100%; height:460px;"></div>
+      <p style="font-size:0.8rem; color:#6b7280;">
+        La regione gialla è l'area ammessa dalle specifiche dinamiche attive: a sinistra della linea blu
+        tratteggiata (vincolo su $T_a$) e dentro il cono delimitato dalle linee rosse tratteggiate (vincolo su
+        $S\%$).
+      </p>
+      <div id="geq-testo-prima" style="overflow-x:auto;"></div>
+      <div id="specifiche-dinamiche-testo-prima" style="margin-top:0.4rem; font-size:0.9rem;"></div>
+    </div>
+    <div class="pannello">
+      <h3>Poli ad anello chiuso</h3>
+      <div id="poli-chiusi-testo-prima"></div>
+    </div>
+    <div class="pannello">
+      <h3>Risposta al gradino (K selezionato)</h3>
+      <div id="grafico-risposta-prima" style="width:100%; height:320px;"></div>
+    </div>
+
+    <h2 class="titolo-sezione">Con controllore — $L(s)=K\cdot C'(s)\cdot G(s)$</h2>
+    <div class="pannello">
+      <div id="fdt-testo-dopo" style="overflow-x:auto;"></div>
+      <div id="specifiche-testo-dopo" style="margin-top:0.6rem; font-size:0.9rem;"></div>
+    </div>
+    <div class="pannello">
+      <div class="campo-slider">
+        <label for="k-slider-dopo">Poli ad anello chiuso per $K$ = <span id="k-slider-val-dopo">0</span></label>
+        <input type="range" id="k-slider-dopo" min="0" max="50" step="0.05" value="0" style="width:100%;" />
+      </div>
+      <div id="grafico-luogo-dopo" style="width:100%; height:460px;"></div>
+      <p style="font-size:0.8rem; color:#6b7280;">
+        Stessa regione ammessa del grafico sopra: confronta come $C'(s)$ sposta i rami rispetto al solo
+        guadagno proporzionale.
+      </p>
+      <div id="geq-testo-dopo" style="overflow-x:auto;"></div>
+      <div id="specifiche-dinamiche-testo-dopo" style="margin-top:0.4rem; font-size:0.9rem;"></div>
+    </div>
+    <div class="pannello">
+      <h3>Poli ad anello chiuso</h3>
+      <div id="poli-chiusi-testo-dopo"></div>
+    </div>
+    <div class="pannello">
+      <h3>Risposta al gradino (K selezionato)</h3>
+      <div id="grafico-risposta-dopo" style="width:100%; height:320px;"></div>
+    </div>
+  </div>
+
+  <script src="../shared/ca-core.js"></script>
+  <script src="../shared/ca-plot.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

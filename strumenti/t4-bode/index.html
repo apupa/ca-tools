@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagrammi di Bode — Controlli Automatici</title>
+  <link rel="stylesheet" href="../shared/stile.css" />
+  <script>
+    // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    .scheda-termine { margin-bottom: 1.2rem; }
+    .scheda-termine h3 { margin-bottom: 0.2rem; }
+    .scheda-termine .descrizione { font-size: 0.9rem; color: #4b5563; margin: 0.3rem 0 0.6rem; }
+  </style>
+</head>
+<body>
+  <div class="contenitore">
+    <a class="link-hub" href="../index.html">← Torna agli strumenti</a>
+    <h1>Diagrammi di Bode</h1>
+    <p class="sottotitolo">Decomposizione automatica di una FdT nei termini elementari, con grafico e spiegazione per ciascuno.</p>
+
+    <details class="teoria">
+      <summary>Teoria in breve</summary>
+      <p>
+        I diagrammi di Bode rappresentano la risposta armonica $G(j\omega)$ con due grafici: l'<strong>ampiezza</strong>
+        in decibel ($20\log_{10}|G(j\omega)|$) e la <strong>fase</strong> in gradi, entrambi in funzione di $\omega$ in
+        scala logaritmica.
+      </p>
+      <p>
+        Ponendo $s=j\omega$, $G(j\omega)$ si scompone nel prodotto di <strong>termini elementari</strong>: un guadagno
+        costante $K$, eventuali poli/zeri nell'origine ($ (j\omega)^{h}$), termini del primo ordine reali
+        $(1+j\omega T)^{\pm1}$, e termini del secondo ordine per coppie complesse coniugate
+        $\left(1+2\dfrac{\delta}{\omega_n}j\omega-\dfrac{\omega^2}{\omega_n^2}\right)^{\pm1}$. Poiché il logaritmo di un
+        prodotto è la somma dei logaritmi, il diagramma di Bode totale si ottiene <strong>sommando</strong> ampiezze (in
+        dB) e fasi dei singoli termini.
+      </p>
+      <p>
+        Per ogni termine si usa spesso un'<strong>approssimazione asintotica a spezzata</strong>: per il primo ordine,
+        0 dB fino al punto di rottura $\omega_0=1/|\tau|$ poi una retta a $\pm20$ dB/dec; per il secondo ordine, 0 dB
+        fino a $\omega_n$ poi $\pm40$ dB/dec (con un eventuale picco di risonanza se $\delta<1/\sqrt{2}$).
+      </p>
+      <p class="riferimento">Riferimento: Lezione CA05.</p>
+    </details>
+
+    <div class="pannello">
+      <div class="riga-campi">
+        <div class="campo">
+          <label for="fdt-num">Numeratore</label>
+          <input type="text" id="fdt-num" placeholder="es. 10" value="10" />
+        </div>
+        <div class="campo">
+          <label for="fdt-den">Denominatore</label>
+          <input type="text" id="fdt-den" placeholder="es. 1 11 10" value="1 11 10" />
+        </div>
+      </div>
+      <div class="riga-campi">
+        <div class="campo">
+          <label for="omega-min">ω minima [rad/s]</label>
+          <input type="text" id="omega-min" value="0.01" />
+        </div>
+        <div class="campo">
+          <label for="omega-max">ω massima [rad/s]</label>
+          <input type="text" id="omega-max" value="100" />
+        </div>
+      </div>
+      <div class="barra-azioni">
+        <button id="btn-calcola">Calcola</button>
+        <button id="btn-esempio" class="secondario">Carica esempio</button>
+      </div>
+      <p id="messaggio-errore" style="color:#b91c1c; display:none;"></p>
+    </div>
+
+    <div class="pannello">
+      <h2>Funzione di trasferimento</h2>
+      <div id="fdt-testo" style="overflow-x:auto;"></div>
+    </div>
+
+    <div id="lista-termini"></div>
+
+    <div class="pannello">
+      <h2>Diagramma di Bode totale</h2>
+      <div id="grafico-totale" style="width:100%; height:480px;"></div>
+      <p id="nota-verifica" style="font-size:0.85rem; color:#6b7280;"></p>
+    </div>
+  </div>
+
+  <script src="../shared/ca-core.js"></script>
+  <script src="../shared/ca-plot.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

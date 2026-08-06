@@ -1,0 +1,16 @@
+---
+title: "Luogo delle radici"
+toc: false
+---
+
+Strumento interattivo. Se il riquadro non si vede bene, aprilo
+[a schermo intero](t5-luogo/index.html){target="_blank"}.
+
+```{=html}
+<iframe
+  src="t5-luogo/index.html"
+  title="Luogo delle radici"
+  style="width:100%; height:85vh; min-height:700px; border:1px solid #ddd; border-radius:8px;"
+  loading="lazy">
+</iframe>
+```

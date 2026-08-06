@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luogo delle radici — Controlli Automatici</title>
+  <link rel="stylesheet" href="../shared/stile.css" />
+  <script>
+    // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+  <div class="contenitore">
+    <a class="link-hub" href="../index.html">← Torna agli strumenti</a>
+    <h1>Luogo delle radici</h1>
+    <p class="sottotitolo">Traccia il luogo delle radici di $L(s)$ al variare di $K$ da 0 a ∞, con tutte le regole di tracciamento.</p>
+
+    <details class="teoria">
+      <summary>Teoria in breve</summary>
+      <p>
+        Il luogo delle radici è il percorso tracciato sul piano complesso dai poli del sistema in retroazione
+        $1+K\,L(s)=0$ al variare del guadagno $K$ da 0 a $\infty$. Alcune proprietà evitano lo studio diretto
+        dell'equazione:
+      </p>
+      <ul>
+        <li>Ha tanti <strong>rami</strong> quanti sono i poli di $L(s)$; ogni ramo parte ($K=0$) da un polo e arriva
+          ($K\to\infty$) a uno zero, oppure va all'infinito lungo un <strong>asintoto</strong>.</li>
+        <li>È <strong>simmetrico</strong> rispetto all'asse reale.</li>
+        <li>Un punto dell'asse reale appartiene al luogo se e solo se lascia alla sua <strong>destra</strong> un
+          numero <strong>dispari</strong> di singolarità (poli+zeri) reali.</li>
+        <li>Gli asintoti sono $n-m$ (grado relativo), si incontrano nel <strong>centro stella</strong>
+          $\sigma_a=\dfrac{\sum p_i-\sum z_i}{n-m}$, con angoli $\vartheta_{a,\nu}=\dfrac{(2\nu+1)180°}{n-m}$.</li>
+      </ul>
+      <p class="riferimento">Riferimento: Lezione CA07.</p>
+    </details>
+
+    <div class="pannello">
+      <div class="riga-campi">
+        <div class="campo">
+          <label for="fdt-num">Numeratore di $L(s)$</label>
+          <input type="text" id="fdt-num" placeholder="es. 1" value="1" />
+        </div>
+        <div class="campo">
+          <label for="fdt-den">Denominatore di $L(s)$</label>
+          <input type="text" id="fdt-den" placeholder="es. 1 3 2 0" value="1 3 2 0" />
+        </div>
+      </div>
+      <div class="campo" style="max-width:200px;">
+        <label for="k-max">$K$ massimo tracciato</label>
+        <input type="text" id="k-max" value="50" />
+      </div>
+      <div class="barra-azioni">
+        <button id="btn-calcola">Calcola</button>
+        <button id="btn-esempio" class="secondario">Carica esempio</button>
+      </div>
+      <p id="messaggio-errore" style="color:#b91c1c; display:none;"></p>
+    </div>
+
+    <div class="pannello">
+      <h2>Funzione di trasferimento d'anello</h2>
+      <div id="fdt-testo" style="overflow-x:auto;"></div>
+    </div>
+
+    <div class="pannello">
+      <h2>Piano complesso</h2>
+      <div class="campo-slider">
+        <label for="k-slider">Poli ad anello chiuso per $K$ = <span id="k-slider-val">0</span></label>
+        <input type="range" id="k-slider" min="0" max="50" step="0.05" value="0" style="width:100%;" />
+      </div>
+      <div id="grafico-luogo" style="width:100%; height:520px;"></div>
+      <p style="font-size:0.85rem; color:#6b7280;">
+        X = poli ad anello aperto, O = zeri ad anello aperto, tratteggio = asintoti, punto grande = poli ad anello
+        chiuso per il $K$ selezionato. Il colore dei punti del luogo indica il valore di $K$.
+      </p>
+      <div id="geq-testo" style="overflow-x:auto;"></div>
+    </div>
+
+    <div class="pannello">
+      <h2>Poli ad anello chiuso (per il $K$ selezionato)</h2>
+      <div id="poli-chiusi-testo"></div>
+    </div>
+
+    <div class="pannello">
+      <h2>Regole del luogo delle radici</h2>
+      <div id="regole-testo"></div>
+    </div>
+  </div>
+
+  <script src="../shared/ca-core.js"></script>
+  <script src="../shared/ca-plot.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
