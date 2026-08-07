@@ -1,5 +1,11 @@
 /* ===== stile.css — stile comune per gli strumenti di Controlli Automatici =====
-   Tema scuro (grigio) con accento giallo muto. */
+   Tema scuro (grigio) con accento giallo muto.
+
+   NB: le pagine degli strumenti caricano questo file con un suffisso di
+   versione (?v=...). GitHub Pages lo tiene in cache 10 minuti, quindi dopo
+   averlo modificato va aggiornato quel suffisso nelle pagine degli strumenti,
+   altrimenti il browser puo' mescolare una versione vecchia di questo file
+   con una nuova di app.js. */
 
 :root {
   --colore-testo: #e7e9ec;
@@ -16,6 +22,11 @@
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  /* Evita l'ingrandimento automatico del testo in orizzontale su iOS. */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -164,6 +175,22 @@ input:disabled {
 
 .campo {
   margin-bottom: 0.9rem;
+}
+
+/* Nota sotto i campi della funzione di trasferimento: ricorda i due formati
+   accettati (coefficienti oppure espressione in s). */
+.nota-formato {
+  margin: -0.3rem 0 0.9rem;
+  font-size: 0.85rem;
+  color: var(--colore-muted);
+}
+
+.nota-formato code {
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--colore-primario-scuro);
+  font-size: 0.95em;
 }
 
 .riga-campi {
@@ -363,6 +390,8 @@ th {
   right: 0;
   top: calc(100% + 0.7rem);
   min-width: 280px;
+  max-height: 75vh;
+  overflow-y: auto;
   background: var(--colore-superficie, var(--ca-superficie));
   border: 1px solid var(--colore-bordo, var(--ca-bordo));
   border-radius: 10px;
@@ -372,6 +401,23 @@ th {
 
 .barra-sito-dropdown.aperto .barra-sito-dropdown-menu {
   display: block;
+}
+
+/* Titolo di gruppo dentro il menu (es. "Strumenti interattivi" / "Pillole
+   teoriche"): separa visivamente le due famiglie di link. */
+.barra-sito-dropdown-titolo {
+  padding: 0.5rem 0.7rem 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--colore-muted, var(--ca-muted));
+}
+
+.barra-sito-dropdown-titolo:not(:first-child) {
+  margin-top: 0.3rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--colore-bordo, var(--ca-bordo));
 }
 
 .barra-sito-dropdown-menu a {
@@ -397,6 +443,7 @@ th {
 @media (max-width: 640px) {
   .barra-sito {
     gap: 1rem;
+    padding: 0.7rem 0.8rem;
   }
   .barra-sito-nav {
     gap: 1rem;
@@ -404,6 +451,17 @@ th {
   .barra-sito-dropdown-menu {
     right: -0.8rem;
     min-width: 240px;
+    max-width: calc(100vw - 1.6rem);
+  }
+}
+
+@media (max-width: 420px) {
+  .barra-sito-brand {
+    font-size: 0.9rem;
+  }
+  .barra-sito-link,
+  .barra-sito-dropdown-toggle {
+    font-size: 0.85rem;
   }
 }
 
@@ -445,12 +503,230 @@ canvas#massa-canvas {
   touch-action: pan-y pinch-zoom !important;
 }
 
+/* ---------- Grafico a schermo intero ----------
+   Sul telefono un grafico alto 300-500 px dentro una colonna stretta e'
+   praticamente illeggibile e i gesti di Plotly litigano con lo scorrimento
+   della pagina. Il tasto "ingrandisci" apre il grafico su tutto lo schermo
+   (ruotando il telefono si ottiene una vista larga) e li' l'interazione di
+   Plotly viene riattivata. */
+.grafico-box {
+  position: relative;
+}
+
+/* Il tasto serve solo dove il puntatore e' il dito: su desktop c'e' gia' la
+   barra dei comandi di Plotly nello stesso angolo. */
+.grafico-espandi {
+  display: none;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 5;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.grafico-espandi:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.grafico-espandi .icona {
+  font-size: 1em;
+  line-height: 1;
+}
+
+/* Zoom manuale (+ / − / ripristino): compare solo a schermo intero, dove
+   e' il grafico stesso a gestire i gesti. */
+.grafico-comandi {
+  display: none;
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  z-index: 5;
+  gap: 0.35rem;
+}
+
+.grafico-box.a-schermo-intero .grafico-comandi {
+  display: flex;
+}
+
+.grafico-comandi button {
+  width: 2.3rem;
+  height: 2.3rem;
+  padding: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #374151;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.grafico-comandi button:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.grafico-box.a-schermo-intero {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  margin: 0;
+  padding: 3rem 0.4rem 0.4rem;
+  background: #ffffff;
+  display: flex;
+  /* I gesti li gestiamo noi (pizzico) e Plotly (trascinamento): il browser
+     non deve intercettarli per scorrere o ingrandire la pagina. */
+  touch-action: none;
+}
+
+.grafico-box.a-schermo-intero > div[id] {
+  flex: 1;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0;
+}
+
+.grafico-box.a-schermo-intero .grafico-espandi {
+  top: 0.7rem;
+  right: 0.7rem;
+}
+
+/* A schermo intero comandiamo noi i gesti: li lasciamo a Plotly (pan/zoom). */
+.grafico-box.a-schermo-intero .js-plotly-plot,
+.grafico-box.a-schermo-intero .js-plotly-plot .plot-container,
+.grafico-box.a-schermo-intero .js-plotly-plot .svg-container,
+.grafico-box.a-schermo-intero .js-plotly-plot .draglayer,
+.grafico-box.a-schermo-intero .js-plotly-plot .drag {
+  touch-action: none !important;
+}
+
+body.grafico-aperto {
+  overflow: hidden;
+}
+
+/* Il suggerimento serve solo dove il puntatore e' il dito. */
+.grafico-suggerimento {
+  display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .grafico-espandi {
+    display: inline-flex;
+  }
+  .grafico-suggerimento {
+    display: block;
+    margin: 0.45rem 0 0;
+    font-size: 0.8rem;
+    color: var(--colore-muted);
+  }
+}
+
+/* ---------- Formule: non devono uscire dal riquadro ----------
+   MathJax produce blocchi inline-block che non vanno a capo: su schermo
+   stretto una formula lunga deborda dal pannello (o dal box "Teoria in
+   breve"). La rendiamo scorrevole orizzontalmente e leggermente piu'
+   piccola sul telefono, invece di lasciarla uscire. */
+mjx-container {
+  max-width: 100%;
+}
+
+mjx-container[display="true"] {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2rem 0;
+}
+
+.pannello,
+details.teoria {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+details.teoria p,
+details.teoria li,
+.pannello p,
+.pannello li,
+.scheda-termine .descrizione {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 600px) {
   body {
     padding: 1rem 0.7rem 2rem;
   }
+
+  h1 {
+    font-size: 1.35rem;
+  }
+
+  h1 .sottotitolo,
+  p.sottotitolo {
+    font-size: 0.92rem;
+  }
+
+  h2 {
+    font-size: 1.05rem;
+    margin-top: 1.5rem;
+  }
+
+  .pannello {
+    padding: 0.9rem;
+  }
+
+  details.teoria {
+    padding: 0.7rem 0.85rem;
+  }
+
   .riga-campi {
     flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  /* I pulsanti a piena larghezza sono molto piu' facili da centrare col dito. */
+  .barra-azioni button {
+    flex: 1 1 45%;
+  }
+
+  /* Tabelle larghe: scorrono da sole invece di allargare la pagina. */
+  .pannello table,
+  .scheda-contenuto table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Le schede (tab) restano su una riga scorrevole. */
+  .schede-intestazione {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .scheda-bottone {
+    white-space: nowrap;
+    padding: 0.5rem 0.7rem;
+  }
+
+  .griglia-matrice input {
+    width: 3.4rem;
+  }
+
+  mjx-container {
+    font-size: 92%;
+  }
+
+  canvas {
+    max-width: 100%;
+    height: auto;
   }
 }

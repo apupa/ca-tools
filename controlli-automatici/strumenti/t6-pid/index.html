@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Taratura PID · Controlli Automatici</title>
-  <link rel="stylesheet" href="../shared/stile.css" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260807b" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -39,6 +39,7 @@
         Strumenti <span class="freccia">&#9662;</span>
       </button>
       <div class="barra-sito-dropdown-menu">
+      <div class="barra-sito-dropdown-titolo">Strumenti interattivi</div>
       <a href="../t1-convertitore/index.html">1. Conversione rappresentazioni</a>
       <a href="../t2-risposta/index.html">2. Risposta nel tempo e modi</a>
       <a href="../t3-elementari/index.html">3. Sistemi elementari (1°/2° ordine)</a>
@@ -93,7 +94,7 @@
       <ul>
         <li><strong>Proporzionale</strong>: maggiore è l'errore, maggiore è l'azione di controllo.</li>
         <li><strong>Integrale</strong>: introduce un polo nell'origine nel guadagno d'anello, annullando l'errore a
-          regime per riferimenti e disturbi costanti — indispensabile per specifiche statiche.</li>
+          regime per riferimenti e disturbi costanti: indispensabile per specifiche statiche.</li>
         <li><strong>Derivativa</strong>: azione "preventiva" basata sul rapporto incrementale, anticipa la fase; per
           essere fisicamente realizzabile si usa filtrata, $T_d s/(1+\frac{T_d}{N}s)$ con $N\approx5$–$20$.</li>
       </ul>
@@ -140,6 +141,7 @@
             <input type="text" id="p-den" value="1 1 1" />
           </div>
         </div>
+        <p class="nota-formato">Puoi scrivere i <strong>coefficienti</strong> separati da spazio, dal grado più alto al più basso (<code>1 11 10</code>), oppure direttamente l'<strong>espressione</strong> in $s$ (<code>(s+1)(s+10)</code>).</p>
       </div>
     </div>
 
@@ -328,7 +330,7 @@
 
     <div class="pannello">
       <div class="barra-azioni">
-        <button id="btn-esempio" class="secondario">Carica esempio</button>
+        <button id="btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
       <p id="messaggio-errore" style="color:#b91c1c; display:none;"></p>
     </div>
@@ -341,7 +343,7 @@
     <div class="pannello">
       <h2>Segnale di controllo $u(t)$</h2>
       <p style="font-size:0.85rem; color:#b7bcc5;">
-        Uscita del regolatore verso l'impianto (comprensiva di $d_u$ quando attivo) — utile per verificare lo
+        Uscita del regolatore verso l'impianto (comprensiva di $d_u$ quando attivo): utile per verificare lo
         sforzo di controllo richiesto, ad esempio per individuare saturazioni dell'attuatore.
       </p>
       <div id="grafico-controllo" style="width:100%; height:280px;"></div>
@@ -353,8 +355,8 @@
     </div>
   </div>
 
-  <script src="../shared/ca-core.js"></script>
-  <script src="../shared/ca-plot.js"></script>
-  <script src="app.js"></script>
+  <script src="../shared/ca-core.js?v=20260807a"></script>
+  <script src="../shared/ca-plot.js?v=20260807a"></script>
+  <script src="app.js?v=20260807a"></script>
 </body>
 </html>

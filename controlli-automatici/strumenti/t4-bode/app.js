@@ -13,13 +13,15 @@
   const divNotaVerifica = document.getElementById("nota-verifica");
 
   // ---------- Utilità numeriche ----------
+  // Legge un polinomio da un campo di testo. Accetta due formati:
+  // i coefficienti separati da spazio ("1 11 10") oppure l'espressione
+  // nella variabile s ("(s+1)(s+10)"). Vedi CA.parsePolinomio.
   function leggiVettoreCoeff(str) {
-    const parti = str.trim().split(/\s+/).filter((s) => s.length > 0);
-    const numeri = parti.map(Number);
-    if (numeri.length === 0 || numeri.some((x) => Number.isNaN(x))) {
-      throw new Error('coefficienti non validi: "' + str + '"');
+    try {
+      return CA.parsePolinomio(str);
+    } catch (e) {
+      throw new Error('polinomio non valido: "' + String(str).trim() + '" [' + e.message + ']');
     }
-    return numeri;
   }
   function formattaNumero(x, decimali) {
     decimali = decimali || 4;
@@ -221,15 +223,20 @@
       const omega0 = 1 / tau;
       const omegaA = omega0 / 10; // una decade prima del punto di rottura
       const omegaB = omega0 * 10; // una decade dopo
+      const log10Omega0 = Math.log10(omega0);
       const pendenza = t.esponente * 20;
       const segnoFase = t.esponente * (t.T < 0 ? -1 : 1);
       const direzioneFase = segnoFase > 0 ? "0° a +90°" : "0° a −90°";
       return (
-        tipoTxt + " reale in ω₀=1/τ=" + formattaNumero(omega0) + " rad/s (τ=" + formattaNumero(t.T) + " s): ampiezza " +
-        "costante fino al punto di rottura, poi pendenza " + (pendenza > 0 ? "+" : "") + pendenza + " dB/dec. " +
+        tipoTxt + " reale in $\\omega_0 = 1/\\tau = " + formattaNumero(omega0) + "$ rad/s ($\\tau = " +
+        formattaNumero(t.T) + "$ s): ampiezza costante fino al punto di rottura, poi pendenza " +
+        (pendenza > 0 ? "+" : "") + pendenza + " dB/dec. " +
         "Fase da " + direzioneFase + ": l'approssimazione asintotica la fa variare linearmente tra una decade prima " +
-        "(ω_a=ω₀/10=" + formattaNumero(omegaA) + " rad/s) e una decade dopo (ω_b=ω₀·10=" + formattaNumero(omegaB) +
-        " rad/s), passando per ±45° in ω₀."
+        "($\\omega_a = \\omega_0/10 = " + formattaNumero(omegaA) + "$ rad/s) e una decade dopo ($\\omega_b = " +
+        "\\omega_0 \\cdot 10 = " + formattaNumero(omegaB) + "$ rad/s), passando per $\\pm45$° in $\\omega_0$. " +
+        "Equivalentemente, in scala logaritmica: $\\log_{10}\\omega_a = \\log_{10}\\omega_0 - 1 = " +
+        formattaNumero(log10Omega0 - 1) + "$ e $\\log_{10}\\omega_b = \\log_{10}\\omega_0 + 1 = " +
+        formattaNumero(log10Omega0 + 1) + "$ (una decade = ±1 in $\\log_{10}\\omega$)."
       );
     }
     const omegaN = t.omegan;
@@ -239,18 +246,15 @@
     const pendenza = t.esponente * 40;
     const segnoFase = t.esponente * (t.zeta < 0 ? -1 : 1);
     const direzioneFase = segnoFase > 0 ? "0° a +180°" : "0° a −180°";
-    let notaRisonanza = "";
-    if (t.esponente < 0 && Math.abs(t.zeta) < 1 / Math.SQRT2 && t.zeta > 0) {
-      const MR = 1 / (2 * t.zeta * Math.sqrt(1 - t.zeta * t.zeta));
-      notaRisonanza = " Presenta un picco di risonanza (M_R≈" + formattaNumero(MR) + ").";
-    }
     return (
-      tipoTxt + " complesso coniugato, ω_n=" + formattaNumero(omegaN) + " rad/s, δ=" + formattaNumero(t.zeta) +
-      ": ampiezza costante fino a ω_n, poi pendenza " + (pendenza > 0 ? "+" : "") + pendenza + " dB/dec. " +
+      tipoTxt + " complesso coniugato, $\\omega_n = " + formattaNumero(omegaN) + "$ rad/s, $\\delta = " +
+      formattaNumero(t.zeta) + "$: ampiezza costante fino a $\\omega_n$, poi pendenza " +
+      (pendenza > 0 ? "+" : "") + pendenza + " dB/dec. " +
       "Fase da " + direzioneFase + ": qui il punto di rottura non basta a delimitare la spezzata, serve la " +
-      "larghezza di banda 4.81^|δ|=" + formattaNumero(larghezza) + " — la fase varia tra ω_a=ω_n/4.81^|δ|=" +
-      formattaNumero(omegaA) + " rad/s e ω_b=ω_n·4.81^|δ|=" + formattaNumero(omegaB) + " rad/s, passando per " +
-      (segnoFase > 0 ? "+90°" : "−90°") + " in ω_n." + notaRisonanza
+      "larghezza di banda $4.81^{|\\delta|} = " + formattaNumero(larghezza) + "$: la fase varia tra $\\omega_a = " +
+      "\\omega_n/4.81^{|\\delta|} = " + formattaNumero(omegaA) + "$ rad/s e $\\omega_b = \\omega_n \\cdot " +
+      "4.81^{|\\delta|} = " + formattaNumero(omegaB) + "$ rad/s, passando per " +
+      (segnoFase > 0 ? "+90°" : "−90°") + " in $\\omega_n$."
     );
   }
 

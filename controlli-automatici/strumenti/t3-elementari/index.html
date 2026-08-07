@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistemi elementari 1°/2° ordine · Controlli Automatici</title>
-  <link rel="stylesheet" href="../shared/stile.css" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260807b" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -17,6 +17,7 @@
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
+    .fdt-generale { font-size: 1.05rem; margin: 0 0 1.1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--colore-bordo); overflow-x: auto; text-align: center; }
     .campo-slider { margin-bottom: 1.1rem; }
     .campo-slider label { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
     .campo-slider input[type="range"] { width: 100%; }
@@ -34,6 +35,7 @@
         Strumenti <span class="freccia">&#9662;</span>
       </button>
       <div class="barra-sito-dropdown-menu">
+      <div class="barra-sito-dropdown-titolo">Strumenti interattivi</div>
       <a href="../t1-convertitore/index.html">1. Conversione rappresentazioni</a>
       <a href="../t2-risposta/index.html">2. Risposta nel tempo e modi</a>
       <a href="../t3-elementari/index.html" class="attivo">3. Sistemi elementari (1°/2° ordine)</a>
@@ -111,6 +113,7 @@
     <!-- ===================== SCHEDA A: PRIMO ORDINE ===================== -->
     <div id="scheda-primo" class="scheda-contenuto attiva">
       <div class="pannello">
+        <p class="fdt-generale">$G(s) = \dfrac{\mu}{\tau s + 1}$</p>
         <div class="campo-slider">
           <label for="a-mu">Guadagno $\mu$ = <span id="a-mu-val">2</span></label>
           <input type="range" id="a-mu" min="-5" max="5" step="0.1" value="2" />
@@ -123,7 +126,7 @@
           <label for="a-tend">Finestra del grafico $T$ [s]</label>
           <input type="text" id="a-tend" value="20" />
         </div>
-        <button id="a-btn-esempio" class="secondario">Carica esempio</button>
+        <button id="a-btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
 
       <div class="pannello">
@@ -152,6 +155,7 @@
     <!-- ===================== SCHEDA B: SECONDO ORDINE ===================== -->
     <div id="scheda-secondo" class="scheda-contenuto">
       <div class="pannello">
+        <p class="fdt-generale">$G(s) = \dfrac{\mu\,\omega_n^{2}}{s^{2} + 2\delta\omega_n s + \omega_n^{2}}$</p>
         <div class="campo-slider">
           <label for="b-mu">Guadagno $\mu$ = <span id="b-mu-val">1</span></label>
           <input type="range" id="b-mu" min="-5" max="5" step="0.1" value="1" />
@@ -168,7 +172,7 @@
           <label for="b-tend">Finestra del grafico $T$ [s]</label>
           <input type="text" id="b-tend" value="20" />
         </div>
-        <button id="b-btn-esempio" class="secondario">Carica esempio</button>
+        <button id="b-btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
 
       <div class="pannello">
@@ -199,6 +203,7 @@
     <!-- ===================== SCHEDA C: MASSA-MOLLA-SMORZATORE ===================== -->
     <div id="scheda-massa" class="scheda-contenuto">
       <div class="pannello">
+        <p class="fdt-generale">$G(s) = \dfrac{1}{m s^{2} + b s + k}$</p>
         <div class="campo-slider">
           <label for="c-m">Massa $m$ = <span id="c-m-val">1</span> kg</label>
           <input type="range" id="c-m" min="0.1" max="5" step="0.1" value="1" />
@@ -228,7 +233,7 @@
           <label for="c-tend">Finestra del grafico $T$ [s]</label>
           <input type="text" id="c-tend" value="20" />
         </div>
-        <button id="c-btn-esempio" class="secondario">Carica esempio</button>
+        <button id="c-btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
 
       <div class="pannello">
@@ -263,8 +268,8 @@
     </div>
   </div>
 
-  <script src="../shared/ca-core.js"></script>
-  <script src="../shared/ca-plot.js"></script>
-  <script src="app.js"></script>
+  <script src="../shared/ca-core.js?v=20260807a"></script>
+  <script src="../shared/ca-plot.js?v=20260807a"></script>
+  <script src="app.js?v=20260807a"></script>
 </body>
 </html>

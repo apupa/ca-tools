@@ -17,13 +17,15 @@
   const divErrore = document.getElementById("messaggio-errore");
 
   // ---------- Utilità numeriche ----------
+  // Legge un polinomio da un campo di testo. Accetta due formati:
+  // i coefficienti separati da spazio ("1 11 10") oppure l'espressione
+  // nella variabile s ("(s+1)(s+10)"). Vedi CA.parsePolinomio.
   function leggiVettoreCoeff(str) {
-    const parti = str.trim().split(/\s+/).filter((s) => s.length > 0);
-    const numeri = parti.map(Number);
-    if (numeri.length === 0 || numeri.some((x) => Number.isNaN(x))) {
-      throw new Error('coefficienti non validi: "' + str + '"');
+    try {
+      return CA.parsePolinomio(str);
+    } catch (e) {
+      throw new Error('polinomio non valido: "' + String(str).trim() + '" [' + e.message + ']');
     }
-    return numeri;
   }
   function leggiNumero(campo, nome) {
     const v = parseFloat(campo.value);
@@ -247,7 +249,7 @@
         html +=
           " Specifica statica (" + ETICHETTA_SPEC_STATICA[specStaticaVal] + "): " +
           '<span class="' + (soddisfatta ? "verdetto-ok" : "verdetto-no") + '">' +
-          (soddisfatta ? "SODDISFATTA" : "NON SODDISFATTA — serve almeno tipo " + richiesto) + "</span>.";
+          (soddisfatta ? "SODDISFATTA" : "NON SODDISFATTA: serve almeno tipo " + richiesto) + "</span>.";
       } else {
         html += " Nessuna specifica statica richiesta.";
       }
@@ -265,7 +267,7 @@
         "Specifiche dinamiche per questo $K$: " +
         '<span class="' + (tutteDentro ? "verdetto-ok" : "verdetto-no") + '">' +
         (tutteDentro ? "SODDISFATTE" : "NON SODDISFATTE") +
-        "</span> — criterio: tutti i poli ad anello chiuso devono cadere nella regione gialla.";
+        "</span>. Criterio: tutti i poli ad anello chiuso devono cadere nella regione gialla.";
       typeset(divSpecificheDinamiche);
     }
 

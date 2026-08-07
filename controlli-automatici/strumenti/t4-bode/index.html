@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Diagrammi di Bode · Controlli Automatici</title>
-  <link rel="stylesheet" href="../shared/stile.css" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260807b" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -19,7 +19,7 @@
   <style>
     .scheda-termine { margin-bottom: 1.2rem; }
     .scheda-termine h3 { margin-bottom: 0.2rem; }
-    .scheda-termine .descrizione { font-size: 0.9rem; color: #4b5563; margin: 0.3rem 0 0.6rem; }
+    .scheda-termine .descrizione { font-size: 0.9rem; color: #b7bcc5; margin: 0.3rem 0 0.6rem; }
   </style>
 </head>
 <body>
@@ -32,6 +32,7 @@
         Strumenti <span class="freccia">&#9662;</span>
       </button>
       <div class="barra-sito-dropdown-menu">
+      <div class="barra-sito-dropdown-titolo">Strumenti interattivi</div>
       <a href="../t1-convertitore/index.html">1. Conversione rappresentazioni</a>
       <a href="../t2-risposta/index.html">2. Risposta nel tempo e modi</a>
       <a href="../t3-elementari/index.html">3. Sistemi elementari (1°/2° ordine)</a>
@@ -111,6 +112,7 @@
           <input type="text" id="fdt-den" placeholder="es. 1 11 10" value="1 11 10" />
         </div>
       </div>
+      <p class="nota-formato">Puoi scrivere i <strong>coefficienti</strong> separati da spazio, dal grado più alto al più basso (<code>1 11 10</code>), oppure direttamente l'<strong>espressione</strong> in $s$ (<code>(s+1)(s+10)</code>).</p>
       <div class="riga-campi">
         <div class="campo">
           <label for="omega-min">ω minima [rad/s]</label>
@@ -123,7 +125,7 @@
       </div>
       <div class="barra-azioni">
         <button id="btn-calcola">Calcola</button>
-        <button id="btn-esempio" class="secondario">Carica esempio</button>
+        <button id="btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
       <p id="messaggio-errore" style="color:#b91c1c; display:none;"></p>
     </div>
@@ -142,8 +144,8 @@
     </div>
   </div>
 
-  <script src="../shared/ca-core.js"></script>
-  <script src="../shared/ca-plot.js"></script>
-  <script src="app.js"></script>
+  <script src="../shared/ca-core.js?v=20260807a"></script>
+  <script src="../shared/ca-plot.js?v=20260807a"></script>
+  <script src="app.js?v=20260807a"></script>
 </body>
 </html>

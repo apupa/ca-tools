@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Conversione rappresentazioni · Controlli Automatici</title>
-  <link rel="stylesheet" href="../shared/stile.css" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260807b" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -32,6 +32,7 @@
         Strumenti <span class="freccia">&#9662;</span>
       </button>
       <div class="barra-sito-dropdown-menu">
+      <div class="barra-sito-dropdown-titolo">Strumenti interattivi</div>
       <a href="../t1-convertitore/index.html" class="attivo">1. Conversione rappresentazioni</a>
       <a href="../t2-risposta/index.html">2. Risposta nel tempo e modi</a>
       <a href="../t3-elementari/index.html">3. Sistemi elementari (1°/2° ordine)</a>
@@ -105,9 +106,9 @@
       <div class="campo">
         <label for="modello-partenza">Modello di partenza</label>
         <select id="modello-partenza">
-          <option value="fdt">FdT — Funzione di trasferimento</option>
-          <option value="isu">ISU — Ingresso-Stato-Uscita</option>
-          <option value="iu">IU — Ingresso-Uscita</option>
+          <option value="fdt">FdT (Funzione di trasferimento)</option>
+          <option value="isu">ISU (Ingresso-Stato-Uscita)</option>
+          <option value="iu">IU (Ingresso-Uscita)</option>
         </select>
       </div>
 
@@ -127,7 +128,7 @@
 
       <!-- Sezione IU -->
       <div id="sezione-iu" class="sezione-modello">
-        <p style="font-size:0.9rem; color:#4b5563;">
+        <p style="font-size:0.9rem; color:#b7bcc5;">
           $a_n\,y^{(n)} + \dots + a_0\,y = b_m\,u^{(m)} + \dots + b_0\,u$
         </p>
         <div class="campo">
@@ -152,12 +153,12 @@
             <input type="text" id="fdt-den" placeholder="es. 1 3 2" value="1 1" />
           </div>
         </div>
-        <p style="font-size:0.85rem; color:#b7bcc5;">Coefficienti separati da spazio, dal grado più alto al più basso.</p>
+        <p class="nota-formato">Puoi scrivere i <strong>coefficienti</strong> separati da spazio, dal grado più alto al più basso (<code>1 11 10</code>), oppure direttamente l'<strong>espressione</strong> in $s$ (<code>(s+1)(s+10)</code>).</p>
       </div>
 
       <div class="barra-azioni">
         <button id="btn-converti">Converti</button>
-        <button id="btn-esempio" class="secondario">Carica esempio</button>
+        <button id="btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
       <p id="messaggio-errore" style="color:#b91c1c; display:none;"></p>
     </div>
@@ -165,7 +166,7 @@
     <div id="risultati"></div>
   </div>
 
-  <script src="../shared/ca-core.js"></script>
-  <script src="app.js"></script>
+  <script src="../shared/ca-core.js?v=20260807a"></script>
+  <script src="app.js?v=20260807a"></script>
 </body>
 </html>
