@@ -263,10 +263,240 @@
     return { num: numRid, den: denRid };
   }
 
+  // ---------- Lettura di polinomi e FdT scritti in forma naturale ----------
+  // Accetta due formati, cosi' lo stesso campo va bene per entrambi:
+  //   - coefficienti separati da spazi o virgole:  "1 11 10"
+  //   - espressione nella variabile s:             "(s+1)(s+10)", "10/(s^2+11s+10)"
+  // Il prodotto implicito e' ammesso: "2s", "3(s+1)", "s(s+1)(s+10)".
+
+  // Ripulisce il rumore numerico introdotto dai prodotti fra polinomi.
+  function polyPulisci(p) {
+    return p.map((c) => {
+      if (!isFinite(c)) throw new Error("coefficiente non finito");
+      if (c === 0) return 0;
+      const r = Number(c.toPrecision(12));
+      return Object.is(r, -0) ? 0 : r;
+    });
+  }
+
+  // Funzioni razionali {num, den} usate durante l'analisi dell'espressione.
+  const Rz = {
+    cost: (x) => ({ num: [x], den: [1] }),
+    esse: () => ({ num: [1, 0], den: [1] }),
+    mul: (a, b) => ({ num: polyMul(a.num, b.num), den: polyMul(a.den, b.den) }),
+    add: (a, b) => ({
+      num: polyAdd(polyMul(a.num, b.den), polyMul(b.num, a.den)),
+      den: polyMul(a.den, b.den),
+    }),
+    div: (a, b) => {
+      const bn = polyStripLeadingZeros(b.num);
+      if (bn.length === 1 && bn[0] === 0) throw new Error("divisione per zero");
+      return { num: polyMul(a.num, b.den), den: polyMul(a.den, b.num) };
+    },
+    neg: (a) => ({ num: a.num.map((c) => -c), den: a.den }),
+    pow: (a, n) => {
+      const base = n < 0 ? Rz.div(Rz.cost(1), a) : a;
+      let r = Rz.cost(1);
+      for (let i = 0; i < Math.abs(n); i++) r = Rz.mul(r, base);
+      return r;
+    },
+  };
+
+  // Analizzatore a discesa ricorsiva:
+  //   espressione := termine (('+' | '-') termine)*
+  //   termine     := potenza (('*' | '/' | implicito) potenza)*
+  //   potenza     := base ('^' intero)?
+  //   base        := numero | 's' | '(' espressione ')' | ('+' | '-') base
+  function analizzaEspressione(testo) {
+    const s = String(testo);
+    let i = 0;
+
+    const saltaSpazi = () => { while (i < s.length && /\s/.test(s[i])) i++; };
+    const prossimo = () => { saltaSpazi(); return i < s.length ? s[i] : ""; };
+    const errore = (msg) => { throw new Error(msg + " (posizione " + (i + 1) + ")"); };
+
+    function base() {
+      const c = prossimo();
+      if (c === "+") { i++; return base(); }
+      if (c === "-") { i++; return Rz.neg(base()); }
+      if (c === "(") {
+        i++;
+        const dentro = espressione();
+        if (prossimo() !== ")") errore("manca una parentesi chiusa");
+        i++;
+        return dentro;
+      }
+      if (c === "s" || c === "S") { i++; return Rz.esse(); }
+      const numero = /^\d+(\.\d*)?([eE][+-]?\d+)?|^\.\d+([eE][+-]?\d+)?/.exec(s.slice(i));
+      if (numero) {
+        i += numero[0].length;
+        return Rz.cost(parseFloat(numero[0]));
+      }
+      if (c === "") errore("espressione incompleta");
+      errore('carattere non riconosciuto: "' + c + '"');
+    }
+
+    function potenza() {
+      const b = base();
+      if (prossimo() !== "^") return b;
+      i++;
+      saltaSpazi();
+      const esp = /^[+-]?\d+/.exec(s.slice(i));
+      if (!esp) errore("dopo ^ serve un esponente intero");
+      i += esp[0].length;
+      const n = parseInt(esp[0], 10);
+      if (Math.abs(n) > 20) errore("esponente troppo grande");
+      return Rz.pow(b, n);
+    }
+
+    function termine() {
+      let acc = potenza();
+      for (;;) {
+        const c = prossimo();
+        if (c === "*") { i++; acc = Rz.mul(acc, potenza()); continue; }
+        if (c === "/") { i++; acc = Rz.div(acc, potenza()); continue; }
+        // Prodotto implicito: "2s", "(s+1)(s+2)", "3(s+1)".
+        if (c === "(" || c === "s" || c === "S" || /[\d.]/.test(c)) {
+          acc = Rz.mul(acc, potenza());
+          continue;
+        }
+        return acc;
+      }
+    }
+
+    function espressione() {
+      let acc = termine();
+      for (;;) {
+        const c = prossimo();
+        if (c === "+") { i++; acc = Rz.add(acc, termine()); continue; }
+        if (c === "-") { i++; acc = Rz.add(acc, Rz.neg(termine())); continue; }
+        return acc;
+      }
+    }
+
+    const r = espressione();
+    if (prossimo() !== "") errore('testo di troppo dopo l\'espressione: "' + s.slice(i).trim() + '"');
+    return {
+      num: polyPulisci(polyStripLeadingZeros(r.num)),
+      den: polyPulisci(polyStripLeadingZeros(r.den)),
+    };
+  }
+
+  // Elenco di coefficienti: "1 11 10" oppure "1, 11, 10".
+  function analizzaCoefficienti(testo) {
+    const parti = String(testo).trim().split(/[\s,]+/).filter((x) => x.length > 0);
+    if (parti.length === 0) return null;
+    const numeri = parti.map(Number);
+    if (numeri.some((x) => !isFinite(x))) return null;
+    return numeri;
+  }
+
+  // Legge una FdT completa: ritorna {num, den}.
+  function parseFdT(testo) {
+    const t = String(testo == null ? "" : testo).trim();
+    if (t === "") throw new Error("campo vuoto");
+    // Senza variabile s ne' operatori, e' un elenco di coefficienti.
+    if (!/[sS()^*/]/.test(t)) {
+      const coeff = analizzaCoefficienti(t);
+      if (coeff) return { num: polyStripLeadingZeros(coeff), den: [1] };
+    }
+    const r = analizzaEspressione(t);
+    if (r.den.length === 1 && r.den[0] === 0) throw new Error("denominatore nullo");
+    return r;
+  }
+
+  // Legge un polinomio: come parseFdT, ma il risultato deve essere un polinomio
+  // (denominatore costante), altrimenti la frazione non avrebbe senso nel campo.
+  function parsePolinomio(testo) {
+    const { num, den } = parseFdT(testo);
+    if (den.length > 1) {
+      throw new Error("qui serve un polinomio, non una frazione (trovato un denominatore in s)");
+    }
+    const d = den[0];
+    if (d === 0) throw new Error("divisione per zero");
+    return polyPulisci(num.map((c) => c / d));
+  }
+
+  // ---------- Forma poli-zeri e forma con le costanti di tempo ----------
+  // Scompone p(s) = guida * s^potenzaS * (fattori con radici non nulle),
+  // separando le radici reali dalle coppie complesse coniugate.
+  // "costante" e' il valore in s=0 di p(s)/s^potenzaS, cioe' quello che
+  // determina il guadagno nella forma con le costanti di tempo.
+  function fattorizzaPolinomio(p) {
+    const c = polyStripLeadingZeros(p).slice();
+    const scala = Math.max(1, Math.abs(c[0]));
+    let potenzaS = 0;
+    while (c.length > 1 && Math.abs(c[c.length - 1]) < 1e-12 * scala) {
+      c.pop();
+      potenzaS++;
+    }
+    const radici = c.length > 1 ? polyRoots(c) : [];
+    const reali = [];
+    const coppie = [];
+    const usata = new Array(radici.length).fill(false);
+    for (let i = 0; i < radici.length; i++) {
+      if (usata[i]) continue;
+      const r = radici[i];
+      usata[i] = true;
+      if (Math.abs(r.im) < 1e-9 * (1 + Cx.abs(r))) {
+        reali.push(r.re);
+        continue;
+      }
+      let j = -1;
+      for (let k = i + 1; k < radici.length; k++) {
+        if (usata[k]) continue;
+        const sc = 1 + Cx.abs(r);
+        if (Math.abs(radici[k].re - r.re) < 1e-6 * sc && Math.abs(radici[k].im + r.im) < 1e-6 * sc) {
+          j = k;
+          break;
+        }
+      }
+      if (j < 0) { reali.push(r.re); continue; }
+      usata[j] = true;
+      const omegaN = Cx.abs(r);
+      coppie.push({ re: r.re, im: Math.abs(r.im), omegaN, delta: -r.re / omegaN });
+    }
+    // Ordinate per modulo crescente: e' l'ordine in cui si incontrano le
+    // pulsazioni di rottura leggendo un diagramma di Bode da sinistra.
+    reali.sort((a, b) => Math.abs(a) - Math.abs(b));
+    coppie.sort((a, b) => a.omegaN - b.omegaN);
+    return { potenzaS, guida: c[0], costante: c[c.length - 1], radici, reali, coppie };
+  }
+
+  // Ritorna le due scritture equivalenti della stessa FdT:
+  //   poliZeri:       k * s^sNum * prod(s - z) / ( s^sDen * prod(s - p) )
+  //   costantiTempo:  k / s^h * prod(1 + tau*s) / prod(1 + tau*s), con i termini
+  //                   del secondo ordine espressi tramite omegaN e delta.
+  // Nella seconda, k e' il guadagno di Bode: coincide con G(0) quando h = 0.
+  function formeFdT(num, den) {
+    const fn = fattorizzaPolinomio(num);
+    const fd = fattorizzaPolinomio(den);
+    return {
+      poliZeri: {
+        k: fn.guida / fd.guida,
+        sNum: fn.potenzaS,
+        sDen: fd.potenzaS,
+        zeriReali: fn.reali,
+        zeriCoppie: fn.coppie,
+        poliReali: fd.reali,
+        poliCoppie: fd.coppie,
+      },
+      costantiTempo: {
+        k: fn.costante / fd.costante,
+        h: fd.potenzaS - fn.potenzaS,
+        tauZeri: fn.reali.map((r) => -1 / r),
+        tauPoli: fd.reali.map((r) => -1 / r),
+        secondiZeri: fn.coppie,
+        secondiPoli: fd.coppie,
+      },
+    };
+  }
+
   window.CA = {
     Cx, polyStripLeadingZeros, polyMul, polyAdd, polyDeriv, polyEvalC, polyRoots,
     matMul, matTrace, matIdent, matAddDiag,
     ssToTf, tfToSs, iuToTf, tfToIu, residues, simulate, freqResp,
     polyFromRoots, semplificaFdT,
+    parseFdT, parsePolinomio, fattorizzaPolinomio, formeFdT,
   };
 })();

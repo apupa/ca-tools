@@ -16,13 +16,15 @@
   const divNotaIngresso = document.getElementById("nota-ingresso");
 
   // ---------- Utilità numeriche ----------
+  // Legge un polinomio da un campo di testo. Accetta due formati:
+  // i coefficienti separati da spazio ("1 11 10") oppure l'espressione
+  // nella variabile s ("(s+1)(s+10)"). Vedi CA.parsePolinomio.
   function leggiVettoreCoeff(str) {
-    const parti = str.trim().split(/\s+/).filter((s) => s.length > 0);
-    const numeri = parti.map(Number);
-    if (numeri.length === 0 || numeri.some((x) => Number.isNaN(x))) {
-      throw new Error('coefficienti non validi: "' + str + '"');
+    try {
+      return CA.parsePolinomio(str);
+    } catch (e) {
+      throw new Error('polinomio non valido: "' + String(str).trim() + '" [' + e.message + ']');
     }
-    return numeri;
   }
   function formattaNumero(x, decimali) {
     decimali = decimali || 4;

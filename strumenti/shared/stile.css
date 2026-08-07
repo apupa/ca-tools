@@ -171,6 +171,22 @@ input:disabled {
   margin-bottom: 0.9rem;
 }
 
+/* Nota sotto i campi della funzione di trasferimento: ricorda i due formati
+   accettati (coefficienti oppure espressione in s). */
+.nota-formato {
+  margin: -0.3rem 0 0.9rem;
+  font-size: 0.85rem;
+  color: var(--colore-muted);
+}
+
+.nota-formato code {
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--colore-primario-scuro);
+  font-size: 0.95em;
+}
+
 .riga-campi {
   display: flex;
   flex-wrap: wrap;

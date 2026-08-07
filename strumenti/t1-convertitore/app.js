@@ -58,13 +58,15 @@
   isuOrdine.addEventListener("change", () => costruisciGrigliaISU(parseInt(isuOrdine.value, 10)));
 
   // ---------- Lettura dati dai campi ----------
+  // Legge un polinomio da un campo di testo. Accetta due formati:
+  // i coefficienti separati da spazio ("1 11 10") oppure l'espressione
+  // nella variabile s ("(s+1)(s+10)"). Vedi CA.parsePolinomio.
   function leggiVettoreCoeff(str) {
-    const parti = str.trim().split(/\s+/).filter((s) => s.length > 0);
-    const numeri = parti.map(Number);
-    if (numeri.length === 0 || numeri.some((x) => Number.isNaN(x))) {
-      throw new Error("coefficienti non validi: \"" + str + "\"");
+    try {
+      return CA.parsePolinomio(str);
+    } catch (e) {
+      throw new Error('polinomio non valido: "' + String(str).trim() + '" [' + e.message + ']');
     }
-    return numeri;
   }
 
   function leggiISU() {
@@ -166,6 +168,119 @@
     return re + " " + segno + " " + imStr;
   }
 
+  // ---------- Forme equivalenti della FdT ----------
+  // Stessa funzione, tre scritture: polinomiale, poli-zeri (radici) e
+  // costanti di tempo. Gli studenti incontrano tutte e tre, quindi le
+  // mostriamo affiancate a partire dagli stessi numeri.
+
+  // Termine "+ 0.5s" / "- s" / "+ 3": il coefficiente 1 non si scrive davanti
+  // alla variabile, ma un termine noto pari a 1 si scrive.
+  function terminePiu(valore, corpo) {
+    const c = formattaNumero(valore);
+    const segno = c >= 0 ? "+ " : "- ";
+    const a = Math.abs(c);
+    if (corpo === "") return segno + a;
+    return segno + (a === 1 ? "" : String(a)) + corpo;
+  }
+
+  // "(s + 2)" a partire dalla radice r, cioe' il fattore (s - r).
+  function fattoreRadiceTex(r) {
+    const a = formattaNumero(-r);
+    if (a === 0) return "s";
+    return "(s " + terminePiu(a, "") + ")";
+  }
+
+  // "(s^2 + 2s + 5)" per una coppia complessa coniugata.
+  function fattoreCoppiaTex(c) {
+    return (
+      "(s^{2} " + terminePiu(-2 * c.re, "s") + " " +
+      terminePiu(c.re * c.re + c.im * c.im, "") + ")"
+    );
+  }
+
+  // "(1 + 0.5s)" a partire dalla costante di tempo.
+  function fattoreTauTex(tau) {
+    return "(1 " + terminePiu(tau, "s") + ")";
+  }
+
+  // "(1 + 0.08s + 0.04s^2)" per una coppia complessa, cioe' la forma
+  // 1 + 2*delta/omega_n*s + s^2/omega_n^2 con i numeri gia' svolti.
+  function fattoreSecondoTex(c) {
+    return (
+      "(1 " + terminePiu((2 * c.delta) / c.omegaN, "s") + " " +
+      terminePiu(1 / (c.omegaN * c.omegaN), "s^{2}") + ")"
+    );
+  }
+
+  function potenzaSTex(h) {
+    if (h <= 0) return "";
+    return h === 1 ? "s" : "s^{" + h + "}";
+  }
+
+  // Assembla "K \dfrac{fattori sopra}{fattori sotto}", omettendo il guadagno
+  // se vale 1 e mettendo 1 dove non c'e' alcun fattore.
+  function frazioneTex(k, sopra, sotto) {
+    const kf = formattaNumero(k);
+    let testa = "";
+    if (kf === -1 && (sopra.length || sotto.length)) testa = "-";
+    else if (kf !== 1) testa = String(kf) + "\\,";
+    const su = sopra.length ? sopra.join("") : "1";
+    const giu = sotto.length ? sotto.join("") : "1";
+    if (giu === "1") return testa === "" ? su : testa + su;
+    return testa + "\\dfrac{" + su + "}{" + giu + "}";
+  }
+
+  function formaPoliZeriTex(pz) {
+    const sopra = [];
+    const sotto = [];
+    if (pz.sNum > 0) sopra.push(potenzaSTex(pz.sNum));
+    if (pz.sDen > 0) sotto.push(potenzaSTex(pz.sDen));
+    pz.zeriReali.forEach((r) => sopra.push(fattoreRadiceTex(r)));
+    pz.zeriCoppie.forEach((c) => sopra.push(fattoreCoppiaTex(c)));
+    pz.poliReali.forEach((r) => sotto.push(fattoreRadiceTex(r)));
+    pz.poliCoppie.forEach((c) => sotto.push(fattoreCoppiaTex(c)));
+    return frazioneTex(pz.k, sopra, sotto);
+  }
+
+  function formaCostantiTempoTex(ct) {
+    const sopra = [];
+    const sotto = [];
+    // h > 0: poli nell'origine (sotto); h < 0: zeri nell'origine (sopra).
+    if (ct.h > 0) sotto.push(potenzaSTex(ct.h));
+    if (ct.h < 0) sopra.push(potenzaSTex(-ct.h));
+    ct.tauZeri.forEach((t) => sopra.push(fattoreTauTex(t)));
+    ct.secondiZeri.forEach((c) => sopra.push(fattoreSecondoTex(c)));
+    ct.tauPoli.forEach((t) => sotto.push(fattoreTauTex(t)));
+    ct.secondiPoli.forEach((c) => sotto.push(fattoreSecondoTex(c)));
+    return frazioneTex(ct.k, sopra, sotto);
+  }
+
+  // Tabellina di supporto: costanti di tempo, pulsazioni naturali, smorzamenti.
+  function tabellaCostantiTempo(ct) {
+    const righe = [];
+    const elenco = (valori) => valori.map((v) => formattaNumero(v)).join(", ");
+    if (ct.tauZeri.length) righe.push(["Costanti di tempo degli zeri", elenco(ct.tauZeri) + " s"]);
+    if (ct.tauPoli.length) righe.push(["Costanti di tempo dei poli", elenco(ct.tauPoli) + " s"]);
+    ct.secondiZeri.forEach((c) => {
+      righe.push(["Coppia di zeri complessi", "ω<sub>n</sub> = " + formattaNumero(c.omegaN) + " rad/s, δ = " + formattaNumero(c.delta)]);
+    });
+    ct.secondiPoli.forEach((c) => {
+      righe.push(["Coppia di poli complessi", "ω<sub>n</sub> = " + formattaNumero(c.omegaN) + " rad/s, δ = " + formattaNumero(c.delta)]);
+    });
+    const tipo = ct.h > 0 ? ct.h : 0;
+    righe.push(["Tipo del sistema (poli nell'origine)", String(tipo)]);
+    righe.push([
+      "Guadagno di Bode K",
+      formattaNumero(ct.k) + (ct.h === 0 ? " (coincide con G(0))" : ""),
+    ]);
+    if (!righe.length) return "";
+    return (
+      "<table><tbody>" +
+      righe.map((r) => "<tr><th>" + r[0] + "</th><td>" + r[1] + "</td></tr>").join("") +
+      "</tbody></table>"
+    );
+  }
+
   // ---------- Guadagno statico G(0) (se definito) ----------
   function guadagnoStatico(num, den) {
     const denCost = den[den.length - 1];
@@ -230,8 +345,16 @@
 
     let html = "";
 
+    const forme = CA.formeFdT(fdt.num, fdt.den);
+
     html += '<div class="pannello"><h2>Funzione di trasferimento</h2>';
+    html += "<p><strong>Forma polinomiale</strong></p>";
     html += '<div class="blocco-formula">$$G(s) = \\dfrac{' + numTex + "}{" + denTex + "}$$</div>";
+    html += "<p><strong>Forma poli-zeri</strong> (fattorizzata nelle radici, guadagno $K$)</p>";
+    html += '<div class="blocco-formula">$$G(s) = ' + formaPoliZeriTex(forme.poliZeri) + "$$</div>";
+    html += "<p><strong>Forma con le costanti di tempo</strong> (quella usata per i diagrammi di Bode)</p>";
+    html += '<div class="blocco-formula">$$G(s) = ' + formaCostantiTempoTex(forme.costantiTempo) + "$$</div>";
+    html += tabellaCostantiTempo(forme.costantiTempo);
     html += "</div>";
 
     html += '<div class="pannello"><h2>Rappresentazione ISU</h2>';
