@@ -38,12 +38,15 @@
     };
   }
 
-  // Restituisce il layout adattato al contesto: compatto e non trascinabile
-  // sul telefono, pieno quando il grafico e' aperto a schermo intero.
+  // Restituisce il layout adattato al contesto.
+  // Sul touch il trascinamento di Plotly resta sempre disattivato: fuori dallo
+  // schermo intero perche' rubava lo scorrimento della pagina, dentro perche'
+  // spostamento e zoom li gestiamo noi (vedi abilitaGestiTouch) e i due
+  // meccanismi in parallelo si disturbavano a vicenda.
   function adattaLayout(layout, espanso) {
     const out = Object.assign({}, layout);
     if (espanso) {
-      out.dragmode = "pan";
+      out.dragmode = dispositivoTouch() ? false : "pan";
       return out;
     }
     if (dispositivoTouch()) out.dragmode = false;
@@ -72,12 +75,19 @@
     Plotly.Plots.resize(div);
   }
 
-  // ---------- Zoom sugli assi ----------
-  // Plotly non fa pinch-to-zoom sui grafici cartesiani: sul touch riconosce
-  // solo il trascinamento a un dito. Lo zoom lo gestiamo quindi noi agendo
-  // direttamente sui range degli assi. Nota: per gli assi logaritmici il
-  // range e' gia' espresso in decadi (log10), quindi l'interpolazione lineare
-  // qui sotto e' esattamente lo zoom "giusto" anche in scala log.
+  // ---------- Gesti touch: spostamento e zoom ----------
+  // Plotly, sui grafici cartesiani, non fa pinch-to-zoom: sul touch riconosce
+  // solo il trascinamento a un dito. Non basta pero' aggiungere il pizzico
+  // sopra Plotly: al primo dito Plotly avvia gia' il proprio trascinamento e
+  // registra i listener sul *document*, quindi continua a spostare il grafico
+  // mentre noi proviamo a zoomare, e ogni relayout ricostruisce il livello di
+  // trascinamento interrompendo la sequenza di tocchi. Percio' a schermo
+  // intero disattiviamo del tutto i gesti di Plotly e gestiamo qui sia lo
+  // spostamento (un dito) sia lo zoom (due dita), agendo sui range degli assi.
+  //
+  // Nota: per gli assi logaritmici il range e' gia' espresso in decadi
+  // (log10), quindi l'aritmetica lineare qui sotto e' lo zoom corretto anche
+  // in scala logaritmica.
   function nomiAssi(gd) {
     const fl = gd._fullLayout || {};
     return Object.keys(fl).filter(function (k) {
@@ -85,22 +95,52 @@
     });
   }
 
-  function leggiRange(gd) {
-    const out = {};
-    nomiAssi(gd).forEach(function (k) { out[k] = gd._fullLayout[k].range.slice(); });
-    return out;
+  // Stato di partenza del gesto: range e geometria in pixel di ogni asse.
+  // _offset/_length sono l'origine e la lunghezza dell'asse in pixel dentro
+  // il grafico; servono per convertire i pixel del dito in unita' di range.
+  function fotografaAssi(gd) {
+    return nomiAssi(gd).map(function (k) {
+      const ax = gd._fullLayout[k];
+      return {
+        nome: k,
+        r0: ax.range[0],
+        r1: ax.range[1],
+        offset: ax._offset,
+        lunghezza: ax._length,
+        orizzontale: k.charAt(0) === "x",
+      };
+    });
   }
 
-  // fattore > 1 = ci si avvicina (intervallo piu' stretto), attorno al centro.
-  function applicaZoom(gd, ranges, fattore) {
+  // fattore > 1 = ci si avvicina (intervallo piu' stretto).
+  // ancora: {x, y} in pixel relativi al grafico; se assente si zooma sul centro.
+  function calcolaZoom(assi, fattore, ancora) {
     const agg = {};
-    Object.keys(ranges).forEach(function (k) {
-      const r = ranges[k];
-      const centro = (r[0] + r[1]) / 2;
-      const semi = (r[1] - r[0]) / 2 / fattore;
-      agg[k + ".range"] = [centro - semi, centro + semi];
+    assi.forEach(function (a) {
+      const ampiezza = a.r1 - a.r0;
+      let v = (a.r0 + a.r1) / 2;
+      if (ancora && a.lunghezza > 0) {
+        const p = a.orizzontale ? ancora.x : ancora.y;
+        let f = (p - a.offset) / a.lunghezza;
+        f = Math.max(0, Math.min(1, f));
+        // Sull'asse verticale i pixel crescono verso il basso, i valori no.
+        v = a.orizzontale ? a.r0 + f * ampiezza : a.r1 - f * ampiezza;
+      }
+      agg[a.nome + ".range"] = [v - (v - a.r0) / fattore, v + (a.r1 - v) / fattore];
     });
-    Plotly.relayout(gd, agg);
+    return agg;
+  }
+
+  function calcolaSpostamento(assi, dx, dy) {
+    const agg = {};
+    assi.forEach(function (a) {
+      if (!(a.lunghezza > 0)) return;
+      const perPixel = (a.r1 - a.r0) / a.lunghezza;
+      // Il dito "trascina" i dati: la finestra si muove nel verso opposto.
+      const d = a.orizzontale ? -dx * perPixel : dy * perPixel;
+      agg[a.nome + ".range"] = [a.r0 + d, a.r1 + d];
+    });
+    return agg;
   }
 
   function distanzaDita(tocchi) {
@@ -109,47 +149,98 @@
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  // Pizzico a due dita sul grafico aperto a schermo intero.
-  function abilitaPizzico(box, div) {
+  // Spostamento (un dito) e zoom (due dita) sul grafico a schermo intero.
+  function abilitaGestiTouch(box, div) {
+    let assi = null;
     let distIniziale = 0;
-    let rangeIniziali = null;
+    let ancora = null;
+    let partenza = null;
+    let aggiornamento = null;
     let inAttesa = false;
-    let fattoreCorrente = 1;
 
     function attivo() {
       return box.classList.contains("a-schermo-intero");
     }
 
-    box.addEventListener("touchstart", function (e) {
-      if (!attivo() || e.touches.length !== 2) return;
-      // Fermiamo l'evento prima che Plotly avvii il proprio trascinamento.
-      e.preventDefault();
-      e.stopPropagation();
-      distIniziale = distanzaDita(e.touches);
-      rangeIniziali = leggiRange(div);
-    }, { passive: false, capture: true });
+    // Il tasto chiudi e i comandi di zoom devono restare toccabili.
+    function suiComandi(e) {
+      return !!(e.target && e.target.closest && e.target.closest("button"));
+    }
 
-    box.addEventListener("touchmove", function (e) {
-      if (!attivo() || e.touches.length !== 2 || !rangeIniziali || !distIniziale) return;
-      e.preventDefault();
-      e.stopPropagation();
-      fattoreCorrente = distanzaDita(e.touches) / distIniziale;
+    function programma() {
       if (inAttesa) return;
       inAttesa = true;
-      // Un ridisegno per fotogramma: relayout a ogni touchmove sarebbe a scatti.
+      // Un ridisegno per fotogramma: un relayout a ogni touchmove va a scatti.
       window.requestAnimationFrame(function () {
         inAttesa = false;
-        if (rangeIniziali) applicaZoom(div, rangeIniziali, fattoreCorrente);
+        if (aggiornamento) Plotly.relayout(div, aggiornamento);
       });
-    }, { passive: false, capture: true });
+    }
+
+    function coordinate(t) {
+      const r = div.getBoundingClientRect();
+      return { x: t.clientX - r.left, y: t.clientY - r.top };
+    }
+
+    function inizio(e) {
+      if (!attivo() || suiComandi(e)) return;
+      e.preventDefault();
+      assi = fotografaAssi(div);
+      aggiornamento = null;
+      if (e.touches.length === 1) {
+        distIniziale = 0;
+        partenza = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      } else if (e.touches.length === 2) {
+        partenza = null;
+        distIniziale = distanzaDita(e.touches);
+        const a = coordinate(e.touches[0]);
+        const b = coordinate(e.touches[1]);
+        ancora = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      }
+    }
+
+    function movimento(e) {
+      if (!attivo() || !assi || suiComandi(e)) return;
+      e.preventDefault();
+      if (e.touches.length === 1 && partenza) {
+        aggiornamento = calcolaSpostamento(
+          assi,
+          e.touches[0].clientX - partenza.x,
+          e.touches[0].clientY - partenza.y
+        );
+        programma();
+      } else if (e.touches.length === 2 && distIniziale > 0) {
+        aggiornamento = calcolaZoom(assi, distanzaDita(e.touches) / distIniziale, ancora);
+        programma();
+      }
+    }
 
     function fine(e) {
-      if (e.touches && e.touches.length >= 2) return;
+      if (!attivo()) return;
+      // Se resta un dito, si riparte da capo con lo stato aggiornato:
+      // altrimenti il grafico "salterebbe" al sollevare del secondo dito.
+      if (e.touches && e.touches.length > 0) {
+        inizio(e);
+        return;
+      }
+      assi = null;
+      partenza = null;
       distIniziale = 0;
-      rangeIniziali = null;
+      aggiornamento = null;
     }
-    box.addEventListener("touchend", fine, { capture: true });
-    box.addEventListener("touchcancel", fine, { capture: true });
+
+    box.addEventListener("touchstart", inizio, { passive: false, capture: true });
+    box.addEventListener("touchmove", movimento, { passive: false, capture: true });
+    box.addEventListener("touchend", fine, { passive: false, capture: true });
+    box.addEventListener("touchcancel", fine, { passive: false, capture: true });
+
+    // Safari su iOS ha i propri eventi di pizzico per ingrandire la pagina:
+    // vanno bloccati o si zooma tutta la pagina invece del grafico.
+    ["gesturestart", "gesturechange", "gestureend"].forEach(function (nome) {
+      box.addEventListener(nome, function (e) {
+        if (attivo()) e.preventDefault();
+      }, { passive: false });
+    });
   }
 
   // Avvolge il grafico in un contenitore con il tasto "ingrandisci" e, a
@@ -190,7 +281,7 @@
         // hanno range fissati apposta, che un semplice autorange perderebbe.
         ridisegna(div, box.classList.contains("a-schermo-intero"));
       } else {
-        applicaZoom(div, leggiRange(div), azione === "piu" ? 1.4 : 1 / 1.4);
+        Plotly.relayout(div, calcolaZoom(fotografaAssi(div), azione === "piu" ? 1.4 : 1 / 1.4, null));
       }
     });
 
@@ -217,7 +308,7 @@
       if (e.key === "Escape" && box.classList.contains("a-schermo-intero")) imposta(false);
     });
 
-    abilitaPizzico(box, div);
+    abilitaGestiTouch(box, div);
   }
 
   // ---------- Risposta nel tempo: y(t) per una o più serie ----------
