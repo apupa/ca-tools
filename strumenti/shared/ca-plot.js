@@ -72,7 +72,88 @@
     Plotly.Plots.resize(div);
   }
 
-  // Avvolge il grafico in un contenitore con il tasto "ingrandisci".
+  // ---------- Zoom sugli assi ----------
+  // Plotly non fa pinch-to-zoom sui grafici cartesiani: sul touch riconosce
+  // solo il trascinamento a un dito. Lo zoom lo gestiamo quindi noi agendo
+  // direttamente sui range degli assi. Nota: per gli assi logaritmici il
+  // range e' gia' espresso in decadi (log10), quindi l'interpolazione lineare
+  // qui sotto e' esattamente lo zoom "giusto" anche in scala log.
+  function nomiAssi(gd) {
+    const fl = gd._fullLayout || {};
+    return Object.keys(fl).filter(function (k) {
+      return /^[xy]axis[0-9]*$/.test(k) && Array.isArray(fl[k].range);
+    });
+  }
+
+  function leggiRange(gd) {
+    const out = {};
+    nomiAssi(gd).forEach(function (k) { out[k] = gd._fullLayout[k].range.slice(); });
+    return out;
+  }
+
+  // fattore > 1 = ci si avvicina (intervallo piu' stretto), attorno al centro.
+  function applicaZoom(gd, ranges, fattore) {
+    const agg = {};
+    Object.keys(ranges).forEach(function (k) {
+      const r = ranges[k];
+      const centro = (r[0] + r[1]) / 2;
+      const semi = (r[1] - r[0]) / 2 / fattore;
+      agg[k + ".range"] = [centro - semi, centro + semi];
+    });
+    Plotly.relayout(gd, agg);
+  }
+
+  function distanzaDita(tocchi) {
+    const dx = tocchi[0].clientX - tocchi[1].clientX;
+    const dy = tocchi[0].clientY - tocchi[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  // Pizzico a due dita sul grafico aperto a schermo intero.
+  function abilitaPizzico(box, div) {
+    let distIniziale = 0;
+    let rangeIniziali = null;
+    let inAttesa = false;
+    let fattoreCorrente = 1;
+
+    function attivo() {
+      return box.classList.contains("a-schermo-intero");
+    }
+
+    box.addEventListener("touchstart", function (e) {
+      if (!attivo() || e.touches.length !== 2) return;
+      // Fermiamo l'evento prima che Plotly avvii il proprio trascinamento.
+      e.preventDefault();
+      e.stopPropagation();
+      distIniziale = distanzaDita(e.touches);
+      rangeIniziali = leggiRange(div);
+    }, { passive: false, capture: true });
+
+    box.addEventListener("touchmove", function (e) {
+      if (!attivo() || e.touches.length !== 2 || !rangeIniziali || !distIniziale) return;
+      e.preventDefault();
+      e.stopPropagation();
+      fattoreCorrente = distanzaDita(e.touches) / distIniziale;
+      if (inAttesa) return;
+      inAttesa = true;
+      // Un ridisegno per fotogramma: relayout a ogni touchmove sarebbe a scatti.
+      window.requestAnimationFrame(function () {
+        inAttesa = false;
+        if (rangeIniziali) applicaZoom(div, rangeIniziali, fattoreCorrente);
+      });
+    }, { passive: false, capture: true });
+
+    function fine(e) {
+      if (e.touches && e.touches.length >= 2) return;
+      distIniziale = 0;
+      rangeIniziali = null;
+    }
+    box.addEventListener("touchend", fine, { capture: true });
+    box.addEventListener("touchcancel", fine, { capture: true });
+  }
+
+  // Avvolge il grafico in un contenitore con il tasto "ingrandisci" e, a
+  // schermo intero, con i comandi di zoom.
   // Idempotente: i grafici vengono ridisegnati a ogni ricalcolo.
   function aggiungiComandi(div) {
     if (div.closest(".grafico-box")) return;
@@ -89,9 +170,34 @@
     btn.innerHTML = '<span class="icona">&#8599;</span><span class="etichetta">Ingrandisci</span>';
     box.appendChild(btn);
 
+    // Comandi di zoom: il pizzico non e' sempre comodo (dita grosse, schermo
+    // piccolo), questi tasti danno un modo sicuro di zoomare e di tornare
+    // alla vista iniziale.
+    const comandi = document.createElement("div");
+    comandi.className = "grafico-comandi";
+    comandi.innerHTML =
+      '<button type="button" data-azione="meno" aria-label="Riduci lo zoom">&minus;</button>' +
+      '<button type="button" data-azione="piu" aria-label="Aumenta lo zoom">+</button>' +
+      '<button type="button" data-azione="reset" aria-label="Torna alla vista iniziale">&#8634;</button>';
+    box.appendChild(comandi);
+
+    comandi.addEventListener("click", function (e) {
+      const tasto = e.target.closest("button");
+      if (!tasto) return;
+      const azione = tasto.dataset.azione;
+      if (azione === "reset") {
+        // Ridisegno dal layout di partenza: alcuni grafici (piano complesso)
+        // hanno range fissati apposta, che un semplice autorange perderebbe.
+        ridisegna(div, box.classList.contains("a-schermo-intero"));
+      } else {
+        applicaZoom(div, leggiRange(div), azione === "piu" ? 1.4 : 1 / 1.4);
+      }
+    });
+
     const suggerimento = document.createElement("p");
     suggerimento.className = "grafico-suggerimento";
-    suggerimento.textContent = "Da telefono usa ↗ per aprire il grafico a schermo intero e potervi zoomare e scorrere.";
+    suggerimento.textContent =
+      "Da telefono usa ↗ per aprire il grafico a schermo intero: lì puoi zoomare con due dita o con i tasti + e −, e spostarti trascinando con un dito.";
     box.parentNode.insertBefore(suggerimento, box.nextSibling);
 
     function imposta(espanso) {
@@ -110,6 +216,8 @@
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && box.classList.contains("a-schermo-intero")) imposta(false);
     });
+
+    abilitaPizzico(box, div);
   }
 
   // ---------- Risposta nel tempo: y(t) per una o più serie ----------

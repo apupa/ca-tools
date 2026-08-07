@@ -501,6 +501,39 @@ canvas#massa-canvas {
   line-height: 1;
 }
 
+/* Zoom manuale (+ / − / ripristino): compare solo a schermo intero, dove
+   e' il grafico stesso a gestire i gesti. */
+.grafico-comandi {
+  display: none;
+  position: absolute;
+  top: 0.7rem;
+  left: 0.7rem;
+  z-index: 5;
+  gap: 0.35rem;
+}
+
+.grafico-box.a-schermo-intero .grafico-comandi {
+  display: flex;
+}
+
+.grafico-comandi button {
+  width: 2.3rem;
+  height: 2.3rem;
+  padding: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #374151;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.grafico-comandi button:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
 .grafico-box.a-schermo-intero {
   position: fixed;
   inset: 0;
@@ -509,6 +542,9 @@ canvas#massa-canvas {
   padding: 3rem 0.4rem 0.4rem;
   background: #ffffff;
   display: flex;
+  /* I gesti li gestiamo noi (pizzico) e Plotly (trascinamento): il browser
+     non deve intercettarli per scorrere o ingrandire la pagina. */
+  touch-action: none;
 }
 
 .grafico-box.a-schermo-intero > div[id] {
