@@ -17,6 +17,7 @@
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
+    .fdt-generale { font-size: 1.05rem; margin: 0 0 1.1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--colore-bordo); overflow-x: auto; }
     .campo-slider { margin-bottom: 1.1rem; }
     .campo-slider label { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
     .campo-slider input[type="range"] { width: 100%; }
@@ -111,6 +112,7 @@
     <!-- ===================== SCHEDA A: PRIMO ORDINE ===================== -->
     <div id="scheda-primo" class="scheda-contenuto attiva">
       <div class="pannello">
+        <p class="fdt-generale">$G(s) = \dfrac{\mu}{\tau s + 1}$</p>
         <div class="campo-slider">
           <label for="a-mu">Guadagno $\mu$ = <span id="a-mu-val">2</span></label>
           <input type="range" id="a-mu" min="-5" max="5" step="0.1" value="2" />
@@ -141,7 +143,6 @@
       <div class="pannello">
         <h2>Parametri</h2>
         <table><tbody>
-          <tr><th>Forma generale</th><td>$G(s) = \dfrac{\mu}{\tau s + 1}$</td></tr>
           <tr><th>FdT</th><td id="a-fdt-testo"></td></tr>
           <tr><th>Polo</th><td id="a-polo-testo"></td></tr>
           <tr><th>Valore di regime $y_\infty=\mu$</th><td id="a-regime-testo"></td></tr>
@@ -153,6 +154,7 @@
     <!-- ===================== SCHEDA B: SECONDO ORDINE ===================== -->
     <div id="scheda-secondo" class="scheda-contenuto">
       <div class="pannello">
+        <p class="fdt-generale">$G(s) = \dfrac{\mu\,\omega_n^{2}}{s^{2} + 2\delta\omega_n s + \omega_n^{2}}$</p>
         <div class="campo-slider">
           <label for="b-mu">Guadagno $\mu$ = <span id="b-mu-val">1</span></label>
           <input type="range" id="b-mu" min="-5" max="5" step="0.1" value="1" />
@@ -187,7 +189,6 @@
       <div class="pannello">
         <h2>Parametri</h2>
         <table><tbody>
-          <tr><th>Forma generale</th><td>$G(s) = \dfrac{\mu\,\omega_n^{2}}{s^{2} + 2\delta\omega_n s + \omega_n^{2}}$</td></tr>
           <tr><th>FdT</th><td id="b-fdt-testo"></td></tr>
           <tr><th>Poli</th><td id="b-poli-testo"></td></tr>
           <tr><th>Sovraelongazione $S\%$</th><td id="b-s-testo"></td></tr>
