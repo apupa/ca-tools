@@ -15,6 +15,7 @@ search: false
         Strumenti <span class="freccia">&#9662;</span>
       </button>
       <div class="barra-sito-dropdown-menu">
+      <div class="barra-sito-dropdown-titolo">Strumenti interattivi</div>
       <a href="strumenti/t1-convertitore/index.html">1. Conversione rappresentazioni</a>
       <a href="strumenti/t2-risposta/index.html">2. Risposta nel tempo e modi</a>
       <a href="strumenti/t3-elementari/index.html">3. Sistemi elementari (1°/2° ordine)</a>
@@ -22,6 +23,15 @@ search: false
       <a href="strumenti/t5-luogo/index.html">5. Luogo delle radici</a>
       <a href="strumenti/t7-progettazione/index.html">6. Progettazione del controllore</a>
       <a href="strumenti/t6-pid/index.html">7. Taratura PID</a>
+      <div class="barra-sito-dropdown-titolo">Pillole teoriche</div>
+      <a href="pillole/CA01.html">CA01 &middot; Sistemi e modelli</a>
+      <a href="pillole/CA02.html">CA02 &middot; Funzioni di trasferimento</a>
+      <a href="pillole/CA03.html">CA03 &middot; Antitrasformate e modi</a>
+      <a href="pillole/CA04.html">CA04 &middot; Sistemi elementari</a>
+      <a href="pillole/CA05.html">CA05 &middot; Analisi armonica</a>
+      <a href="pillole/CA06.html">CA06 &middot; Controllo in retroazione</a>
+      <a href="pillole/CA07.html">CA07 &middot; Luogo delle radici</a>
+      <a href="pillole/CA08.html">CA08 &middot; PID</a>
       </div>
     </div>
   </div>
@@ -119,6 +129,61 @@ search: false
       <span class="num">7</span>
       <h3>Taratura PID</h3>
       <p>Regola Kp, Ti, Td su un impianto e osserva l'effetto dei disturbi in retroazione.</p>
+    </a>
+
+  </div>
+
+  <h2 class="section-title">Pillole teoriche</h2>
+  <p class="section-hint">Un approfondimento per argomento, più disteso del richiamo rapido dentro ogni strumento.</p>
+
+  <div class="griglia-strumenti">
+
+    <a class="card-strumento card-pillola" href="pillole/CA01.html">
+      <span class="num">CA01</span>
+      <h3>Sistemi e modelli</h3>
+      <p>Sistemi statici e dinamici, rappresentazione ISU/IU, causalità, sistemi LTI.</p>
+    </a>
+
+    <a class="card-strumento card-pillola" href="pillole/CA02.html">
+      <span class="num">CA02</span>
+      <h3>Funzioni di trasferimento</h3>
+      <p>Trasformata di Laplace, definizione della FdT, schemi a blocchi e loro riduzione.</p>
+    </a>
+
+    <a class="card-strumento card-pillola" href="pillole/CA03.html">
+      <span class="num">CA03</span>
+      <h3>Antitrasformate e modi</h3>
+      <p>Sviluppo in fratti semplici, modi naturali, forma delle radici e delle costanti di tempo.</p>
+    </a>
+
+    <a class="card-strumento card-pillola" href="pillole/CA04.html">
+      <span class="num">CA04</span>
+      <h3>Sistemi elementari</h3>
+      <p>Risposta al gradino, primo e secondo ordine, poli dominanti.</p>
+    </a>
+
+    <a class="card-strumento card-pillola" href="pillole/CA05.html">
+      <span class="num">CA05</span>
+      <h3>Analisi armonica</h3>
+      <p>Risposta armonica, diagrammi di Bode e termini elementari.</p>
+    </a>
+
+    <a class="card-strumento card-pillola" href="pillole/CA06.html">
+      <span class="num">CA06</span>
+      <h3>Controllo in retroazione</h3>
+      <p>Guadagno d'anello, sensitività, specifiche statiche e dinamiche.</p>
+    </a>
+
+    <a class="card-strumento card-pillola" href="pillole/CA07.html">
+      <span class="num">CA07</span>
+      <h3>Luogo delle radici</h3>
+      <p>Costruzione del luogo, regole geometriche, sintesi del controllore.</p>
+    </a>
+
+    <a class="card-strumento card-pillola" href="pillole/CA08.html">
+      <span class="num">CA08</span>
+      <h3>PID</h3>
+      <p>Azioni P, I, D, regolatori P/PI/PD/PID, cancellazione poli-zeri.</p>
     </a>
 
   </div>

@@ -2,6 +2,7 @@ project:
   type: website
   resources:
     - strumenti/**            # copia tutti gli strumenti nel sito generato
+    - pillole/**               # copia le pillole teoriche (pagine + markdown + immagini)
   render:
     - "*.qmd"                 # renderizza SOLO i .qmd, non gli .html degli strumenti
 

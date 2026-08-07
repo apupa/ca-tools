@@ -271,6 +271,24 @@ a:hover { color: var(--ca-primario-scuro); }
   justify-content: center;
 }
 
+/* Le pillole si identificano col codice lezione (es. "CA01"), più largo di
+   un semplice numero: il badge si allarga invece di restare quadrato. */
+.card-pillola .num {
+  width: auto;
+  min-width: 1.7rem;
+  padding: 0 0.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.01em;
+}
+
+.card-pillola {
+  padding-left: 4.4rem;
+}
+
+.card-pillola .num {
+  left: 1.3rem;
+}
+
 .card-strumento h3 {
   margin: 0 0 .35rem;
   font-size: 1.06rem;
@@ -315,6 +333,8 @@ a:hover { color: var(--ca-primario-scuro); }
   }
   .card-strumento { padding: 1.05rem 1.05rem 1.05rem 3.1rem; }
   .card-strumento .num { top: 1.05rem; }
+  .card-pillola { padding-left: 4rem; }
+  .card-pillola .num { left: 1.05rem; }
   /* Le card non si sollevano al tocco: su touch l'hover resta "appiccicato". */
   .card-strumento:hover { transform: none; }
 }

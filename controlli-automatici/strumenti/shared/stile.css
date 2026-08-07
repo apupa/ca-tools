@@ -730,3 +730,48 @@ details.teoria li,
     height: auto;
   }
 }
+
+/* ---------- Pillole teoriche (pagine in pillole/) ---------- */
+.pillole-intestazione {
+  color: var(--colore-muted);
+  margin-bottom: 1.5rem;
+}
+
+.pillola {
+  background: var(--colore-superficie);
+  border: 1px solid var(--colore-bordo);
+  border-radius: var(--raggio-bordo);
+  box-shadow: var(--ombra);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1.2rem;
+}
+
+.pillola h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  color: var(--colore-primario-scuro);
+}
+
+.pillola p {
+  margin: 0.8rem 0;
+  line-height: 1.65;
+}
+
+.pillola-immagine {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.8rem auto;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 0.6rem;
+}
+
+.pillole-caricamento,
+.pillole-errore {
+  color: var(--colore-muted);
+}
+
+.pillole-errore {
+  color: #f87171;
+}
