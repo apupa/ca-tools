@@ -9,7 +9,108 @@
     plot_bgcolor: "#ffffff",
     legend: { orientation: "h", x: 0, y: 1.15 },
   };
-  const configBase = { responsive: true, displaylogo: false };
+
+  // ---------- Adattamento a schermi piccoli / touch ----------
+  // Su telefono i gesti di Plotly (pan/zoom con un dito) rubano lo scorrimento
+  // della pagina: si resta "incastrati" nel grafico mentre si scorre. Quindi
+  // sui dispositivi touch il grafico nasce non trascinabile (la pagina scorre
+  // normalmente) e l'interazione vera si ottiene aprendolo a schermo intero.
+  function schermoStretto() {
+    return window.matchMedia("(max-width: 700px)").matches;
+  }
+  function dispositivoTouch() {
+    return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  }
+
+  // Su touch la barra dei comandi di Plotly non compare mai: i suoi tasti sono
+  // troppo piccoli per il dito e occuperebbero l'angolo dove sta il tasto
+  // "ingrandisci". A schermo intero bastano trascinamento e pizzico.
+  function configPer() {
+    return {
+      responsive: true,
+      displaylogo: false,
+      displayModeBar: dispositivoTouch() ? false : "hover",
+      scrollZoom: false,
+      modeBarButtonsToRemove: [
+        "select2d", "lasso2d", "toggleSpikelines",
+        "hoverClosestCartesian", "hoverCompareCartesian",
+      ],
+    };
+  }
+
+  // Restituisce il layout adattato al contesto: compatto e non trascinabile
+  // sul telefono, pieno quando il grafico e' aperto a schermo intero.
+  function adattaLayout(layout, espanso) {
+    const out = Object.assign({}, layout);
+    if (espanso) {
+      out.dragmode = "pan";
+      return out;
+    }
+    if (dispositivoTouch()) out.dragmode = false;
+    if (schermoStretto()) {
+      out.margin = Object.assign({}, layout.margin, { l: 48, r: 12, t: 26, b: 42 });
+      out.font = Object.assign({}, layout.font, { size: 11 });
+    }
+    return out;
+  }
+
+  // Disegna e ricorda tracce/layout "base" sul nodo, cosi' il passaggio a
+  // schermo intero puo' ridisegnare con la configurazione giusta.
+  function disegna(divId, tracce, layout) {
+    const div = typeof divId === "string" ? document.getElementById(divId) : divId;
+    if (!div) return;
+    div._caTracce = tracce;
+    div._caLayout = layout;
+    const espanso = !!div.closest(".grafico-box.a-schermo-intero");
+    Plotly.newPlot(div, tracce, adattaLayout(layout, espanso), configPer());
+    aggiungiComandi(div);
+  }
+
+  function ridisegna(div, espanso) {
+    if (!div._caTracce) return;
+    Plotly.react(div, div._caTracce, adattaLayout(div._caLayout, espanso), configPer());
+    Plotly.Plots.resize(div);
+  }
+
+  // Avvolge il grafico in un contenitore con il tasto "ingrandisci".
+  // Idempotente: i grafici vengono ridisegnati a ogni ricalcolo.
+  function aggiungiComandi(div) {
+    if (div.closest(".grafico-box")) return;
+
+    const box = document.createElement("div");
+    box.className = "grafico-box";
+    div.parentNode.insertBefore(box, div);
+    box.appendChild(div);
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "grafico-espandi";
+    btn.setAttribute("aria-label", "Apri il grafico a schermo intero");
+    btn.innerHTML = '<span class="icona">&#8599;</span><span class="etichetta">Ingrandisci</span>';
+    box.appendChild(btn);
+
+    const suggerimento = document.createElement("p");
+    suggerimento.className = "grafico-suggerimento";
+    suggerimento.textContent = "Da telefono usa ↗ per aprire il grafico a schermo intero e potervi zoomare e scorrere.";
+    box.parentNode.insertBefore(suggerimento, box.nextSibling);
+
+    function imposta(espanso) {
+      box.classList.toggle("a-schermo-intero", espanso);
+      document.body.classList.toggle("grafico-aperto", espanso);
+      btn.innerHTML = espanso
+        ? '<span class="icona">&#10005;</span><span class="etichetta">Chiudi</span>'
+        : '<span class="icona">&#8599;</span><span class="etichetta">Ingrandisci</span>';
+      btn.setAttribute("aria-label", espanso ? "Chiudi il grafico a schermo intero" : "Apri il grafico a schermo intero");
+      ridisegna(div, espanso);
+    }
+
+    btn.addEventListener("click", function () {
+      imposta(!box.classList.contains("a-schermo-intero"));
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && box.classList.contains("a-schermo-intero")) imposta(false);
+    });
+  }
 
   // ---------- Risposta nel tempo: y(t) per una o più serie ----------
   // series: [{name, y}]  — condivide lo stesso asse t
@@ -25,7 +126,7 @@
       xaxis: { title: "tempo [s]", zeroline: true, gridcolor: "#e5e7eb" },
       yaxis: { title: "ampiezza", zeroline: true, gridcolor: "#e5e7eb" },
     });
-    Plotly.newPlot(divId, tracce, layout, configBase);
+    disegna(divId, tracce, layout);
   }
 
   // ---------- Diagrammi di Bode: ampiezza [dB] + fase [deg] ----------
@@ -94,7 +195,7 @@
       xaxis2: assePulsazioniConEtichetta,
       yaxis2: Object.assign({ title: "fase [°]" }, assiVerticali),
     });
-    Plotly.newPlot(divId, tracce, layout, configBase);
+    disegna(divId, tracce, layout);
   }
 
   // ---------- Piano complesso (Re/Im) ----------
@@ -135,7 +236,7 @@
         range: opts.yrange, autorange: opts.yrange ? false : true,
       },
     });
-    Plotly.newPlot(divId, tracce, layout, configBase);
+    disegna(divId, tracce, layout);
   }
 
   window.CAPlot = { plotTime, plotBode, plotComplex };

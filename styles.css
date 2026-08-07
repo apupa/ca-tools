@@ -274,7 +274,29 @@ a:hover { color: var(--ca-primario-scuro); }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 560px) {
-  .hero { padding-top: 1.8rem; gap: 1.4rem; }
-  .hero-title { font-size: 2rem; }
-  .hero-photo { width: 132px; height: 132px; }
+  .landing { padding: 0 .85rem; }
+  /* In colonna e centrato: con la foto a sinistra e il testo che va a capo
+     sotto, su schermo stretto il blocco risultava sbilenco. */
+  .hero {
+    padding-top: 1.6rem;
+    gap: 1.1rem;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .hero-body { flex: 1 1 auto; }
+  .hero-title { font-size: 1.9rem; }
+  .hero-sub { font-size: 1rem; max-width: none; }
+  .hero-photo { width: 124px; height: 124px; }
+  .intro { padding: 1rem 1.1rem; margin: 1rem 0 2rem; }
+  .section-title { font-size: 1.25rem; }
+  .griglia-strumenti {
+    grid-template-columns: 1fr;
+    gap: .85rem;
+    margin-bottom: 2.2rem;
+  }
+  .card-strumento { padding: 1.05rem 1.05rem 1.05rem 3.1rem; }
+  .card-strumento .num { top: 1.05rem; }
+  /* Le card non si sollevano al tocco: su touch l'hover resta "appiccicato". */
+  .card-strumento:hover { transform: none; }
 }
