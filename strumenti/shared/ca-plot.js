@@ -1,4 +1,9 @@
 // ===== ca-plot.js — helper di plotting su Plotly (grafici statici) =====
+// NB: le pagine degli strumenti caricano questo file con un suffisso di versione
+// (?v=...). GitHub Pages lo tiene in cache 10 minuti, quindi dopo averlo
+// modificato bisogna aggiornare quel suffisso in strumenti/*/index.html,
+// altrimenti il browser puo' mescolare una versione vecchia di questo file
+// con una nuova di app.js.
 (function () {
   // Layout comune: font di sistema, margini contenuti, sfondo bianco
   // (i grafici restano leggibili anche col tema scuro del sito).

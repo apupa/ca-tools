@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistemi elementari 1°/2° ordine · Controlli Automatici</title>
-  <link rel="stylesheet" href="../shared/stile.css" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260807a" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -141,6 +141,7 @@
       <div class="pannello">
         <h2>Parametri</h2>
         <table><tbody>
+          <tr><th>Forma generale</th><td>$G(s) = \dfrac{\mu}{\tau s + 1}$</td></tr>
           <tr><th>FdT</th><td id="a-fdt-testo"></td></tr>
           <tr><th>Polo</th><td id="a-polo-testo"></td></tr>
           <tr><th>Valore di regime $y_\infty=\mu$</th><td id="a-regime-testo"></td></tr>
@@ -186,6 +187,7 @@
       <div class="pannello">
         <h2>Parametri</h2>
         <table><tbody>
+          <tr><th>Forma generale</th><td>$G(s) = \dfrac{\mu\,\omega_n^{2}}{s^{2} + 2\delta\omega_n s + \omega_n^{2}}$</td></tr>
           <tr><th>FdT</th><td id="b-fdt-testo"></td></tr>
           <tr><th>Poli</th><td id="b-poli-testo"></td></tr>
           <tr><th>Sovraelongazione $S\%$</th><td id="b-s-testo"></td></tr>
@@ -263,8 +265,8 @@
     </div>
   </div>
 
-  <script src="../shared/ca-core.js"></script>
-  <script src="../shared/ca-plot.js"></script>
-  <script src="app.js"></script>
+  <script src="../shared/ca-core.js?v=20260807a"></script>
+  <script src="../shared/ca-plot.js?v=20260807a"></script>
+  <script src="app.js?v=20260807a"></script>
 </body>
 </html>

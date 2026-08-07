@@ -1,4 +1,9 @@
 // ===== ca-core.js — motore matematico condiviso (SISO) =====
+// NB: le pagine degli strumenti caricano questo file con un suffisso di versione
+// (?v=...). GitHub Pages lo tiene in cache 10 minuti, quindi dopo averlo
+// modificato bisogna aggiornare quel suffisso in strumenti/*/index.html,
+// altrimenti il browser puo' mescolare una versione vecchia di questo file
+// con una nuova di app.js.
 (function () {
   // ---------- Numeri complessi {re, im} ----------
   const Cx = {

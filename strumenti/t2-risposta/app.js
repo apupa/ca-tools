@@ -14,6 +14,7 @@
   const divErrore = document.getElementById("messaggio-errore");
   const divTabellaModi = document.getElementById("tabella-modi");
   const divNotaIngresso = document.getElementById("nota-ingresso");
+  const divFdtTesto = document.getElementById("fdt-testo");
 
   // ---------- Utilità numeriche ----------
   // Legge un polinomio da un campo di testo. Accetta due formati:
@@ -40,6 +41,35 @@
     const segno = im > 0 ? "+" : "-";
     const absIm = Math.abs(im);
     return re + " " + segno + " " + (absIm === 1 ? "j" : absIm + "j");
+  }
+  function typeset(el) {
+    if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise([el]);
+  }
+  // Costruisce "s^2 + 3s + 2" (variabile generica, per polinomi in s)
+  function formattaPolinomioTex(coeffs, variabile) {
+    const grado = coeffs.length - 1;
+    const termini = [];
+    coeffs.forEach((c, i) => {
+      const g = grado - i;
+      const cf = formattaNumero(c);
+      if (cf === 0 && !(grado === 0 && termini.length === 0)) return;
+      const segno = cf < 0 ? "-" : termini.length ? "+" : "";
+      const abs = Math.abs(cf);
+      let corpo;
+      if (g === 0) corpo = String(abs);
+      else {
+        const coeffStr = abs === 1 ? "" : String(abs);
+        corpo = coeffStr + variabile + (g === 1 ? "" : "^{" + g + "}");
+      }
+      termini.push(segno + corpo);
+    });
+    return termini.length ? termini.join(" ") : "0";
+  }
+  function mostraFdT(num, den) {
+    const numTex = formattaPolinomioTex(num, "s");
+    const denTex = formattaPolinomioTex(den, "s");
+    divFdtTesto.innerHTML = "<div style=\"overflow-x:auto;\">$$G(s) = \\dfrac{" + numTex + "}{" + denTex + "}$$</div>";
+    typeset(divFdtTesto);
   }
 
   // ---------- Passo di integrazione: fisso, non modificabile dall'utente ----------
@@ -151,6 +181,7 @@
     try {
       const num = leggiVettoreCoeff(campoNum.value);
       const den = leggiVettoreCoeff(campoDen.value);
+      mostraFdT(num, den);
 
       const tEnd = parseFloat(campoTEnd.value);
       if (Number.isNaN(tEnd) || tEnd <= 0) {

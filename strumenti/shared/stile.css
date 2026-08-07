@@ -1,5 +1,11 @@
 /* ===== stile.css — stile comune per gli strumenti di Controlli Automatici =====
-   Tema scuro (grigio) con accento giallo muto. */
+   Tema scuro (grigio) con accento giallo muto.
+
+   NB: le pagine degli strumenti caricano questo file con un suffisso di
+   versione (?v=...). GitHub Pages lo tiene in cache 10 minuti, quindi dopo
+   averlo modificato va aggiornato quel suffisso nelle pagine degli strumenti,
+   altrimenti il browser puo' mescolare una versione vecchia di questo file
+   con una nuova di app.js. */
 
 :root {
   --colore-testo: #e7e9ec;
