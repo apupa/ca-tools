@@ -234,15 +234,21 @@
         "Fase da " + direzioneFase + ": l'approssimazione asintotica la fa variare linearmente tra una decade prima " +
         "($\\omega_a = \\omega_0/10 = " + formattaNumero(omegaA) + "$ rad/s) e una decade dopo ($\\omega_b = " +
         "\\omega_0 \\cdot 10 = " + formattaNumero(omegaB) + "$ rad/s), passando per $\\pm45$° in $\\omega_0$. " +
-        "Equivalentemente, in scala logaritmica: $\\log_{10}\\omega_a = \\log_{10}\\omega_0 - 1 = " +
-        formattaNumero(log10Omega0 - 1) + "$ e $\\log_{10}\\omega_b = \\log_{10}\\omega_0 + 1 = " +
-        formattaNumero(log10Omega0 + 1) + "$ (una decade = ±1 in $\\log_{10}\\omega$)."
+        "Equivalentemente, in scala logaritmica il punto di rottura cade in $\\log_{10}\\omega_0 = " +
+        "-\\log_{10}|\\tau| = " + formattaNumero(log10Omega0) + "$, quindi $\\log_{10}\\omega_a = " +
+        "\\log_{10}\\omega_0 - 1 = " + formattaNumero(log10Omega0 - 1) + "$ e $\\log_{10}\\omega_b = " +
+        "\\log_{10}\\omega_0 + 1 = " + formattaNumero(log10Omega0 + 1) + "$ (una decade = ±1 in $\\log_{10}\\omega$)."
       );
     }
     const omegaN = t.omegan;
     const larghezza = Math.pow(4.81, Math.abs(t.zeta));
     const omegaA = omegaN / larghezza;
     const omegaB = omegaN * larghezza;
+    const log10OmegaN = Math.log10(omegaN);
+    // Nel termine reale la spezzata di fase è larga ±1 decade; qui la semi-larghezza non è
+    // fissa ma vale |δ|·log10(4.81) ≈ 0.682·|δ| decadi (per δ=0 si annulla: la fase salta di
+    // colpo, coerentemente con i poli sull'asse immaginario).
+    const semiLarghezzaDecadi = Math.abs(t.zeta) * Math.log10(4.81);
     const pendenza = t.esponente * 40;
     const segnoFase = t.esponente * (t.zeta < 0 ? -1 : 1);
     const direzioneFase = segnoFase > 0 ? "0° a +180°" : "0° a −180°";
@@ -254,7 +260,18 @@
       "larghezza di banda $4.81^{|\\delta|} = " + formattaNumero(larghezza) + "$: la fase varia tra $\\omega_a = " +
       "\\omega_n/4.81^{|\\delta|} = " + formattaNumero(omegaA) + "$ rad/s e $\\omega_b = \\omega_n \\cdot " +
       "4.81^{|\\delta|} = " + formattaNumero(omegaB) + "$ rad/s, passando per " +
-      (segnoFase > 0 ? "+90°" : "−90°") + " in $\\omega_n$."
+      (segnoFase > 0 ? "+90°" : "−90°") + " in $\\omega_n$. " +
+      "Equivalentemente, in scala logaritmica: $\\log_{10}\\omega_a = \\log_{10}\\omega_n - |\\delta|\\log_{10}4.81 = " +
+      formattaNumero(log10OmegaN) + " - " + formattaNumero(semiLarghezzaDecadi) + " = " +
+      formattaNumero(log10OmegaN - semiLarghezzaDecadi) +
+      "$ e $\\log_{10}\\omega_b = \\log_{10}\\omega_n + |\\delta|\\log_{10}4.81 = " +
+      formattaNumero(log10OmegaN) + " + " + formattaNumero(semiLarghezzaDecadi) + " = " +
+      formattaNumero(log10OmegaN + semiLarghezzaDecadi) +
+      "$: la spezzata è larga $2|\\delta|\\log_{10}4.81 = " + formattaNumero(2 * semiLarghezzaDecadi) +
+      "$ decadi, centrata su $\\omega_n$ (nel termine reale era invece larga 2 decadi fisse)." +
+      (semiLarghezzaDecadi < 1e-9
+        ? " Con $\\delta = 0$ la larghezza si annulla: l'approssimazione asintotica fa saltare la fase di colpo in $\\omega_n$."
+        : "")
     );
   }
 
@@ -337,7 +354,11 @@
         titolo = t.h > 0 ? "Zero nell'origine" : "Polo nell'origine";
         formula = "(j\\omega)^{" + t.h + "}";
         descrizione =
-          "Retta di pendenza " + 20 * t.h + " dB/dec passante per 0 dB a ω=1 rad/s; fase costante " + t.h * 90 + "°.";
+          "Retta di pendenza " + 20 * t.h + " dB/dec passante per 0 dB a ω=1 rad/s; fase costante " + t.h * 90 + "°. " +
+          "In scala logaritmica $|G|_{dB} = " + 20 * t.h + "\\log_{10}\\omega$: è una retta esatta (non " +
+          "un'approssimazione asintotica), che " + (t.h > 0 ? "sale" : "scende") + " di " +
+          Math.abs(20 * t.h) + " dB ogni volta che $\\log_{10}\\omega$ aumenta di 1, e vale 0 dB in " +
+          "$\\log_{10}\\omega = 0$, cioè in $\\omega = 1$ rad/s.";
       } else {
         titolo = (t.esponente > 0 ? "Zero" : "Polo") + (t.tipo === "reale" ? " reale" : " complesso coniugato");
         formula = "$" + formulaTermineTex(t) + "$";
