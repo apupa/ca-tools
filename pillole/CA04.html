@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CA04 &middot; Sistemi elementari &middot; Pillole teoriche · Controlli Automatici</title>
+  <link rel="stylesheet" href="../strumenti/shared/stile.css?v=20260807b" />
+  <script>
+    // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+</head>
+<body>
+<nav class="barra-sito">
+  <span class="barra-sito-brand">Controlli Automatici</span>
+  <div class="barra-sito-nav">
+    <a class="barra-sito-link" href="../">Home</a>
+    <div class="barra-sito-dropdown">
+      <button type="button" class="barra-sito-dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+        Strumenti <span class="freccia">&#9662;</span>
+      </button>
+      <div class="barra-sito-dropdown-menu">
+      <a href="../strumenti/t1-convertitore/index.html">1. Conversione rappresentazioni</a>
+      <a href="../strumenti/t2-risposta/index.html">2. Risposta nel tempo e modi</a>
+      <a href="../strumenti/t3-elementari/index.html">3. Sistemi elementari (1°/2° ordine)</a>
+      <a href="../strumenti/t4-bode/index.html">4. Diagrammi di Bode</a>
+      <a href="../strumenti/t5-luogo/index.html">5. Luogo delle radici</a>
+      <a href="../strumenti/t7-progettazione/index.html">6. Progettazione del controllore</a>
+      <a href="../strumenti/t6-pid/index.html">7. Taratura PID</a>
+      </div>
+    </div>
+    <div class="barra-sito-dropdown">
+      <button type="button" class="barra-sito-dropdown-toggle attivo" aria-haspopup="true" aria-expanded="false">
+        Pillole <span class="freccia">&#9662;</span>
+      </button>
+      <div class="barra-sito-dropdown-menu">
+      <a href="CA01.html">CA01 &middot; Sistemi e modelli</a>
+      <a href="CA02.html">CA02 &middot; Funzioni di trasferimento</a>
+      <a href="CA03.html">CA03 &middot; Antitrasformate e modi</a>
+      <a href="CA04.html" class="attivo">CA04 &middot; Sistemi elementari</a>
+      <a href="CA05.html">CA05 &middot; Analisi armonica</a>
+      <a href="CA06.html">CA06 &middot; Controllo in retroazione</a>
+      <a href="CA07.html">CA07 &middot; Luogo delle radici</a>
+      <a href="CA08.html">CA08 &middot; PID</a>
+      </div>
+    </div>
+  </div>
+</nav>
+<script>
+(function () {
+  document.querySelectorAll('.barra-sito-dropdown-toggle').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var dd = btn.closest('.barra-sito-dropdown');
+      var giaAperto = dd.classList.contains('aperto');
+      document.querySelectorAll('.barra-sito-dropdown.aperto').forEach(function (d) {
+        d.classList.remove('aperto');
+        d.querySelector('.barra-sito-dropdown-toggle').setAttribute('aria-expanded', 'false');
+      });
+      if (!giaAperto) {
+        dd.classList.add('aperto');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.barra-sito-dropdown.aperto').forEach(function (d) {
+      d.classList.remove('aperto');
+      d.querySelector('.barra-sito-dropdown-toggle').setAttribute('aria-expanded', 'false');
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.barra-sito-dropdown.aperto').forEach(function (d) { d.classList.remove('aperto'); });
+    }
+  });
+})();
+</script>
+  <div class="contenitore">
+    <h1>CA04 <span class="sottotitolo">Sistemi elementari</span></h1>
+    <p class="sottotitolo pillole-intestazione">Riassunto concettuale, molto sintetico, dei contenuti della lezione. Non sostituisce il libro di testo né il materiale didattico del corso.</p>
+
+    <div id="pillole-contenuto"><p class="pillole-caricamento">Caricamento delle pillole&hellip;</p></div>
+  </div>
+
+  <script>window.CA_LEZIONE_MD = "CA04.md";</script>
+  <script src="pillole.js?v=1"></script>
+</body>
+</html>

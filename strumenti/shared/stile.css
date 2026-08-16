@@ -390,6 +390,8 @@ th {
   right: 0;
   top: calc(100% + 0.7rem);
   min-width: 280px;
+  max-height: 75vh;
+  overflow-y: auto;
   background: var(--colore-superficie, var(--ca-superficie));
   border: 1px solid var(--colore-bordo, var(--ca-bordo));
   border-radius: 10px;
@@ -399,6 +401,23 @@ th {
 
 .barra-sito-dropdown.aperto .barra-sito-dropdown-menu {
   display: block;
+}
+
+/* Titolo di gruppo dentro il menu (es. "Strumenti interattivi" / "Pillole
+   teoriche"): separa visivamente le due famiglie di link. */
+.barra-sito-dropdown-titolo {
+  padding: 0.5rem 0.7rem 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--colore-muted, var(--ca-muted));
+}
+
+.barra-sito-dropdown-titolo:not(:first-child) {
+  margin-top: 0.3rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--colore-bordo, var(--ca-bordo));
 }
 
 .barra-sito-dropdown-menu a {
