@@ -240,43 +240,6 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   z-index: 0;
 }
 
-/* ---------- Figura di apertura ----------
-   La risposta al gradino non e' un ornamento in filigrana ma una figura
-   vera, a tutta larghezza e con didascalia numerata: e' esattamente il
-   grafico che lo studente ritrova negli strumenti. */
-.figura-apertura {
-  margin: 0 0 2rem;
-  padding-top: .4rem;
-}
-
-.figura-traccia {
-  display: block;
-  width: 100%;
-  height: 130px;
-}
-
-.figura-apertura figcaption {
-  text-align: left;
-  font-style: normal;
-  display: flex;
-  gap: 1.1rem;
-  align-items: baseline;
-  padding-top: .6rem;
-  border-top: 1px solid var(--ca-filetto);
-}
-
-/* La parte descrittiva resta in tondo minuscolo: il maiuscoletto
-   trasformerebbe δ in Δ, che in questo contesto significa altro. */
-.figura-apertura figcaption .didascalia {
-  text-transform: none;
-  letter-spacing: .03em;
-}
-
-.figura-apertura figcaption .etichetta:first-child {
-  color: var(--ca-rosso);
-  white-space: nowrap;
-}
-
 .frontespizio > div { position: relative; z-index: 1; }
 
 .frontespizio-testo { max-width: 34rem; }
@@ -347,7 +310,7 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   gap: 1.6rem;
   padding: 1.5rem 0;
   border-top: 1px solid var(--ca-inchiostro);
-  margin: 1.6rem 0 3.4rem;
+  margin: 2.6rem 0 3.4rem;
 }
 
 .nota-apertura p:not(.etichetta) {
@@ -507,7 +470,6 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   }
   .testata-sezione .conteggio { display: none; }
 
-  .figura-apertura figcaption { flex-direction: column; gap: .25rem; }
 
   .voce {
     grid-template-columns: 3.1rem 1fr;
