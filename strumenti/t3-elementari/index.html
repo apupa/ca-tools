@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20260904a" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260904h" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -116,6 +116,7 @@
     <!-- ===================== SCHEDA A: PRIMO ORDINE ===================== -->
     <div id="scheda-primo" class="scheda-contenuto attiva">
       <div class="pannello">
+      <h2>Parametri</h2>
         <p class="fdt-generale">$G(s) = \dfrac{\mu}{\tau s + 1}$</p>
         <div class="campo-slider">
           <label for="a-mu">Guadagno $\mu$ = <span id="a-mu-val">2</span></label>
@@ -158,6 +159,7 @@
     <!-- ===================== SCHEDA B: SECONDO ORDINE ===================== -->
     <div id="scheda-secondo" class="scheda-contenuto">
       <div class="pannello">
+      <h2>Parametri</h2>
         <p class="fdt-generale">$G(s) = \dfrac{\mu\,\omega_n^{2}}{s^{2} + 2\delta\omega_n s + \omega_n^{2}}$</p>
         <div class="campo-slider">
           <label for="b-mu">Guadagno $\mu$ = <span id="b-mu-val">1</span></label>
@@ -206,6 +208,7 @@
     <!-- ===================== SCHEDA C: MASSA-MOLLA-SMORZATORE ===================== -->
     <div id="scheda-massa" class="scheda-contenuto">
       <div class="pannello">
+        <h2>Parametri</h2>
         <p class="fdt-generale">$G(s) = \dfrac{1}{m s^{2} + b s + k}$</p>
         <div class="campo-slider">
           <label for="c-m">Massa $m$ = <span id="c-m-val">1</span> kg</label>

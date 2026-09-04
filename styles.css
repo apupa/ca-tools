@@ -59,7 +59,8 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   display: flex;
   align-items: baseline;
   gap: 1.6rem;
-  padding: .9rem 1.4rem .75rem;
+  padding-block: .9rem .75rem;
+  padding-inline: max(1.4rem, calc((100% - 940px) / 2 + 1.4rem));
   background: var(--ca-carta);
   border-bottom: 1px solid var(--ca-inchiostro);
   position: sticky;
@@ -188,7 +189,7 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 }
 
 @media (max-width: 640px) {
-  .barra-sito { gap: 1rem; padding: .8rem 1rem .7rem; }
+  .barra-sito { gap: 1rem; padding-block: .8rem .7rem; padding-inline: 1rem; }
   .barra-sito-nav { gap: 1rem; }
   .barra-sito-dropdown-menu { right: -.8rem; min-width: 250px; max-width: calc(100vw - 2rem); }
 }
@@ -196,7 +197,7 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 /* Sul telefono la testata usciva dallo schermo: il titolo del corso e i
    link stanno su una riga sola solo stringendo corpo e spaziatura. */
 @media (max-width: 470px) {
-  .barra-sito { gap: .7rem; padding: .75rem .8rem .65rem; }
+  .barra-sito { gap: .7rem; padding-block: .75rem .65rem; padding-inline: .8rem; }
   .barra-sito-nav { gap: .8rem; }
   .barra-sito-brand { font-size: .64rem; letter-spacing: .09em; }
   .barra-sito-brand::before { width: .34rem; height: .34rem; margin-right: .4rem; }
@@ -205,7 +206,7 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 }
 
 /* ---------- Contenitore ---------- */
-.landing { max-width: 940px; margin: 0 auto; padding: 0 1.4rem; }
+.landing { max-width: 940px; margin: 0 auto; padding: 0 1.4rem 4rem; }
 
 /* ---------- Frontespizio ----------
    Impaginato come la prima pagina di una dispensa: etichetta, titolo in
@@ -218,7 +219,6 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   gap: 3rem;
   align-items: end;
   padding: 3.6rem 0 2rem;
-  overflow: hidden;
 }
 
 /* Carta millimetrata: due griglie sovrapposte, disegnate in CSS.
@@ -226,7 +226,11 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 .frontespizio::before {
   content: "";
   position: absolute;
-  inset: -1px 0 0;
+  top: -1px;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
   background:
     repeating-linear-gradient(to right,  var(--ca-filetto-2) 0 1px, transparent 1px var(--ca-passo)),
     repeating-linear-gradient(to bottom, var(--ca-filetto-2) 0 1px, transparent 1px var(--ca-passo));
@@ -344,7 +348,6 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   gap: 1.6rem;
   padding: 1.5rem 0;
   border-top: 1px solid var(--ca-inchiostro);
-  border-bottom: 1px solid var(--ca-filetto);
   margin: 1.6rem 0 3.4rem;
 }
 

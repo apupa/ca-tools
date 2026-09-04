@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20260904a" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260904h" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -25,8 +25,8 @@
     .campo-slider { margin-bottom: 1rem; }
     .campo-slider label { font-family: var(--font-serif); text-transform: none; letter-spacing: 0; color: var(--colore-testo); font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
     .campo-slider input[type="range"] { width: 100%; }
-    fieldset.disturbo { border: 1px solid var(--colore-filetto); padding: 0.8rem 1rem; margin-bottom: 1rem; }
-    fieldset.disturbo legend { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.03em; color: var(--colore-muted); font-weight: 600; padding: 0 0.4rem; }
+    fieldset.disturbo { border: none; padding: 0; margin: 0 0 1.6rem; }
+    fieldset.disturbo legend { width: 100%; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.03em; color: var(--colore-muted); font-weight: 600; padding: 0 0 0.4rem; margin-bottom: 0.9rem; border-bottom: 1px solid var(--colore-filetto-2); }
     .campo-inline { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
     .campo-inline label { font-family: var(--font-serif); text-transform: none; letter-spacing: 0; color: var(--colore-testo); font-weight: normal; font-size: 0.9rem; white-space: nowrap; }
     .campo-inline input[type="text"] { width: 90px; }
@@ -331,7 +331,7 @@
       </fieldset>
     </div>
 
-    <div class="pannello">
+    <div class="azioni-pagina">
       <div class="barra-azioni">
         <button id="btn-esempio" class="secondario">Ripristina esempio</button>
       </div>

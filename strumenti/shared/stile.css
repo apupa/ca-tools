@@ -37,7 +37,7 @@ html {
 
 body {
   margin: 0;
-  padding: 0 0 4rem;
+  padding: 0;
   font-family: var(--font-serif);
   font-size: 1.02rem;
   color: var(--colore-testo);
@@ -47,9 +47,10 @@ body {
 }
 
 .contenitore {
-  max-width: 880px;
+  --margine: 11.5rem;   /* colonna di sinistra: numero + etichetta */
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 2.2rem 1.4rem 0;
+  padding: 2.2rem 1.4rem 4rem;
 }
 
 /* ---------- Testatina della pagina ----------
@@ -64,6 +65,11 @@ h1 {
   margin: 0 0 .5rem;
 }
 
+h1 .sottotitolo {
+  display: block;
+  margin-top: .35rem;
+}
+
 h1 .sottotitolo,
 p.sottotitolo {
   color: var(--colore-testo-2);
@@ -73,10 +79,13 @@ p.sottotitolo {
 }
 
 p.sottotitolo {
-  margin: 0 0 1.5rem;
-  padding-bottom: 1.2rem;
+  margin: 0 0 2rem;
+  padding-bottom: 1.3rem;
   border-bottom: 2px solid var(--colore-testo);
 }
+
+h1 { padding-left: var(--margine); }
+p.sottotitolo { padding-left: var(--margine); }
 
 h2 {
   font-family: var(--font-serif);
@@ -154,14 +163,70 @@ a:hover {
   color: var(--colore-testo-2);
 }
 
-/* ---------- Sezioni generiche ----------
-   Un riquadro e' un foglio: filetto sottile, angoli vivi, nessuna ombra. */
+/* ---------- Sezioni ----------
+   Niente riquadri: il foglio e' la pagina. Ogni sezione e' separata dalla
+   precedente da un filetto e portata dal titolo, che scende nella colonna
+   di margine a sinistra insieme al proprio numero di paragrafo. E'
+   l'impaginazione delle dispense tecniche: la gerarchia la fanno la
+   posizione e lo spazio bianco, non i contenitori. */
+.contenitore,
+.scheda-contenuto { counter-reset: sezione; }
+
 .pannello {
-  background: var(--colore-foglio);
-  border: 1px solid var(--colore-filetto);
-  border-radius: 0;
-  padding: 1.3rem 1.4rem;
-  margin-bottom: 1.4rem;
+  position: relative;
+  padding: 2rem 0 2.2rem var(--margine);
+  border-top: 1px solid var(--colore-filetto);
+  counter-increment: sezione;
+}
+
+/* Il titolo esce dal flusso e va nel margine; resta in alto anche quando
+   la sezione e' lunga diversi schermi. */
+.pannello > h2 {
+  position: absolute;
+  left: 0;
+  top: 2rem;
+  width: calc(var(--margine) - 2rem);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: .02em;
+  color: var(--colore-testo-2);
+}
+
+/* Numero di paragrafo sopra l'etichetta: e' il segno che tiene insieme
+   la colonna di margine lungo tutta la pagina. */
+.pannello > h2::before {
+  content: "§ " counter(sezione);
+  display: block;
+  margin-bottom: .3rem;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  color: var(--colore-rosso);
+}
+
+/* I termini di Bode sono sottosezioni: stesso trattamento a margine, ma
+   numerano da soli ("1. Guadagno costante") e non incrementano il §. */
+.pannello.scheda-termine { counter-increment: none; }
+
+.pannello.scheda-termine > h3 {
+  position: absolute;
+  left: 0;
+  top: 2rem;
+  width: calc(var(--margine) - 2rem);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: .02em;
+  color: var(--colore-testo-2);
+}
+
+/* Barra di comando che non e' una sezione (es. "ripristina esempio"). */
+.azioni-pagina {
+  padding: 1.2rem 0 0 var(--margine);
 }
 
 /* Il richiamo teorico si distingue per il filetto pieno in alto e la
@@ -169,12 +234,13 @@ a:hover {
 details.teoria {
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--colore-filetto);
   border-radius: 0;
-  padding: 0 0 1rem;
-  margin-bottom: 1.6rem;
+  padding: 0 0 1.4rem var(--margine);
+  margin: 0;
   color: var(--colore-testo-2);
 }
+
+details.teoria > *:not(summary) { padding-left: 0; }
 
 details.teoria summary {
   cursor: pointer;
@@ -201,8 +267,6 @@ details.teoria summary::before {
 details.teoria[open] summary::before { content: "\2212"; }
 
 details.teoria[open] summary { margin-bottom: .7rem; }
-
-details.teoria > *:not(summary) { padding-left: 1.1rem; }
 
 details.teoria .riferimento {
   margin-top: .8rem;
@@ -266,6 +330,7 @@ input[type="radio"] {
 
 input[type="range"] {
   width: 100%;
+  max-width: 34rem;
   height: 1.4rem;
 }
 
@@ -354,7 +419,7 @@ button.secondario:hover {
   display: flex;
   gap: .6rem;
   flex-wrap: wrap;
-  margin: 1.2rem 0 0;
+  margin: 1.4rem 0 1.3rem;
 }
 
 /* ---------- Tabelle ----------
@@ -422,7 +487,8 @@ th {
   display: flex;
   align-items: baseline;
   gap: 1.6rem;
-  padding: .9rem 1.4rem .75rem;
+  padding-block: .9rem .75rem;
+  padding-inline: max(1.4rem, calc((100% - 1000px) / 2 + 1.4rem));
   background: var(--colore-carta);
   border-bottom: 1px solid var(--colore-testo);
   position: sticky;
@@ -564,7 +630,8 @@ th {
 @media (max-width: 640px) {
   .barra-sito {
     gap: 1rem;
-    padding: .8rem 1rem .7rem;
+    padding-block: .8rem .7rem;
+    padding-inline: 1rem;
   }
   .barra-sito-nav {
     gap: 1rem;
@@ -579,7 +646,8 @@ th {
 @media (max-width: 470px) {
   .barra-sito {
     gap: .7rem;
-    padding: .75rem .8rem .65rem;
+    padding-block: .75rem .65rem;
+    padding-inline: .8rem;
   }
   .barra-sito-nav {
     gap: .8rem;
@@ -797,9 +865,44 @@ details.teoria li,
 }
 
 /* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .contenitore { --margine: 9rem; }
+}
+
+@media (max-width: 860px) {
+  .contenitore {
+    --margine: 0rem;
+  }
+
+  h1,
+  p.sottotitolo,
+  details.teoria,
+  .azioni-pagina {
+    padding-left: 0;
+  }
+
+  .pannello > h2,
+  .pannello.scheda-termine > h3 {
+    position: static;
+    width: auto;
+    margin: 0 0 .9rem;
+    font-size: .8rem;
+  }
+
+  .pannello > h2::before {
+    display: inline;
+    margin: 0 .55rem 0 0;
+  }
+
+  .pannello {
+    padding-top: 1.6rem;
+    padding-bottom: 1.8rem;
+  }
+}
+
 @media (max-width: 600px) {
   .contenitore {
-    padding: 1.5rem .95rem 0;
+    padding: 1.5rem .95rem 3rem;
   }
 
   h1 {
@@ -813,10 +916,6 @@ details.teoria li,
 
   h2 {
     font-size: 1.08rem;
-  }
-
-  .pannello {
-    padding: 1rem;
   }
 
   .riga-campi {
