@@ -322,7 +322,6 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   height: 200px;
   object-fit: cover;
   border: 1px solid var(--ca-inchiostro);
-  filter: grayscale(1) contrast(1.06);
 }
 
 .ritratto figcaption {
