@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20260904h" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260905c" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -77,7 +77,7 @@
   });
 })();
 </script>
-  <div class="contenitore">
+  <div class="contenitore banco-pagina">
     <h1>Conversione rappresentazioni <span class="sottotitolo">tra ISU, IU e funzione di trasferimento</span></h1>
     <p class="sottotitolo">Converti tra rappresentazione di stato, ingresso-uscita e funzione di trasferimento (sistemi SISO).</p>
 
@@ -104,8 +104,9 @@
       </p>
       <p class="riferimento">Riferimento: Lezioni CA01, CA02.</p>
     </details>
-
-    <div class="pannello">
+    <div class="banco">
+      <aside class="banco-comandi">
+      <div class="pannello">
       <h2>Modello</h2>
       <div class="campo">
         <label for="modello-partenza">Modello di partenza</label>
@@ -166,8 +167,12 @@
       </div>
       <p id="messaggio-errore" style="color:var(--colore-errore); display:none;"></p>
     </div>
+      </aside>
 
-    <div id="risultati"></div>
+      <div class="banco-esiti">
+      <div id="risultati"></div>
+      </div>
+    </div>
   </div>
 
   <script src="../shared/ca-core.js?v=20260807a"></script>

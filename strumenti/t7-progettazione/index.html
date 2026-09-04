@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20260904h" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260905c" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -82,7 +82,7 @@
   });
 })();
 </script>
-  <div class="contenitore">
+  <div class="contenitore banco-pagina">
     <h1>Progettazione del controllore</h1>
     <p class="sottotitolo">
       Parti dalle specifiche, verifica se un controllore proporzionale le soddisfa e, se serve, progetta un
@@ -112,8 +112,9 @@
       </p>
       <p class="riferimento">Riferimento: Lezione CA07.</p>
     </details>
-
-    <div class="pannello">
+    <div class="banco">
+      <aside class="banco-comandi">
+      <div class="pannello">
       <h2>Impianto $G(s)$</h2>
       <div class="riga-campi">
         <div class="campo">
@@ -128,7 +129,7 @@
       <p class="nota-formato">Puoi scrivere i <strong>coefficienti</strong> separati da spazio, dal grado più alto al più basso (<code>1 11 10</code>), oppure direttamente l'<strong>espressione</strong> in $s$ (<code>(s+1)(s+10)</code>).</p>
     </div>
 
-    <div class="pannello">
+      <div class="pannello">
       <h2>Specifiche di progetto</h2>
       <fieldset class="specifica">
         <legend>Errore a regime (specifica statica)</legend>
@@ -159,7 +160,7 @@
       </fieldset>
     </div>
 
-    <div class="pannello">
+      <div class="pannello">
       <h2>Controllore $C(s) = K\cdot C'(s)$</h2>
       <p style="font-size:0.85rem; color:var(--colore-muted);">
         Scrivi solo la <strong>forma</strong> $C'(s)$ del controllore da inserire in serie all'impianto (il
@@ -193,14 +194,18 @@
       </div>
       <p id="messaggio-errore" style="color:var(--colore-errore); display:none;"></p>
     </div>
+      </aside>
 
-    <h2 class="titolo-sezione">Controllore proporzionale: $L(s)=K\cdot G(s)$</h2>
-    <div class="pannello">
+      <div class="banco-esiti">
+      <h2 class="titolo-sezione">Controllore proporzionale: $L(s)=K\cdot G(s)$</h2>
+
+      <div class="pannello">
       <h2>Verifica statica</h2>
       <div id="fdt-testo-prima" style="overflow-x:auto;"></div>
       <div id="specifiche-testo-prima" style="margin-top:0.6rem; font-size:0.9rem;"></div>
     </div>
-    <div class="pannello">
+
+      <div class="pannello">
       <h2>Luogo delle radici</h2>
       <div class="campo-slider">
         <label for="k-slider-prima">Poli ad anello chiuso per $K$ = <span id="k-slider-val-prima">0</span></label>
@@ -215,22 +220,26 @@
       <div id="geq-testo-prima" style="overflow-x:auto;"></div>
       <div id="specifiche-dinamiche-testo-prima" style="margin-top:0.4rem; font-size:0.9rem;"></div>
     </div>
-    <div class="pannello">
+
+      <div class="pannello">
       <h2>Poli ad anello chiuso</h2>
       <div id="poli-chiusi-testo-prima"></div>
     </div>
-    <div class="pannello">
+
+      <div class="pannello">
       <h2>Risposta al gradino</h2>
       <div id="grafico-risposta-prima" style="width:100%; height:320px;"></div>
     </div>
 
-    <h2 class="titolo-sezione">Con controllore: $L(s)=K\cdot C'(s)\cdot G(s)$</h2>
-    <div class="pannello">
+      <h2 class="titolo-sezione">Con controllore: $L(s)=K\cdot C'(s)\cdot G(s)$</h2>
+
+      <div class="pannello">
       <h2>Verifica statica</h2>
       <div id="fdt-testo-dopo" style="overflow-x:auto;"></div>
       <div id="specifiche-testo-dopo" style="margin-top:0.6rem; font-size:0.9rem;"></div>
     </div>
-    <div class="pannello">
+
+      <div class="pannello">
       <h2>Luogo delle radici</h2>
       <div class="campo-slider">
         <label for="k-slider-dopo">Poli ad anello chiuso per $K$ = <span id="k-slider-val-dopo">0</span></label>
@@ -244,13 +253,17 @@
       <div id="geq-testo-dopo" style="overflow-x:auto;"></div>
       <div id="specifiche-dinamiche-testo-dopo" style="margin-top:0.4rem; font-size:0.9rem;"></div>
     </div>
-    <div class="pannello">
+
+      <div class="pannello">
       <h2>Poli ad anello chiuso</h2>
       <div id="poli-chiusi-testo-dopo"></div>
     </div>
-    <div class="pannello">
+
+      <div class="pannello">
       <h2>Risposta al gradino</h2>
       <div id="grafico-risposta-dopo" style="width:100%; height:320px;"></div>
+    </div>
+      </div>
     </div>
   </div>
 

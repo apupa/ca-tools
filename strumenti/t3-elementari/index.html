@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20260904h" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260905c" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -80,7 +80,7 @@
   });
 })();
 </script>
-  <div class="contenitore">
+  <div class="contenitore banco-pagina">
     <h1>Sistemi elementari 1° e 2° ordine</h1>
     <p class="sottotitolo">Esplora con gli slider il primo e il secondo ordine, e prova il massa-molla-smorzatore animato.</p>
 
@@ -115,7 +115,9 @@
 
     <!-- ===================== SCHEDA A: PRIMO ORDINE ===================== -->
     <div id="scheda-primo" class="scheda-contenuto attiva">
-      <div class="pannello">
+        <div class="banco">
+          <aside class="banco-comandi">
+          <div class="pannello">
       <h2>Parametri</h2>
         <p class="fdt-generale">$G(s) = \dfrac{\mu}{\tau s + 1}$</p>
         <div class="campo-slider">
@@ -133,7 +135,11 @@
         <button id="a-btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
 
-      <div class="pannello">
+          
+          </aside>
+
+          <div class="banco-esiti">
+          <div class="pannello">
         <h2>Risposta al gradino</h2>
         <p style="font-size:0.85rem; color:var(--colore-muted);">
           La finestra temporale $T$ è fissa (non si adatta a $\tau$): a parità di $T$, un sistema più lento mostra
@@ -141,12 +147,15 @@
         </p>
         <div id="a-grafico-risposta" style="width:100%; height:320px;"></div>
       </div>
-      <div class="pannello">
+
+          <div class="pannello">
         <h2>Polo nel piano complesso</h2>
         <div id="a-grafico-polo" style="width:100%; height:320px;"></div>
       </div>
-      <div class="pannello">
-        <h2>Parametri</h2>
+          
+
+          <div class="pannello">
+        <h2>Grandezze caratteristiche</h2>
         <table><tbody>
           <tr><th>FdT</th><td id="a-fdt-testo"></td></tr>
           <tr><th>Polo</th><td id="a-polo-testo"></td></tr>
@@ -154,11 +163,15 @@
           <tr><th>Tempo di assestamento $T_a \approx 3\tau$</th><td id="a-ta-testo"></td></tr>
         </tbody></table>
       </div>
-    </div>
+        </div>
+        </div>
+      </div>
 
     <!-- ===================== SCHEDA B: SECONDO ORDINE ===================== -->
     <div id="scheda-secondo" class="scheda-contenuto">
-      <div class="pannello">
+        <div class="banco">
+          <aside class="banco-comandi">
+          <div class="pannello">
       <h2>Parametri</h2>
         <p class="fdt-generale">$G(s) = \dfrac{\mu\,\omega_n^{2}}{s^{2} + 2\delta\omega_n s + \omega_n^{2}}$</p>
         <div class="campo-slider">
@@ -180,7 +193,11 @@
         <button id="b-btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
 
-      <div class="pannello">
+          
+          </aside>
+
+          <div class="banco-esiti">
+          <div class="pannello">
         <h2>Risposta al gradino</h2>
         <p style="font-size:0.85rem; color:var(--colore-muted);">
           La finestra temporale $T$ è fissa (non si adatta a $\omega_n$, $\delta$): a parità di $T$ si vede subito se
@@ -188,12 +205,15 @@
         </p>
         <div id="b-grafico-risposta" style="width:100%; height:320px;"></div>
       </div>
-      <div class="pannello">
+
+          <div class="pannello">
         <h2>Poli nel piano complesso</h2>
         <div id="b-grafico-poli" style="width:100%; height:320px;"></div>
       </div>
-      <div class="pannello">
-        <h2>Parametri</h2>
+          
+
+          <div class="pannello">
+        <h2>Grandezze caratteristiche</h2>
         <table><tbody>
           <tr><th>FdT</th><td id="b-fdt-testo"></td></tr>
           <tr><th>Poli</th><td id="b-poli-testo"></td></tr>
@@ -203,11 +223,15 @@
         </tbody></table>
         <p id="b-nota-poli" style="font-size:0.85rem; color:var(--colore-muted);"></p>
       </div>
-    </div>
+        </div>
+        </div>
+      </div>
 
     <!-- ===================== SCHEDA C: MASSA-MOLLA-SMORZATORE ===================== -->
     <div id="scheda-massa" class="scheda-contenuto">
-      <div class="pannello">
+        <div class="banco">
+          <aside class="banco-comandi">
+          <div class="pannello">
         <h2>Parametri</h2>
         <p class="fdt-generale">$G(s) = \dfrac{1}{m s^{2} + b s + k}$</p>
         <div class="campo-slider">
@@ -242,7 +266,11 @@
         <button id="c-btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
 
-      <div class="pannello">
+          
+          </aside>
+
+          <div class="banco-esiti">
+          <div class="pannello">
         <h2>Animazione</h2>
         <canvas id="massa-canvas" width="800" height="180"></canvas>
         <div class="barra-azioni">
@@ -258,12 +286,14 @@
         </p>
       </div>
 
-      <div class="pannello">
+          <div class="pannello">
         <h2>Risposta x(t)</h2>
         <div id="c-grafico-risposta" style="width:100%; height:320px;"></div>
       </div>
-      <div class="pannello">
-        <h2>Parametri</h2>
+          
+
+          <div class="pannello">
+        <h2>Grandezze caratteristiche</h2>
         <table><tbody>
           <tr><th>FdT (posizione/forza)</th><td id="c-fdt-testo"></td></tr>
           <tr><th>Pulsazione naturale $\omega_n=\sqrt{k/m}$</th><td id="c-omegan-testo"></td></tr>
@@ -271,7 +301,9 @@
           <tr><th>Regime</th><td id="c-tipo-testo"></td></tr>
         </tbody></table>
       </div>
-    </div>
+        </div>
+        </div>
+      </div>
   </div>
 
   <script src="../shared/ca-core.js?v=20260807a"></script>

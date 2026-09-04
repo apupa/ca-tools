@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20260904h" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260905c" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -72,7 +72,7 @@
   });
 })();
 </script>
-  <div class="contenitore">
+  <div class="contenitore banco-pagina">
     <h1>Luogo delle radici</h1>
     <p class="sottotitolo">Traccia il luogo delle radici di $L(s)$ al variare di $K$ da 0 a ∞, con tutte le regole di tracciamento.</p>
 
@@ -94,8 +94,9 @@
       </ul>
       <p class="riferimento">Riferimento: Lezione CA07.</p>
     </details>
-
-    <div class="pannello">
+    <div class="banco">
+      <aside class="banco-comandi">
+      <div class="pannello">
       <h2>Modello</h2>
       <div class="riga-campi">
         <div class="campo">
@@ -118,13 +119,15 @@
       </div>
       <p id="messaggio-errore" style="color:var(--colore-errore); display:none;"></p>
     </div>
+      </aside>
 
-    <div class="pannello">
+      <div class="banco-esiti">
+      <div class="pannello">
       <h2>Funzione di trasferimento d'anello</h2>
       <div id="fdt-testo" style="overflow-x:auto;"></div>
     </div>
 
-    <div class="pannello">
+      <div class="pannello">
       <h2>Piano complesso</h2>
       <div class="campo-slider">
         <label for="k-slider">Poli ad anello chiuso per $K$ = <span id="k-slider-val">0</span></label>
@@ -138,14 +141,16 @@
       <div id="geq-testo" style="overflow-x:auto;"></div>
     </div>
 
-    <div class="pannello">
+      <div class="pannello">
       <h2>Poli ad anello chiuso (per il $K$ selezionato)</h2>
       <div id="poli-chiusi-testo"></div>
     </div>
 
-    <div class="pannello">
+      <div class="pannello">
       <h2>Regole del luogo delle radici</h2>
       <div id="regole-testo"></div>
+    </div>
+      </div>
     </div>
   </div>
 

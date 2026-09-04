@@ -48,9 +48,18 @@ body {
 
 .contenitore {
   --margine: 11.5rem;   /* colonna di sinistra: numero + etichetta */
+  --rail:    21rem;     /* colonna dei comandi, nelle pagine a banco */
+  --gronda:  2.8rem;    /* spazio fra le due colonne */
   max-width: 1000px;
   margin: 0 auto;
   padding: 2.2rem 1.4rem 4rem;
+}
+
+/* Le pagine strumento lavorano a due colonne: i comandi non scorrono via,
+   quindi non serve la colonna di margine per le etichette. */
+.contenitore.banco-pagina {
+  --margine: 0rem;
+  max-width: 1180px;
 }
 
 /* ---------- Testatina della pagina ----------
@@ -274,6 +283,129 @@ details.teoria .riferimento {
   font-size: .72rem;
   letter-spacing: .06em;
   color: var(--colore-muted);
+}
+
+
+/* ---------- Banco di lavoro ----------
+   I comandi escono dal flusso della pagina e diventano una colonna che
+   resta ferma mentre scorrono i risultati: si sposta uno slider e si
+   vede subito il grafico reagire, senza dover risalire. */
+.banco {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--rail) 1fr;
+  gap: 0 var(--gronda);
+  border-top: 2px solid var(--colore-testo);
+}
+
+/* Il filetto verticale lo disegna il contenitore e non la colonna: cosi'
+   arriva in fondo alla pagina invece di fermarsi dove finiscono i
+   comandi. */
+.banco::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--rail) + var(--gronda) / 2);
+  border-left: 1px solid var(--colore-filetto);
+}
+
+.banco-comandi {
+  position: sticky;
+  top: 3.3rem;                       /* subito sotto la barra */
+  align-self: start;
+  max-height: calc(100vh - 4.2rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* spazio per la barra di scorrimento, che altrimenti taglia le
+     etichette lunghe degli slider */
+  padding-right: 1.3rem;
+  padding-bottom: 1.4rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--colore-filetto) transparent;
+}
+
+/* Intestazione della colonna: dice cosa e' quella colonna e resta in
+   cima quando i comandi scorrono. */
+.banco-comandi::before {
+  content: "Comandi";
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: .1rem 0 .7rem;
+  background: var(--colore-carta);
+  font-family: var(--font-mono);
+  font-size: .69rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--colore-muted);
+}
+
+/* I comandi non sono paragrafi del documento: la numerazione § corre
+   solo nella colonna dei risultati, altrimenti le due colonne mostrano
+   affiancati numeri che non si susseguono (§ 2 accanto a § 5). */
+.banco-esiti { counter-reset: sezione; }
+.banco-comandi .pannello { counter-increment: none; }
+.banco-comandi .pannello > h2::before { content: none; }
+
+.banco .pannello,
+.banco .azioni-pagina {
+  padding-left: 0;
+}
+
+.banco .pannello {
+  padding-top: 1.7rem;
+  padding-bottom: 1.9rem;
+}
+
+.banco-comandi > .pannello:first-child,
+.banco-esiti > .pannello:first-child,
+.banco-esiti > h2.titolo-sezione:first-child {
+  border-top: none;
+  padding-top: 1.8rem;
+}
+
+/* Senza colonna di margine l'etichetta torna in linea, col numero di
+   paragrafo davanti. */
+.banco .pannello > h2,
+.banco .pannello.scheda-termine > h3 {
+  position: static;
+  width: auto;
+  margin: 0 0 .9rem;
+  font-size: .8rem;
+}
+
+.banco .pannello > h2::before {
+  display: inline;
+  margin: 0 .55rem 0 0;
+}
+
+/* Nella colonna stretta gli slider usano tutta la larghezza. */
+.banco-comandi input[type="range"] { max-width: none; }
+.banco-comandi .riga-campi { flex-direction: column; gap: .7rem; }
+/* In colonna il flex-basis di .campo (160px) diventa un'ALTEZZA, e i
+   campi si distanziavano di due dita l'uno dall'altro. */
+.banco-comandi .riga-campi > .campo { flex: 0 0 auto; }
+
+/* Sotto questa larghezza le due colonne non stanno: i comandi tornano
+   in cima al flusso e la pagina scorre tutta insieme. */
+@media (max-width: 1120px) {
+  .banco { display: block; border-top: 2px solid var(--colore-testo); }
+  .banco::before { display: none; }
+  .banco-comandi {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+  .banco-esiti > .pannello:first-child,
+  .banco-esiti > h2.titolo-sezione:first-child {
+    border-top: 1px solid var(--colore-filetto);
+  }
+  .banco-comandi input[type="range"] { max-width: 34rem; }
+  .banco-comandi .riga-campi { flex-direction: row; gap: 1rem; }
 }
 
 /* ---------- Form / campi input ---------- */
