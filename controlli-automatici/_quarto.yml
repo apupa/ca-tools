@@ -8,15 +8,18 @@ project:
 website:
   title: "Controlli Automatici"
   search: false
-  page-footer:
-    border: true
-    left: "© 2025 Andrea Pupa"
-    right: "Corso di Controlli Automatici"
 
 format:
   html:
+    # Base chiara: il sito e' impaginato come un quaderno tecnico (carta avorio,
+    # inchiostro), quindi il tema scuro di Bootstrap non serve piu'.
     theme:
-      - darkly
+      - cosmo
     css: styles.css
     toc: true
     anchor-sections: false   # niente icona-link automatica accanto ai titoli
+    include-in-header:
+      text: |
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">

@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Taratura PID · Controlli Automatici</title>
-  <link rel="stylesheet" href="../shared/stile.css?v=20260807b" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="../shared/stile.css?v=20260904h" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -20,12 +23,12 @@
     .sezione-impianto { display: none; }
     .sezione-impianto.attiva { display: block; }
     .campo-slider { margin-bottom: 1rem; }
-    .campo-slider label { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+    .campo-slider label { font-family: var(--font-serif); text-transform: none; letter-spacing: 0; color: var(--colore-testo); font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
     .campo-slider input[type="range"] { width: 100%; }
-    fieldset.disturbo { border: 1px solid var(--colore-bordo); border-radius: 8px; padding: 0.8rem 1rem; margin-bottom: 1rem; }
-    fieldset.disturbo legend { font-weight: 600; padding: 0 0.4rem; }
+    fieldset.disturbo { border: none; padding: 0; margin: 0 0 1.6rem; }
+    fieldset.disturbo legend { width: 100%; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.03em; color: var(--colore-muted); font-weight: 600; padding: 0 0 0.4rem; margin-bottom: 0.9rem; border-bottom: 1px solid var(--colore-filetto-2); }
     .campo-inline { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
-    .campo-inline label { font-weight: normal; font-size: 0.9rem; white-space: nowrap; }
+    .campo-inline label { font-family: var(--font-serif); text-transform: none; letter-spacing: 0; color: var(--colore-testo); font-weight: normal; font-size: 0.9rem; white-space: nowrap; }
     .campo-inline input[type="text"] { width: 90px; }
   </style>
 </head>
@@ -182,7 +185,7 @@
 
     <div class="pannello">
       <h2>Funzione di trasferimento ad anello chiuso</h2>
-      <p style="font-size:0.85rem; color:#b7bcc5;">Per i parametri del regolatore e dell'impianto scelti sopra, retroazione unitaria:</p>
+      <p style="font-size:0.85rem; color:var(--colore-muted);">Per i parametri del regolatore e dell'impianto scelti sopra, retroazione unitaria:</p>
       <div id="geq-testo" style="overflow-x:auto;"></div>
     </div>
 
@@ -202,7 +205,7 @@
 
     <div class="pannello">
       <h2>Schema a blocchi</h2>
-      <p style="font-size:0.85rem; color:#b7bcc5;">
+      <p style="font-size:0.85rem; color:var(--colore-muted);">
         Dove entrano in gioco i disturbi nell'anello: $d_u$ si somma all'uscita del regolatore (agisce come un
         ingresso spurio sull'impianto), $d_y$ si somma direttamente all'uscita dell'impianto, $n$ si somma solo
         sul segnale di misura usato per calcolare l'errore (non altera l'uscita vera $y(t)$, ma "inganna" il
@@ -212,10 +215,10 @@
         <svg viewBox="0 0 860 270" style="width:100%; max-width:860px; height:auto; font-family:inherit;">
           <defs>
             <marker id="freccia" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="#1f2937" />
+              <path d="M0,0 L10,5 L0,10 z" fill="#3a3934" />
             </marker>
           </defs>
-          <g fill="none" stroke="#1f2937" stroke-width="1.6">
+          <g fill="none" stroke="#3a3934" stroke-width="1.6">
             <!-- r(t) in ingresso -->
             <line x1="14" y1="120" x2="76" y2="120" marker-end="url(#freccia)" />
             <!-- sommatore 1 (errore) -->
@@ -240,7 +243,7 @@
             <line x1="596" y1="58" x2="596" y2="103" marker-end="url(#freccia)" stroke="#b45309" />
             <!-- sommatore3 -> uscita y(t), con nodo di diramazione -->
             <line x1="612" y1="120" x2="720" y2="120" marker-end="url(#freccia)" />
-            <circle cx="676" cy="120" r="3.5" fill="#1f2937" stroke="none" />
+            <circle cx="676" cy="120" r="3.5" fill="#3a3934" stroke="none" />
             <!-- retroazione: giù dal nodo, fino al sommatore rumore -->
             <line x1="676" y1="120" x2="676" y2="205" />
             <line x1="676" y1="205" x2="612" y2="205" marker-end="url(#freccia)" />
@@ -251,11 +254,11 @@
             <line x1="582" y1="205" x2="95" y2="205" />
             <line x1="95" y1="205" x2="95" y2="137" marker-end="url(#freccia)" />
           </g>
-          <g font-size="15" fill="#1f2937" text-anchor="middle" font-weight="600">
+          <g font-size="15" fill="#3a3934" text-anchor="middle" font-weight="600">
             <text x="213" y="125">C(s)</text>
             <text x="471" y="125">G(s)</text>
           </g>
-          <g font-size="13" fill="#1f2937" text-anchor="middle">
+          <g font-size="13" fill="#3a3934" text-anchor="middle">
             <text x="40" y="110">r(t)</text>
             <text x="140" y="110">e(t)</text>
             <text x="392" y="110">u(t)</text>
@@ -270,7 +273,7 @@
             <text x="596" y="50">d<tspan baseline-shift="sub" font-size="10">y</tspan>(t)</text>
             <text x="596" y="262">n(t)</text>
           </g>
-          <g font-size="13" fill="#1f2937" text-anchor="middle" font-weight="600">
+          <g font-size="13" fill="#3a3934" text-anchor="middle" font-weight="600">
             <text x="745" y="110">y(t)</text>
           </g>
           <g font-size="12" fill="#6b7280" text-anchor="middle">
@@ -328,11 +331,11 @@
       </fieldset>
     </div>
 
-    <div class="pannello">
+    <div class="azioni-pagina">
       <div class="barra-azioni">
         <button id="btn-esempio" class="secondario">Ripristina esempio</button>
       </div>
-      <p id="messaggio-errore" style="color:#b91c1c; display:none;"></p>
+      <p id="messaggio-errore" style="color:var(--colore-errore); display:none;"></p>
     </div>
 
     <div class="pannello">
@@ -342,7 +345,7 @@
 
     <div class="pannello">
       <h2>Segnale di controllo $u(t)$</h2>
-      <p style="font-size:0.85rem; color:#b7bcc5;">
+      <p style="font-size:0.85rem; color:var(--colore-muted);">
         Uscita del regolatore verso l'impianto (comprensiva di $d_u$ quando attivo): utile per verificare lo
         sforzo di controllo richiesto, ad esempio per individuare saturazioni dell'attuatore.
       </p>
@@ -356,7 +359,7 @@
   </div>
 
   <script src="../shared/ca-core.js?v=20260807a"></script>
-  <script src="../shared/ca-plot.js?v=20260807a"></script>
+  <script src="../shared/ca-plot.js?v=20260904a"></script>
   <script src="app.js?v=20260807a"></script>
 </body>
 </html>

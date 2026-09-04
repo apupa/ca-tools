@@ -5,13 +5,14 @@
 // altrimenti il browser puo' mescolare una versione vecchia di questo file
 // con una nuova di app.js.
 (function () {
-  // Layout comune: font di sistema, margini contenuti, sfondo bianco
-  // (i grafici restano leggibili anche col tema scuro del sito).
+  // Layout comune: monospaziato per le etichette degli assi, margini
+  // contenuti e fondo carta, lo stesso dei pannelli: il grafico fa parte
+  // della pagina invece di essere un rettangolo bianco appoggiato sopra.
   const layoutBase = {
-    font: { family: "-apple-system, Segoe UI, Roboto, Arial, sans-serif", size: 12, color: "#1f2937" },
+    font: { family: "IBM Plex Mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace", size: 11, color: "#45443d" },
     margin: { l: 55, r: 20, t: 30, b: 45 },
-    paper_bgcolor: "#ffffff",
-    plot_bgcolor: "#ffffff",
+    paper_bgcolor: "#fbf9f5",
+    plot_bgcolor: "#fbf9f5",
     legend: { orientation: "h", x: 0, y: 1.15 },
   };
 
@@ -327,8 +328,8 @@
       line: s.line || {},
     }));
     const layout = Object.assign({}, layoutBase, {
-      xaxis: { title: "tempo [s]", zeroline: true, gridcolor: "#e5e7eb" },
-      yaxis: { title: "ampiezza", zeroline: true, gridcolor: "#e5e7eb" },
+      xaxis: { title: "tempo [s]", zeroline: true, gridcolor: "#e6e0d3" },
+      yaxis: { title: "ampiezza", zeroline: true, gridcolor: "#e6e0d3" },
     });
     disegna(divId, tracce, layout);
   }
@@ -374,13 +375,13 @@
     // (fitta e chiara per le suddivisioni intermedie, più marcata sulle
     // tacche principali) e assi a "L" (solo sinistra/basso, senza riquadro).
     const assiStileQuaderno = {
-      showline: true, linecolor: "#374151", linewidth: 1, mirror: false, zeroline: false,
+      showline: true, linecolor: "#45443d", linewidth: 1, mirror: false, zeroline: false,
     };
     const assePulsazioniBase = Object.assign({}, assiStileQuaderno, {
       type: "log",
       tickmode: "array", tickvals, ticktext,
-      gridcolor: "#d1d5db", gridwidth: 1,
-      minor: { showgrid: true, dtick: "D1", gridcolor: "#eef0f2", gridwidth: 1, ticks: "" },
+      gridcolor: "#d9d3c6", gridwidth: 1,
+      minor: { showgrid: true, dtick: "D1", gridcolor: "#ece7dd", gridwidth: 1, ticks: "" },
     });
     // Asse ω condiviso da ampiezza e fase (sono impilati, stessa scala):
     // l'etichetta si mette solo sul grafico in basso (fase), non ripetuta su quello in alto.
@@ -389,8 +390,8 @@
       title: "log₁₀(ω)  [decadi]",
     });
     const assiVerticali = Object.assign({}, assiStileQuaderno, {
-      gridcolor: "#d1d5db", gridwidth: 1,
-      minor: { showgrid: true, gridcolor: "#eef0f2", gridwidth: 1, ticks: "" },
+      gridcolor: "#d9d3c6", gridwidth: 1,
+      minor: { showgrid: true, gridcolor: "#ece7dd", gridwidth: 1, ticks: "" },
     });
     const layout = Object.assign({}, layoutBase, {
       grid: { rows: 2, columns: 1, pattern: "independent" },
@@ -431,12 +432,12 @@
     const layout = Object.assign({}, layoutBase, {
       title: opts.title,
       xaxis: {
-        title: "Re", zeroline: true, zerolinewidth: 1.5, zerolinecolor: "#9ca3af",
-        gridcolor: "#e5e7eb", range: opts.xrange, autorange: opts.xrange ? false : true,
+        title: "Re", zeroline: true, zerolinewidth: 1.5, zerolinecolor: "#8f8a7c",
+        gridcolor: "#e6e0d3", range: opts.xrange, autorange: opts.xrange ? false : true,
       },
       yaxis: {
-        title: "Im", zeroline: true, zerolinewidth: 1.5, zerolinecolor: "#9ca3af",
-        gridcolor: "#e5e7eb", scaleanchor: "x", scaleratio: 1,
+        title: "Im", zeroline: true, zerolinewidth: 1.5, zerolinecolor: "#8f8a7c",
+        gridcolor: "#e6e0d3", scaleanchor: "x", scaleratio: 1,
         range: opts.yrange, autorange: opts.yrange ? false : true,
       },
     });
