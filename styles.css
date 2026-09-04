@@ -1,320 +1,525 @@
 /* ===================================================================
    Controlli Automatici — stile del sito Quarto
-   Tema scuro (grigio) con accento giallo muto.
+   "Quaderno tecnico": carta avorio, inchiostro, filetti al posto di
+   ombre. L'identita' visiva e' presa dalla materia: carta millimetrata,
+   segni del piano s (croci e cerchi), sigle in monospaziato.
    =================================================================== */
 
 :root {
-  --ca-primario:      #d9b24c;   /* giallo muto */
-  --ca-primario-scuro:#e8c66a;   /* giallo piu chiaro (per testo su fondo scuro) */
-  --ca-testo:         #e7e9ec;
-  --ca-testo-soft:    #b7bcc5;
-  --ca-muted:         #8b919b;
-  --ca-sfondo:        #1b1e23;    /* pagina, grigio scuro */
-  --ca-superficie:    #262a31;    /* schede/pannelli */
-  --ca-bordo:         #363b44;
-  --ca-accento:       rgba(217, 178, 76, .14);
-  --ca-raggio:        12px;
-  --ca-ombra:         0 1px 3px rgba(0, 0, 0, .40), 0 1px 2px rgba(0, 0, 0, .30);
-  --ca-ombra-hover:   0 12px 28px rgba(0, 0, 0, .55);
+  /* --- Carta e inchiostro --- */
+  --ca-carta:        #f2efe8;   /* pagina */
+  --ca-foglio:       #fbf9f5;   /* riquadri: un foglio appoggiato sulla pagina */
+  --ca-inchiostro:   #1a1a17;
+  --ca-inchiostro-2: #45443d;   /* prosa secondaria */
+  --ca-inchiostro-3: #7d7a70;   /* didascalie, sigle */
+  --ca-filetto:      #d9d3c6;   /* hairline */
+  --ca-filetto-2:    #ebe6dc;   /* hairline tenue (griglia) */
+
+  /* --- Segni --- */
+  --ca-blu:          #1d4ed8;   /* inchiostro blu: link, tracciati */
+  --ca-blu-tenue:    rgba(29, 78, 216, .08);
+  --ca-rosso:        #b3261e;   /* rosso segnale: poli, numerazione, errori */
+  --ca-rosso-tenue:  rgba(179, 38, 30, .09);
+
+  /* --- Tipografia --- */
+  --ca-serif: "Spectral", Georgia, "Times New Roman", serif;
+  --ca-mono:  "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Passo della carta millimetrata (usato nell'intestazione). */
+  --ca-passo: 22px;
 }
 
 /* ---------- Base ---------- */
 body {
-  background: var(--ca-sfondo);
-  color: var(--ca-testo);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--ca-carta);
+  color: var(--ca-inchiostro);
+  font-family: var(--ca-serif);
+  font-size: 1.02rem;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
 }
 
-a { color: var(--ca-primario); text-decoration: none; }
-a:hover { color: var(--ca-primario-scuro); }
+a { color: var(--ca-blu); text-decoration: none; }
+a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offset: 3px; }
 
-/* ---------- Barra di navigazione (identica su home e strumenti) ---------- */
+/* Etichetta tecnica: piccola, monospaziata, maiuscoletto spaziato.
+   E' l'elemento che ricorre in tutto il sito per dare il tono "tavola
+   tecnica" senza aggiungere decorazioni. */
+.etichetta {
+  font-family: var(--ca-mono);
+  font-size: .69rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ca-inchiostro-3);
+}
+
+/* ---------- Testata del sito (identica su home e strumenti) ---------- */
 .barra-sito {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 1.6rem;
-  padding: 0.8rem 1.2rem;
-  background: rgba(21, 24, 29, .92);
-  border-bottom: 1px solid var(--ca-bordo);
+  padding: .9rem 1.4rem .75rem;
+  background: var(--ca-carta);
+  border-bottom: 1px solid var(--ca-inchiostro);
   position: sticky;
   top: 0;
   z-index: 30;
 }
 
 .barra-sito-brand {
-  font-weight: 700;
-  color: var(--ca-testo);
+  font-family: var(--ca-mono);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .19em;
+  text-transform: uppercase;
+  color: var(--ca-inchiostro);
   white-space: nowrap;
+}
+
+/* Il quadratino rosso davanti al nome e' il solo "logo": un polo sul
+   piano s ridotto all'osso. */
+.barra-sito-brand::before {
+  content: "";
+  display: inline-block;
+  width: .42rem;
+  height: .42rem;
+  margin-right: .6rem;
+  background: var(--ca-rosso);
+  vertical-align: baseline;
 }
 
 .barra-sito-nav {
   display: flex;
-  align-items: center;
-  gap: 1.4rem;
+  align-items: baseline;
+  gap: 1.5rem;
   margin-left: auto;
 }
 
-.barra-sito-link {
-  color: var(--ca-muted);
-  font-size: 0.92rem;
+.barra-sito-link,
+.barra-sito-dropdown-toggle {
+  font-family: var(--ca-mono);
+  font-size: .74rem;
   font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ca-inchiostro-3);
   white-space: nowrap;
 }
 
-.barra-sito-link:hover {
-  color: var(--ca-primario-scuro);
-  text-decoration: none;
-}
+.barra-sito-link:hover { color: var(--ca-inchiostro); text-decoration: none; }
 
 .barra-sito-link.attivo {
-  color: var(--ca-primario-scuro);
-  border-bottom: 2px solid var(--ca-primario);
-  padding-bottom: 2px;
+  color: var(--ca-inchiostro);
+  box-shadow: inset 0 -2px 0 var(--ca-rosso);
 }
 
 /* Menu a tendina "Strumenti" */
-.barra-sito-dropdown {
-  position: relative;
-}
+.barra-sito-dropdown { position: relative; }
 
 .barra-sito-dropdown-toggle {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: .4rem;
   background: none;
   border: none;
   padding: 0;
-  font-family: inherit;
-  font-size: 0.92rem;
-  font-weight: 500;
-  color: var(--ca-muted);
   cursor: pointer;
 }
 
 .barra-sito-dropdown-toggle .freccia {
-  font-size: 0.65em;
-  transition: transform 0.15s ease;
+  font-size: .6em;
+  transition: transform .15s ease;
 }
 
 .barra-sito-dropdown-toggle:hover,
-.barra-sito-dropdown.aperto .barra-sito-dropdown-toggle {
-  color: var(--ca-primario-scuro);
-}
+.barra-sito-dropdown.aperto .barra-sito-dropdown-toggle { color: var(--ca-inchiostro); }
+.barra-sito-dropdown-toggle.attivo { color: var(--ca-inchiostro); box-shadow: inset 0 -2px 0 var(--ca-rosso); }
+.barra-sito-dropdown.aperto .freccia { transform: rotate(180deg); }
 
-.barra-sito-dropdown.aperto .freccia {
-  transform: rotate(180deg);
-}
-
+/* Squadrato e con filetto pieno: una tabella, non una "card". */
 .barra-sito-dropdown-menu {
   display: none;
   position: absolute;
   right: 0;
-  top: calc(100% + 0.7rem);
-  min-width: 280px;
+  top: calc(100% + .8rem);
+  min-width: 300px;
   max-height: 75vh;
   overflow-y: auto;
-  background: var(--ca-superficie);
-  border: 1px solid var(--ca-bordo);
-  border-radius: 10px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
-  padding: 0.4rem;
+  background: var(--ca-foglio);
+  border: 1px solid var(--ca-inchiostro);
+  border-radius: 0;
+  padding: 0;
 }
 
-.barra-sito-dropdown.aperto .barra-sito-dropdown-menu {
-  display: block;
-}
+.barra-sito-dropdown.aperto .barra-sito-dropdown-menu { display: block; }
 
 .barra-sito-dropdown-titolo {
-  padding: 0.5rem 0.7rem 0.3rem;
-  font-size: 0.7rem;
-  font-weight: 700;
+  padding: .7rem .9rem .45rem;
+  font-family: var(--ca-mono);
+  font-size: .66rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--ca-muted);
-}
-
-.barra-sito-dropdown-titolo:not(:first-child) {
-  margin-top: 0.3rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--ca-bordo);
+  letter-spacing: .16em;
+  color: var(--ca-inchiostro-3);
+  border-bottom: 1px solid var(--ca-filetto);
 }
 
 .barra-sito-dropdown-menu a {
   display: block;
-  padding: 0.55rem 0.7rem;
-  border-radius: 6px;
-  color: var(--ca-testo);
-  font-size: 0.9rem;
+  padding: .55rem .9rem;
+  color: var(--ca-inchiostro);
+  font-size: .93rem;
+  border-bottom: 1px solid var(--ca-filetto-2);
 }
 
+.barra-sito-dropdown-menu a:last-child { border-bottom: none; }
+
 .barra-sito-dropdown-menu a:hover {
-  background: var(--ca-accento);
-  color: var(--ca-primario-scuro);
+  background: var(--ca-blu-tenue);
+  color: var(--ca-blu);
   text-decoration: none;
 }
 
 .barra-sito-dropdown-menu a.attivo {
-  color: var(--ca-primario-scuro);
-  font-weight: 600;
-  background: var(--ca-accento);
+  color: var(--ca-inchiostro);
+  font-weight: 500;
+  box-shadow: inset 3px 0 0 var(--ca-rosso);
 }
 
 @media (max-width: 640px) {
-  .barra-sito { gap: 1rem; }
+  .barra-sito { gap: 1rem; padding: .8rem 1rem .7rem; }
   .barra-sito-nav { gap: 1rem; }
-  .barra-sito-dropdown-menu { right: -0.8rem; min-width: 240px; }
+  .barra-sito-dropdown-menu { right: -.8rem; min-width: 250px; max-width: calc(100vw - 2rem); }
 }
 
-/* ---------- Contenitore landing ---------- */
-.landing { max-width: 1080px; margin: 0 auto; padding: 0 1rem; }
+/* Sul telefono la testata usciva dallo schermo: il titolo del corso e i
+   link stanno su una riga sola solo stringendo corpo e spaziatura. */
+@media (max-width: 470px) {
+  .barra-sito { gap: .7rem; padding: .75rem .8rem .65rem; }
+  .barra-sito-nav { gap: .8rem; }
+  .barra-sito-brand { font-size: .64rem; letter-spacing: .09em; }
+  .barra-sito-brand::before { width: .34rem; height: .34rem; margin-right: .4rem; }
+  .barra-sito-link,
+  .barra-sito-dropdown-toggle { font-size: .63rem; letter-spacing: .05em; }
+}
 
-/* ---------- Hero ---------- */
-.hero {
-  display: flex;
-  align-items: center;
-  gap: 2.2rem;
-  padding: 2.6rem 0 1.4rem;
-  flex-wrap: wrap;
-}
-.hero-photo {
-  width: 168px;
-  height: 168px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex: 0 0 auto;
-  border: 3px solid rgba(217, 178, 76, .35);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, .55);
-}
-.hero-body { flex: 1 1 320px; }
-.hero-title {
-  font-size: 2.5rem;
-  line-height: 1.1;
-  font-weight: 800;
-  letter-spacing: -.02em;
-  margin: 0 0 .5rem;
-  color: var(--ca-testo);
-}
-.hero-sub {
-  font-size: 1.12rem;
-  color: var(--ca-testo-soft);
-  margin: 0 0 .7rem;
-  max-width: 48ch;
-}
-.hero-author { margin: 0; color: var(--ca-muted); font-size: .98rem; line-height: 1.55; }
-.autore-nome { font-weight: 700; color: var(--ca-testo); }
-.autore-nome:hover { color: var(--ca-primario); }
-.autore-titolo { color: var(--ca-muted); font-weight: 600; }
-.autore-mail { font-size: .95rem; font-weight: 500; }
+/* ---------- Contenitore ---------- */
+.landing { max-width: 940px; margin: 0 auto; padding: 0 1.4rem; }
 
-/* ---------- Blocco introduttivo ---------- */
-.intro {
-  background: var(--ca-superficie);
-  border: 1px solid var(--ca-bordo);
-  border-left: 4px solid var(--ca-primario);
-  border-radius: var(--ca-raggio);
-  padding: 1.3rem 1.5rem;
-  margin: 1.2rem 0 2.4rem;
-  box-shadow: var(--ca-ombra);
-  color: var(--ca-testo-soft);
-  line-height: 1.6;
-}
-.intro p { margin: 0; }
-
-/* ---------- Titolo di sezione ---------- */
-.section-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -.01em;
-  margin: 0 0 .3rem;
-  color: var(--ca-testo);
-}
-.section-hint { color: var(--ca-muted); margin: 0 0 1.3rem; }
-
-/* ---------- Griglia strumenti ---------- */
-.griglia-strumenti {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.1rem;
-  margin-bottom: 3rem;
-}
-.card-strumento {
+/* ---------- Frontespizio ----------
+   Impaginato come la prima pagina di una dispensa: etichetta, titolo in
+   serif, filetto, sommario. Il ritratto sta nel margine con didascalia,
+   non e' un avatar tondo al centro. */
+.frontespizio {
   position: relative;
-  display: block;
-  background: var(--ca-superficie);
-  border: 1px solid var(--ca-bordo);
-  border-radius: var(--ca-raggio);
-  box-shadow: var(--ca-ombra);
-  padding: 1.3rem 1.3rem 1.3rem 3.4rem;
-  color: var(--ca-testo);
-  text-decoration: none !important;
-  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3rem;
+  align-items: end;
+  padding: 3.6rem 0 2rem;
+  overflow: hidden;
 }
-.card-strumento:hover {
-  transform: translateY(-3px);
-  border-color: var(--ca-primario);
-  box-shadow: var(--ca-ombra-hover);
-  color: var(--ca-testo);
-}
-.card-strumento .num {
+
+/* Carta millimetrata: due griglie sovrapposte, disegnate in CSS.
+   Sfuma verso il basso per non competere col testo. */
+.frontespizio::before {
+  content: "";
   position: absolute;
-  top: 1.3rem;
-  left: 1.1rem;
-  width: 1.7rem;
-  height: 1.7rem;
-  border-radius: 8px;
-  background: var(--ca-accento);
-  color: var(--ca-primario-scuro);
-  font-weight: 700;
-  font-size: .9rem;
+  inset: -1px 0 0;
+  background:
+    repeating-linear-gradient(to right,  var(--ca-filetto-2) 0 1px, transparent 1px var(--ca-passo)),
+    repeating-linear-gradient(to bottom, var(--ca-filetto-2) 0 1px, transparent 1px var(--ca-passo));
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
+          mask-image: linear-gradient(to bottom, #000 0%, transparent 78%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---------- Figura di apertura ----------
+   La risposta al gradino non e' un ornamento in filigrana ma una figura
+   vera, a tutta larghezza e con didascalia numerata: e' esattamente il
+   grafico che lo studente ritrova negli strumenti. */
+.figura-apertura {
+  margin: 0 0 2rem;
+  padding-top: .4rem;
+}
+
+.figura-traccia {
+  display: block;
+  width: 100%;
+  height: 130px;
+}
+
+.figura-apertura figcaption {
+  text-align: left;
+  font-style: normal;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 1.1rem;
+  align-items: baseline;
+  padding-top: .6rem;
+  border-top: 1px solid var(--ca-filetto);
 }
 
-.card-strumento h3 {
-  margin: 0 0 .35rem;
-  font-size: 1.06rem;
-  color: var(--ca-primario-scuro);
+/* La parte descrittiva resta in tondo minuscolo: il maiuscoletto
+   trasformerebbe δ in Δ, che in questo contesto significa altro. */
+.figura-apertura figcaption .didascalia {
+  text-transform: none;
+  letter-spacing: .03em;
 }
-.card-strumento p {
+
+.figura-apertura figcaption .etichetta:first-child {
+  color: var(--ca-rosso);
+  white-space: nowrap;
+}
+
+.frontespizio > div { position: relative; z-index: 1; }
+
+.frontespizio-testo { max-width: 34rem; }
+
+.frontespizio-titolo {
+  font-family: var(--ca-serif);
+  font-size: clamp(2.4rem, 6vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -.015em;
+  margin: .8rem 0 0;
+  color: var(--ca-inchiostro);
+}
+
+.frontespizio-titolo em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ca-rosso);
+}
+
+.frontespizio-filetto {
+  height: 0;
+  border: none;
+  border-top: 2px solid var(--ca-inchiostro);
+  margin: 1.5rem 0 1.1rem;
+}
+
+.frontespizio-sommario {
+  font-size: 1.12rem;
+  line-height: 1.55;
+  color: var(--ca-inchiostro-2);
   margin: 0;
-  font-size: .93rem;
-  color: var(--ca-testo-soft);
-  line-height: 1.5;
+  max-width: 30rem;
 }
 
-/* ---------- Footer ---------- */
+/* Ritratto nel margine: rettangolare, con didascalia sotto come in una
+   figura numerata. */
+.ritratto { display: block; width: 172px; margin: 0; }
+
+.ritratto img {
+  display: block;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border: 1px solid var(--ca-inchiostro);
+  filter: grayscale(1) contrast(1.06);
+}
+
+.ritratto figcaption {
+  margin-top: .55rem;
+  text-align: left;
+  font-style: normal;
+  font-family: var(--ca-mono);
+  font-size: .68rem;
+  line-height: 1.55;
+  color: var(--ca-inchiostro-3);
+}
+
+.ritratto figcaption a { color: var(--ca-inchiostro); }
+.ritratto figcaption .ruolo { display: block; }
+.ritratto figcaption .mail { display: block; }
+
+/* ---------- Nota di apertura ----------
+   Al posto del riquadro con la barretta colorata: una nota con
+   l'etichetta nel margine sinistro, come un'annotazione a bordo pagina. */
+.nota-apertura {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 1.6rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--ca-inchiostro);
+  border-bottom: 1px solid var(--ca-filetto);
+  margin: 1.6rem 0 3.4rem;
+}
+
+.nota-apertura p:not(.etichetta) {
+  margin: 0;
+  color: var(--ca-inchiostro-2);
+  font-size: 1.03rem;
+}
+
+.nota-apertura strong { color: var(--ca-inchiostro); font-weight: 600; }
+
+/* ---------- Intestazione di sezione ---------- */
+.testata-sezione {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  border-bottom: 2px solid var(--ca-inchiostro);
+  padding-bottom: .5rem;
+  margin-bottom: 0;
+}
+
+.testata-sezione h2 {
+  border-bottom: none;
+  padding-bottom: 0;
+  font-family: var(--ca-serif);
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  margin: 0;
+  color: var(--ca-inchiostro);
+}
+
+.testata-sezione .conteggio { margin-left: auto; white-space: nowrap; }
+
+/* ---------- Indice degli strumenti ----------
+   Un sommario tipografico: righe separate da filetti, numero di sezione
+   a sinistra, sigla della materia a destra. Niente griglia di schede. */
+.indice-strumenti { border-bottom: 1px solid var(--ca-inchiostro); }
+
+.voce {
+  display: grid;
+  grid-template-columns: 4.2rem 1fr auto;
+  align-items: baseline;
+  gap: 0 1.4rem;
+  padding: 1.15rem .6rem 1.15rem .4rem;
+  border-bottom: 1px solid var(--ca-filetto);
+  color: var(--ca-inchiostro);
+  text-decoration: none !important;
+  transition: background .13s ease, padding-left .13s ease;
+}
+
+.voce:last-child { border-bottom: none; }
+
+.voce:hover {
+  background: var(--ca-blu-tenue);
+  padding-left: .9rem;
+  color: var(--ca-inchiostro);
+}
+
+.voce-num {
+  font-family: var(--ca-mono);
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--ca-inchiostro-3);
+  letter-spacing: .04em;
+}
+
+.voce:hover .voce-num { color: var(--ca-rosso); }
+
+.voce-titolo {
+  display: block;
+  font-size: 1.14rem;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: .18rem;
+}
+
+.voce:hover .voce-titolo { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+.voce-desc {
+  display: block;
+  font-size: .95rem;
+  color: var(--ca-inchiostro-2);
+  line-height: 1.5;
+  max-width: 46rem;
+}
+
+/* Sigla: la "firma" matematica dello strumento (e^{lambda t}, -20 dB/dec,
+   ...). E' cio' che distingue una voce dall'altra a colpo d'occhio. */
+.voce-sigla {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-family: var(--ca-mono);
+  font-size: .78rem;
+  color: var(--ca-inchiostro-3);
+  white-space: nowrap;
+  padding-left: 1rem;
+  border-left: 1px solid var(--ca-filetto);
+}
+
+.voce:hover .voce-sigla { color: var(--ca-blu); border-left-color: var(--ca-blu); }
+
+.voce-corpo { grid-column: 2; }
+.voce-num { grid-column: 1; }
+
+/* ---------- Coda ---------- */
+.coda-pagina {
+  margin: 3rem 0 3.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--ca-filetto);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+/* ---------- Footer di Quarto ---------- */
 .nav-footer {
-  border-top: 1px solid var(--ca-bordo);
-  color: var(--ca-muted);
-  background: var(--ca-sfondo);
+  border-top: 1px solid var(--ca-inchiostro) !important;
+  background: var(--ca-carta);
+  font-family: var(--ca-mono);
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ca-inchiostro-3);
 }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 560px) {
-  .landing { padding: 0 .85rem; }
-  /* In colonna e centrato: con la foto a sinistra e il testo che va a capo
-     sotto, su schermo stretto il blocco risultava sbilenco. */
-  .hero {
-    padding-top: 1.6rem;
-    gap: 1.1rem;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  .hero-body { flex: 1 1 auto; }
-  .hero-title { font-size: 1.9rem; }
-  .hero-sub { font-size: 1rem; max-width: none; }
-  .hero-photo { width: 124px; height: 124px; }
-  .intro { padding: 1rem 1.1rem; margin: 1rem 0 2rem; }
-  .section-title { font-size: 1.25rem; }
-  .griglia-strumenti {
+@media (max-width: 760px) {
+  .frontespizio {
     grid-template-columns: 1fr;
-    gap: .85rem;
-    margin-bottom: 2.2rem;
+    gap: 1.8rem;
+    align-items: start;
+    padding: 2.4rem 0 1.4rem;
   }
-  .card-strumento { padding: 1.05rem 1.05rem 1.05rem 3.1rem; }
-  .card-strumento .num { top: 1.05rem; }
-  /* Le card non si sollevano al tocco: su touch l'hover resta "appiccicato". */
-  .card-strumento:hover { transform: none; }
+  /* Il ritratto scende sotto il sommario e si mette in riga con la
+     didascalia: sopra al titolo lo avrebbe sepolto, in colonna avrebbe
+     occupato troppo spazio utile. */
+  .ritratto { width: 130px; }
+  .ritratto img { height: 152px; }
+}
+
+@media (max-width: 560px) {
+  .landing { padding: 0 1.05rem; }
+  .frontespizio-sommario { font-size: 1.02rem; }
+  .nota-apertura {
+    grid-template-columns: 1fr;
+    gap: .55rem;
+    margin: 1.2rem 0 2.4rem;
+  }
+  /* La testata di sezione va in colonna e il conteggio sparisce: su una
+     riga sola i tre elementi si spezzavano a meta' parola. */
+  .testata-sezione {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .25rem;
+  }
+  .testata-sezione .conteggio { display: none; }
+
+  .figura-apertura figcaption { flex-direction: column; gap: .25rem; }
+
+  .voce {
+    grid-template-columns: 3.1rem 1fr;
+    padding: .95rem .2rem;
+  }
+  /* La sigla scende sotto la descrizione e perde il filetto: in colonna
+     stretta a destra non ci sta senza spezzare il titolo. */
+  .voce-sigla {
+    grid-column: 2;
+    grid-row: auto;
+    padding: .35rem 0 0;
+    border-left: none;
+    font-size: .72rem;
+  }
+  .voce:hover { padding-left: .5rem; }
+  .voce-titolo { font-size: 1.05rem; }
 }

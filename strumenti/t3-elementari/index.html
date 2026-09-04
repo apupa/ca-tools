@@ -4,7 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sistemi elementari 1°/2° ordine · Controlli Automatici</title>
-  <link rel="stylesheet" href="../shared/stile.css?v=20260807b" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="../shared/stile.css?v=20260904a" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -17,12 +20,12 @@
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
-    .fdt-generale { font-size: 1.05rem; margin: 0 0 1.1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--colore-bordo); overflow-x: auto; text-align: center; }
+    .fdt-generale { font-size: 1.05rem; margin: 0 0 1.1rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--colore-filetto); overflow-x: auto; text-align: center; }
     .campo-slider { margin-bottom: 1.1rem; }
-    .campo-slider label { font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
+    .campo-slider label { font-family: var(--font-serif); text-transform: none; letter-spacing: 0; color: var(--colore-testo); font-weight: 600; font-size: 0.92rem; margin-bottom: 0.3rem; }
     .campo-slider input[type="range"] { width: 100%; }
-    #massa-canvas { width: 100%; max-width: 100%; height: 180px; display: block; background: #f7f8fa; border: 1px solid var(--colore-bordo); border-radius: 8px; }
-    .stato-molla { font-size: 0.85rem; color: #b7bcc5; margin-top: 0.4rem; }
+    #massa-canvas { width: 100%; max-width: 100%; height: 180px; display: block; background: #f7f8fa; border: 1px solid var(--colore-filetto); }
+    .stato-molla { font-size: 0.85rem; color: var(--colore-muted); margin-top: 0.4rem; }
   </style>
 </head>
 <body>
@@ -131,7 +134,7 @@
 
       <div class="pannello">
         <h2>Risposta al gradino</h2>
-        <p style="font-size:0.85rem; color:#b7bcc5;">
+        <p style="font-size:0.85rem; color:var(--colore-muted);">
           La finestra temporale $T$ è fissa (non si adatta a $\tau$): a parità di $T$, un sistema più lento mostra
           la curva salire più lentamente e magari non raggiungere il regime entro il grafico.
         </p>
@@ -177,7 +180,7 @@
 
       <div class="pannello">
         <h2>Risposta al gradino</h2>
-        <p style="font-size:0.85rem; color:#b7bcc5;">
+        <p style="font-size:0.85rem; color:var(--colore-muted);">
           La finestra temporale $T$ è fissa (non si adatta a $\omega_n$, $\delta$): a parità di $T$ si vede subito se
           il sistema è diventato più lento o più veloce.
         </p>
@@ -196,7 +199,7 @@
           <tr><th>Tempo di picco $T_p$</th><td id="b-tp-testo"></td></tr>
           <tr><th>Tempo di assestamento $T_a \approx 3/(\delta\omega_n)$</th><td id="b-ta-testo"></td></tr>
         </tbody></table>
-        <p id="b-nota-poli" style="font-size:0.85rem; color:#b7bcc5;"></p>
+        <p id="b-nota-poli" style="font-size:0.85rem; color:var(--colore-muted);"></p>
       </div>
     </div>
 
@@ -269,7 +272,7 @@
   </div>
 
   <script src="../shared/ca-core.js?v=20260807a"></script>
-  <script src="../shared/ca-plot.js?v=20260807a"></script>
+  <script src="../shared/ca-plot.js?v=20260904a"></script>
   <script src="app.js?v=20260807a"></script>
 </body>
 </html>

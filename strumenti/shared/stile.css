@@ -1,5 +1,6 @@
 /* ===== stile.css — stile comune per gli strumenti di Controlli Automatici =====
-   Tema scuro (grigio) con accento giallo muto.
+   "Quaderno tecnico": carta avorio, inchiostro, filetti al posto di ombre.
+   Le stesse variabili della home (styles.css), con i nomi usati qui.
 
    NB: le pagine degli strumenti caricano questo file con un suffisso di
    versione (?v=...). GitHub Pages lo tiene in cache 10 minuti, quindi dopo
@@ -8,16 +9,21 @@
    con una nuova di app.js. */
 
 :root {
-  --colore-testo: #e7e9ec;
-  --colore-sfondo: #1b1e23;
-  --colore-superficie: #262a31;
-  --colore-bordo: #363b44;
-  --colore-primario: #d9b24c;        /* giallo muto */
-  --colore-primario-scuro: #e8c66a;  /* giallo piu chiaro per testo su fondo scuro */
-  --colore-accento: rgba(217, 178, 76, .14);
-  --colore-muted: #9aa1ab;
-  --raggio-bordo: 10px;
-  --ombra: 0 1px 3px rgba(0, 0, 0, .40), 0 1px 2px rgba(0, 0, 0, .30);
+  --colore-carta:      #f2efe8;   /* pagina */
+  --colore-foglio:     #fbf9f5;   /* riquadri */
+  --colore-testo:      #1a1a17;
+  --colore-testo-2:    #45443d;
+  --colore-muted:      #7d7a70;
+  --colore-filetto:    #d9d3c6;
+  --colore-filetto-2:  #ebe6dc;
+  --colore-blu:        #1d4ed8;
+  --colore-blu-tenue:  rgba(29, 78, 216, .08);
+  --colore-rosso:      #b3261e;
+  --colore-rosso-tenue:rgba(179, 38, 30, .09);
+  --colore-errore:     #b3261e;
+
+  --font-serif: "Spectral", Georgia, "Times New Roman", serif;
+  --font-mono:  "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
 * {
@@ -31,118 +37,190 @@ html {
 
 body {
   margin: 0;
-  padding: 1.5rem 1rem 3rem;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: 0 0 4rem;
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
   color: var(--colore-testo);
-  background: var(--colore-sfondo);
-  line-height: 1.5;
+  background: var(--colore-carta);
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
 }
 
 .contenitore {
-  max-width: 900px;
+  max-width: 880px;
   margin: 0 auto;
+  padding: 2.2rem 1.4rem 0;
 }
 
+/* ---------- Testatina della pagina ----------
+   Titolo in serif con filetto sotto: la stessa impaginazione del
+   frontespizio della home, in scala ridotta. */
 h1 {
-  font-size: 1.7rem;
-  margin-bottom: 0.3rem;
+  font-family: var(--font-serif);
+  font-size: 2.1rem;
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -.015em;
+  margin: 0 0 .5rem;
 }
 
 h1 .sottotitolo,
 p.sottotitolo {
-  color: var(--colore-muted);
+  color: var(--colore-testo-2);
   font-weight: normal;
-  font-size: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+p.sottotitolo {
+  margin: 0 0 1.5rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 2px solid var(--colore-testo);
 }
 
 h2 {
-  font-size: 1.2rem;
-  margin-top: 2rem;
+  font-family: var(--font-serif);
+  font-size: 1.22rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  margin: 0 0 .9rem;
+}
+
+h3 {
+  font-family: var(--font-serif);
+  font-size: 1.06rem;
+  font-weight: 600;
 }
 
 a {
-  color: var(--colore-primario);
+  color: var(--colore-blu);
   text-decoration: none;
 }
 
 a:hover {
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-/* ---------- Hub: griglia di card ---------- */
+/* Etichetta tecnica ricorrente (mono, maiuscoletto spaziato). */
+.etichetta {
+  font-family: var(--font-mono);
+  font-size: .69rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--colore-muted);
+}
+
+/* ---------- Hub: indice degli strumenti ----------
+   Righe con filetto, non schede con ombra: e' un sommario. */
 .griglia-strumenti {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1rem;
+  border-bottom: 1px solid var(--colore-testo);
   margin-top: 1.5rem;
 }
 
 .card-strumento {
   display: block;
-  background: var(--colore-superficie);
-  border: 1px solid var(--colore-bordo);
-  border-radius: var(--raggio-bordo);
-  box-shadow: var(--ombra);
-  padding: 1.2rem;
+  padding: 1.1rem .5rem;
+  border-bottom: 1px solid var(--colore-filetto);
   color: var(--colore-testo);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  transition: background .13s ease, padding-left .13s ease;
 }
+
+.card-strumento:last-child { border-bottom: none; }
 
 .card-strumento:hover {
   text-decoration: none;
-  transform: translateY(-2px);
-  border-color: var(--colore-primario);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  background: var(--colore-blu-tenue);
+  padding-left: .95rem;
 }
 
 .card-strumento h3 {
-  margin: 0 0 0.4rem;
-  font-size: 1.05rem;
-  color: var(--colore-primario-scuro);
+  margin: 0 0 .2rem;
+  font-size: 1.12rem;
+  font-weight: 500;
+  color: var(--colore-testo);
+}
+
+.card-strumento:hover h3 {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
 .card-strumento p {
   margin: 0;
-  font-size: 0.92rem;
-  color: var(--colore-testo);
+  font-size: .95rem;
+  color: var(--colore-testo-2);
 }
 
-/* ---------- Sezioni generiche ---------- */
+/* ---------- Sezioni generiche ----------
+   Un riquadro e' un foglio: filetto sottile, angoli vivi, nessuna ombra. */
 .pannello {
-  background: var(--colore-superficie);
-  border: 1px solid var(--colore-bordo);
-  border-radius: var(--raggio-bordo);
-  box-shadow: var(--ombra);
-  padding: 1.2rem;
-  margin-bottom: 1.2rem;
+  background: var(--colore-foglio);
+  border: 1px solid var(--colore-filetto);
+  border-radius: 0;
+  padding: 1.3rem 1.4rem;
+  margin-bottom: 1.4rem;
 }
 
+/* Il richiamo teorico si distingue per il filetto pieno in alto e la
+   riga "TEORIA IN BREVE" in monospaziato: sembra un box di manuale. */
 details.teoria {
-  background: var(--colore-accento);
-  border: 1px solid var(--colore-bordo);
-  border-radius: var(--raggio-bordo);
-  padding: 0.8rem 1.1rem;
-  margin-bottom: 1.2rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--colore-filetto);
+  border-radius: 0;
+  padding: 0 0 1rem;
+  margin-bottom: 1.6rem;
+  color: var(--colore-testo-2);
 }
 
 details.teoria summary {
   cursor: pointer;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: .7rem;
   font-weight: 600;
-  color: var(--colore-primario-scuro);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--colore-testo);
 }
 
+details.teoria summary::-webkit-details-marker { display: none; }
+
+/* Segno di apertura in stile tecnico: + chiuso, − aperto. */
+details.teoria summary::before {
+  content: "+";
+  display: inline-block;
+  width: 1.1rem;
+  color: var(--colore-rosso);
+  font-weight: 600;
+}
+
+details.teoria[open] summary::before { content: "\2212"; }
+
+details.teoria[open] summary { margin-bottom: .7rem; }
+
+details.teoria > *:not(summary) { padding-left: 1.1rem; }
+
 details.teoria .riferimento {
-  margin-top: 0.6rem;
-  font-size: 0.85rem;
+  margin-top: .8rem;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: .06em;
   color: var(--colore-muted);
 }
 
 /* ---------- Form / campi input ---------- */
 label {
   display: block;
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 0.3rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: .78rem;
+  letter-spacing: .04em;
+  color: var(--colore-muted);
+  margin-bottom: .35rem;
 }
 
 input[type="text"],
@@ -150,11 +228,12 @@ input[type="number"],
 select,
 textarea {
   width: 100%;
-  padding: 0.5rem 0.6rem;
-  border: 1px solid var(--colore-bordo);
-  border-radius: 6px;
-  font-size: 0.95rem;
-  background: #1f232a;
+  padding: .5rem .6rem;
+  border: 1px solid var(--colore-filetto);
+  border-radius: 0;
+  font-family: var(--font-mono);
+  font-size: .92rem;
+  background: #fff;
   color: var(--colore-testo);
 }
 
@@ -162,35 +241,55 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--colore-primario);
-  box-shadow: 0 0 0 3px rgba(217, 178, 76, 0.25);
+  border-color: var(--colore-blu);
+  box-shadow: inset 0 -2px 0 var(--colore-blu);
 }
 
 input[readonly],
 input:disabled {
-  background: #21252c;
+  background: var(--colore-carta);
   color: var(--colore-muted);
   cursor: not-allowed;
 }
 
 .campo {
-  margin-bottom: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+/* Slider e caselle di spunta: il blu di sistema stonava sulla carta,
+   accent-color li riporta all'inchiostro blu del sito. */
+input[type="range"],
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--colore-blu);
+}
+
+input[type="range"] {
+  width: 100%;
+  height: 1.4rem;
 }
 
 /* Nota sotto i campi della funzione di trasferimento: ricorda i due formati
    accettati (coefficienti oppure espressione in s). */
 .nota-formato {
-  margin: -0.3rem 0 0.9rem;
-  font-size: 0.85rem;
+  margin: -.4rem 0 1rem;
+  font-size: .9rem;
   color: var(--colore-muted);
 }
 
 .nota-formato code {
-  padding: 0.05rem 0.3rem;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--colore-primario-scuro);
-  font-size: 0.95em;
+  padding: .05rem .3rem;
+  background: var(--colore-blu-tenue);
+  color: var(--colore-blu);
+  font-family: var(--font-mono);
+  font-size: .88em;
+}
+
+/* Nota di servizio sotto grafici e tabelle (sostituisce i vecchi colori
+   scritti a mano nelle pagine). */
+.nota {
+  font-size: .9rem;
+  color: var(--colore-muted);
 }
 
 .riga-campi {
@@ -203,11 +302,15 @@ input:disabled {
   flex: 1 1 160px;
 }
 
-/* Griglia editabile per matrici (ISU) */
+/* Griglia editabile per matrici (ISU): le parentesi quadre sono disegnate
+   col bordo, come si scrive una matrice a mano. */
 .griglia-matrice {
   display: inline-grid;
-  gap: 0.3rem;
-  margin: 0.4rem 0;
+  gap: .3rem;
+  margin: .4rem 0;
+  padding: .4rem .55rem;
+  border-left: 2px solid var(--colore-testo);
+  border-right: 2px solid var(--colore-testo);
 }
 
 .griglia-matrice input {
@@ -217,86 +320,93 @@ input:disabled {
 
 /* ---------- Bottoni ---------- */
 button {
-  font-family: inherit;
-  font-size: 0.95rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: 6px;
-  border: 1px solid var(--colore-primario);
-  background: var(--colore-primario);
-  color: #1b1e23;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: .6rem 1.15rem;
+  border-radius: 0;
+  border: 1px solid var(--colore-testo);
+  background: var(--colore-testo);
+  color: var(--colore-carta);
   cursor: pointer;
-  transition: background 0.12s ease;
+  transition: background .12s ease, color .12s ease;
 }
 
 button:hover {
-  background: var(--colore-primario-scuro);
+  background: var(--colore-blu);
+  border-color: var(--colore-blu);
+  color: #fff;
 }
 
 button.secondario {
-  background: var(--colore-superficie);
-  color: var(--colore-primario);
+  background: transparent;
+  color: var(--colore-testo);
 }
 
 button.secondario:hover {
-  background: var(--colore-accento);
+  background: var(--colore-blu-tenue);
+  color: var(--colore-blu);
 }
 
 .barra-azioni {
   display: flex;
-  gap: 0.6rem;
+  gap: .6rem;
   flex-wrap: wrap;
-  margin: 1rem 0;
+  margin: 1.2rem 0 0;
 }
 
-/* ---------- Tabelle ---------- */
+/* ---------- Tabelle ----------
+   Filetti orizzontali soltanto, testatina in monospaziato: tabella da
+   dispensa, non da dashboard. */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0.8rem 0;
-  font-size: 0.92rem;
+  margin: .9rem 0;
+  font-size: .95rem;
 }
 
 th,
 td {
   text-align: left;
-  padding: 0.5rem 0.6rem;
-  border-bottom: 1px solid var(--colore-bordo);
+  padding: .5rem .6rem .5rem 0;
+  border-bottom: 1px solid var(--colore-filetto-2);
 }
 
 th {
-  color: var(--colore-muted);
+  font-family: var(--font-mono);
+  font-size: .76rem;
   font-weight: 600;
-  font-size: 0.85rem;
+  letter-spacing: .03em;
+  color: var(--colore-muted);
+  border-bottom: 1px solid var(--colore-testo);
 }
 
 /* ---------- Tab (schede) ---------- */
 .schede-intestazione {
   display: flex;
-  gap: 0.3rem;
-  border-bottom: 1px solid var(--colore-bordo);
-  margin-bottom: 1rem;
+  gap: 1.6rem;
+  border-bottom: 1px solid var(--colore-testo);
+  margin-bottom: 1.2rem;
 }
 
 .scheda-bottone {
   background: none;
   border: none;
   color: var(--colore-muted);
-  padding: 0.6rem 1rem;
-  border-radius: 6px 6px 0 0;
-  box-shadow: none;
-  font-weight: 500;
+  padding: .5rem 0 .55rem;
+  border-radius: 0;
 }
 
 .scheda-bottone:hover {
-  background: var(--colore-accento);
-  color: var(--colore-primario-scuro);
+  background: none;
+  color: var(--colore-testo);
 }
 
 .scheda-bottone.attiva {
-  color: var(--colore-primario-scuro);
-  border-bottom: 2px solid var(--colore-primario);
-  font-weight: 600;
+  color: var(--colore-testo);
+  box-shadow: inset 0 -3px 0 var(--colore-rosso);
 }
 
 .scheda-contenuto {
@@ -307,188 +417,214 @@ th {
   display: block;
 }
 
-/* ---------- Barra di navigazione (identica su home e strumenti) ---------- */
+/* ---------- Testata del sito (identica su home e strumenti) ---------- */
 .barra-sito {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 1.6rem;
-  padding: 0.8rem 1.2rem;
-  background: rgba(21, 24, 29, .92);
-  border-bottom: 1px solid var(--colore-bordo, var(--ca-bordo));
+  padding: .9rem 1.4rem .75rem;
+  background: var(--colore-carta);
+  border-bottom: 1px solid var(--colore-testo);
   position: sticky;
   top: 0;
   z-index: 30;
 }
 
 .barra-sito-brand {
-  font-weight: 700;
-  color: var(--colore-testo, var(--ca-testo));
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .19em;
+  text-transform: uppercase;
+  color: var(--colore-testo);
   white-space: nowrap;
+}
+
+.barra-sito-brand::before {
+  content: "";
+  display: inline-block;
+  width: .42rem;
+  height: .42rem;
+  margin-right: .6rem;
+  background: var(--colore-rosso);
+  vertical-align: baseline;
 }
 
 .barra-sito-nav {
   display: flex;
-  align-items: center;
-  gap: 1.4rem;
+  align-items: baseline;
+  gap: 1.5rem;
   margin-left: auto;
 }
 
-.barra-sito-link {
-  color: var(--colore-muted, var(--ca-muted));
-  font-size: 0.92rem;
+.barra-sito-link,
+.barra-sito-dropdown-toggle {
+  font-family: var(--font-mono);
+  font-size: .74rem;
   font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--colore-muted);
   white-space: nowrap;
 }
 
-.barra-sito-link:hover {
-  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
-  text-decoration: none;
-}
+.barra-sito-link:hover { color: var(--colore-testo); text-decoration: none; }
 
 .barra-sito-link.attivo {
-  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
-  border-bottom: 2px solid var(--colore-primario, var(--ca-primario));
-  padding-bottom: 2px;
+  color: var(--colore-testo);
+  box-shadow: inset 0 -2px 0 var(--colore-rosso);
 }
 
 /* Menu a tendina "Strumenti" */
-.barra-sito-dropdown {
-  position: relative;
-}
+.barra-sito-dropdown { position: relative; }
 
 .barra-sito-dropdown-toggle {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: .4rem;
   background: none;
   border: none;
   padding: 0;
-  font-family: inherit;
-  font-size: 0.92rem;
-  font-weight: 500;
-  color: var(--colore-muted, var(--ca-muted));
   cursor: pointer;
 }
 
+.barra-sito-dropdown-toggle:hover { background: none; }
+
 .barra-sito-dropdown-toggle .freccia {
-  font-size: 0.65em;
-  transition: transform 0.15s ease;
+  font-size: .6em;
+  transition: transform .15s ease;
 }
 
 .barra-sito-dropdown-toggle:hover,
-.barra-sito-dropdown.aperto .barra-sito-dropdown-toggle {
-  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
+.barra-sito-dropdown.aperto .barra-sito-dropdown-toggle { color: var(--colore-testo); }
+
+.barra-sito-dropdown-toggle.attivo {
+  color: var(--colore-testo);
+  box-shadow: inset 0 -2px 0 var(--colore-rosso);
 }
 
-.barra-sito-dropdown.aperto .freccia {
-  transform: rotate(180deg);
-}
+.barra-sito-dropdown.aperto .freccia { transform: rotate(180deg); }
 
 .barra-sito-dropdown-menu {
   display: none;
   position: absolute;
   right: 0;
-  top: calc(100% + 0.7rem);
-  min-width: 280px;
+  top: calc(100% + .8rem);
+  min-width: 300px;
   max-height: 75vh;
   overflow-y: auto;
-  background: var(--colore-superficie, var(--ca-superficie));
-  border: 1px solid var(--colore-bordo, var(--ca-bordo));
-  border-radius: 10px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
-  padding: 0.4rem;
+  background: var(--colore-foglio);
+  border: 1px solid var(--colore-testo);
+  border-radius: 0;
+  padding: 0;
 }
 
-.barra-sito-dropdown.aperto .barra-sito-dropdown-menu {
-  display: block;
-}
+.barra-sito-dropdown.aperto .barra-sito-dropdown-menu { display: block; }
 
 /* Titolo di gruppo dentro il menu (es. "Strumenti interattivi" / "Pillole
    teoriche"): separa visivamente le due famiglie di link. */
 .barra-sito-dropdown-titolo {
-  padding: 0.5rem 0.7rem 0.3rem;
-  font-size: 0.7rem;
-  font-weight: 700;
+  padding: .7rem .9rem .45rem;
+  font-family: var(--font-mono);
+  font-size: .66rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--colore-muted, var(--ca-muted));
+  letter-spacing: .16em;
+  color: var(--colore-muted);
+  border-bottom: 1px solid var(--colore-filetto);
 }
 
 .barra-sito-dropdown-titolo:not(:first-child) {
-  margin-top: 0.3rem;
-  padding-top: 0.6rem;
-  border-top: 1px solid var(--colore-bordo, var(--ca-bordo));
+  margin-top: .4rem;
+  border-top: 1px solid var(--colore-filetto);
 }
 
 .barra-sito-dropdown-menu a {
   display: block;
-  padding: 0.55rem 0.7rem;
-  border-radius: 6px;
-  color: var(--colore-testo, var(--ca-testo));
-  font-size: 0.9rem;
+  padding: .55rem .9rem;
+  color: var(--colore-testo);
+  font-size: .93rem;
+  border-bottom: 1px solid var(--colore-filetto-2);
 }
 
+.barra-sito-dropdown-menu a:last-child { border-bottom: none; }
+
 .barra-sito-dropdown-menu a:hover {
-  background: var(--colore-accento, var(--ca-accento));
-  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
+  background: var(--colore-blu-tenue);
+  color: var(--colore-blu);
   text-decoration: none;
 }
 
 .barra-sito-dropdown-menu a.attivo {
-  color: var(--colore-primario-scuro, var(--ca-primario-scuro));
-  font-weight: 600;
-  background: var(--colore-accento, var(--ca-accento));
+  color: var(--colore-testo);
+  font-weight: 500;
+  box-shadow: inset 3px 0 0 var(--colore-rosso);
 }
 
 @media (max-width: 640px) {
   .barra-sito {
     gap: 1rem;
-    padding: 0.7rem 0.8rem;
+    padding: .8rem 1rem .7rem;
   }
   .barra-sito-nav {
     gap: 1rem;
   }
   .barra-sito-dropdown-menu {
-    right: -0.8rem;
-    min-width: 240px;
+    right: -.8rem;
+    min-width: 250px;
     max-width: calc(100vw - 1.6rem);
   }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 470px) {
+  .barra-sito {
+    gap: .7rem;
+    padding: .75rem .8rem .65rem;
+  }
+  .barra-sito-nav {
+    gap: .8rem;
+  }
   .barra-sito-brand {
-    font-size: 0.9rem;
+    font-size: .64rem;
+    letter-spacing: .09em;
+  }
+  .barra-sito-brand::before {
+    width: .34rem;
+    height: .34rem;
+    margin-right: .4rem;
   }
   .barra-sito-link,
   .barra-sito-dropdown-toggle {
-    font-size: 0.85rem;
+    font-size: .63rem;
+    letter-spacing: .05em;
   }
 }
 
-/* ---------- Grafici (Plotly) e animazioni (canvas): sfondo bianco ----------
-   Il layout dei grafici Plotly e' gia' impostato su bianco in ca-plot.js;
-   qui diamo lo stesso trattamento al riquadro che li contiene (bordi
-   arrotondati) cosi' risultano leggibili anche sul tema scuro del sito. */
+/* ---------- Grafici (Plotly) e animazioni (canvas) ----------
+   I grafici sono impostati su carta in ca-plot.js: qui diamo al riquadro
+   che li contiene lo stesso trattamento dei pannelli (filetto, angoli
+   vivi), cosi' il grafico e' parte della pagina invece di essere un
+   rettangolo bianco appoggiato sopra. */
 div[id*="grafico"],
 div[id*="-plot"] {
-  background: #ffffff;
-  border-radius: 8px;
+  background: var(--colore-foglio);
+  border: 1px solid var(--colore-filetto);
+  border-radius: 0;
   overflow: hidden;
 }
 
 canvas#massa-canvas {
-  background: #ffffff;
-  border-radius: 8px;
+  background: var(--colore-foglio);
+  border: 1px solid var(--colore-filetto);
   display: block;
 }
 
 /* Contenitore per diagrammi/schemi disegnati con colori "chiari"
-   (es. lo schema a blocchi del PID): li ospita su sfondo bianco cosi'
-   restano leggibili anche col tema scuro del sito. */
+   (es. lo schema a blocchi del PID). */
 .diagramma-bianco {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 0.8rem;
+  background: var(--colore-foglio);
+  border: 1px solid var(--colore-filetto);
+  padding: 1rem .8rem;
 }
 
 /* ---------- Grafici su mobile: consenti lo zoom con due dita ----------
@@ -518,23 +654,21 @@ canvas#massa-canvas {
 .grafico-espandi {
   display: none;
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: .5rem;
+  right: .5rem;
   z-index: 5;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.6rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #374151;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  gap: .35rem;
+  padding: .35rem .6rem;
+  font-size: .68rem;
+  color: var(--colore-testo);
+  background: var(--colore-carta);
+  border: 1px solid var(--colore-testo);
 }
 
 .grafico-espandi:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--colore-testo);
+  color: var(--colore-carta);
 }
 
 .grafico-espandi .icona {
@@ -547,10 +681,10 @@ canvas#massa-canvas {
 .grafico-comandi {
   display: none;
   position: absolute;
-  top: 0.7rem;
-  left: 0.7rem;
+  top: .7rem;
+  left: .7rem;
   z-index: 5;
-  gap: 0.35rem;
+  gap: .35rem;
 }
 
 .grafico-box.a-schermo-intero .grafico-comandi {
@@ -561,18 +695,18 @@ canvas#massa-canvas {
   width: 2.3rem;
   height: 2.3rem;
   padding: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 500;
   line-height: 1;
-  color: #374151;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  letter-spacing: 0;
+  color: var(--colore-testo);
+  background: var(--colore-carta);
+  border: 1px solid var(--colore-testo);
 }
 
 .grafico-comandi button:hover {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--colore-testo);
+  color: var(--colore-carta);
 }
 
 .grafico-box.a-schermo-intero {
@@ -580,8 +714,8 @@ canvas#massa-canvas {
   inset: 0;
   z-index: 200;
   margin: 0;
-  padding: 3rem 0.4rem 0.4rem;
-  background: #ffffff;
+  padding: 3rem .4rem .4rem;
+  background: var(--colore-foglio);
   display: flex;
   /* I gesti li gestiamo noi (pizzico) e Plotly (trascinamento): il browser
      non deve intercettarli per scorrere o ingrandire la pagina. */
@@ -592,12 +726,12 @@ canvas#massa-canvas {
   flex: 1;
   width: 100% !important;
   height: 100% !important;
-  border-radius: 0;
+  border: none;
 }
 
 .grafico-box.a-schermo-intero .grafico-espandi {
-  top: 0.7rem;
-  right: 0.7rem;
+  top: .7rem;
+  right: .7rem;
 }
 
 /* A schermo intero comandiamo noi i gesti: li lasciamo a Plotly (pan/zoom). */
@@ -624,8 +758,10 @@ body.grafico-aperto {
   }
   .grafico-suggerimento {
     display: block;
-    margin: 0.45rem 0 0;
-    font-size: 0.8rem;
+    margin: .5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .05em;
     color: var(--colore-muted);
   }
 }
@@ -642,7 +778,7 @@ mjx-container {
 mjx-container[display="true"] {
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.2rem 0;
+  padding: .2rem 0;
 }
 
 .pannello,
@@ -662,35 +798,30 @@ details.teoria li,
 
 /* ---------- Responsive ---------- */
 @media (max-width: 600px) {
-  body {
-    padding: 1rem 0.7rem 2rem;
+  .contenitore {
+    padding: 1.5rem .95rem 0;
   }
 
   h1 {
-    font-size: 1.35rem;
+    font-size: 1.6rem;
   }
 
   h1 .sottotitolo,
   p.sottotitolo {
-    font-size: 0.92rem;
+    font-size: .98rem;
   }
 
   h2 {
-    font-size: 1.05rem;
-    margin-top: 1.5rem;
+    font-size: 1.08rem;
   }
 
   .pannello {
-    padding: 0.9rem;
-  }
-
-  details.teoria {
-    padding: 0.7rem 0.85rem;
+    padding: 1rem;
   }
 
   .riga-campi {
     flex-direction: column;
-    gap: 0.6rem;
+    gap: .7rem;
   }
 
   /* I pulsanti a piena larghezza sono molto piu' facili da centrare col dito. */
@@ -710,11 +841,11 @@ details.teoria li,
   .schede-intestazione {
     overflow-x: auto;
     flex-wrap: nowrap;
+    gap: 1.1rem;
   }
 
   .scheda-bottone {
     white-space: nowrap;
-    padding: 0.5rem 0.7rem;
   }
 
   .griglia-matrice input {
