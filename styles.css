@@ -226,7 +226,9 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
    d'inchiostro, vincoli campiti, riferimento in rosso). */
 .frontespizio-figura {
   margin: 0 0 .4rem;
-  width: 230px;
+  /* Piu' di cosi' e la colonna del testo scende sotto i 34rem del
+     sommario, che si riimpagina su quattro righe. */
+  width: 290px;
 }
 
 .figura-robot {
@@ -254,7 +256,10 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   z-index: 0;
 }
 
-.frontespizio > div { position: relative; z-index: 1; }
+/* Anche la <figure> del robot, non solo i div: fuori dal contesto di
+   impilamento la griglia (un ::before posizionato) le passava sopra e
+   lasciava un filo chiaro attraverso il disegno. */
+.frontespizio > * { position: relative; z-index: 1; }
 
 .frontespizio-testo { max-width: 34rem; }
 
@@ -481,7 +486,7 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   }
   /* In colonna il disegno passa sopra al titolo e si rimpicciolisce:
      sotto al sommario spingerebbe l'indice troppo in basso. */
-  .frontespizio-figura { order: -1; width: 170px; }
+  .frontespizio-figura { order: -1; width: 205px; }
 
   /* Il colophon va in colonna: affiancare un ritratto a un testo lungo
      su schermo stretto lascia due colonne entrambe illeggibili. */
