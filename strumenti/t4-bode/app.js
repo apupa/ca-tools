@@ -221,9 +221,9 @@
     if (t.tipo === "reale") {
       const tau = Math.abs(t.T);
       const omega0 = 1 / tau;
+      const log0 = Math.log10(omega0);
       const omegaA = omega0 / 10; // una decade prima del punto di rottura
       const omegaB = omega0 * 10; // una decade dopo
-      const log10Omega0 = Math.log10(omega0);
       const pendenza = t.esponente * 20;
       const segnoFase = t.esponente * (t.T < 0 ? -1 : 1);
       const direzioneFase = segnoFase > 0 ? "0° a +90°" : "0° a −90°";
@@ -231,24 +231,25 @@
         tipoTxt + " reale in $\\omega_0 = 1/\\tau = " + formattaNumero(omega0) + "$ rad/s ($\\tau = " +
         formattaNumero(t.T) + "$ s): ampiezza costante fino al punto di rottura, poi pendenza " +
         (pendenza > 0 ? "+" : "") + pendenza + " dB/dec. " +
-        "Fase da " + direzioneFase + ": l'approssimazione asintotica la fa variare linearmente tra una decade prima " +
-        "($\\omega_a = \\omega_0/10 = " + formattaNumero(omegaA) + "$ rad/s) e una decade dopo ($\\omega_b = " +
-        "\\omega_0 \\cdot 10 = " + formattaNumero(omegaB) + "$ rad/s), passando per $\\pm45$° in $\\omega_0$. " +
-        "Equivalentemente, in scala logaritmica il punto di rottura cade in $\\log_{10}\\omega_0 = " +
-        "-\\log_{10}|\\tau| = " + formattaNumero(log10Omega0) + "$, quindi $\\log_{10}\\omega_a = " +
-        "\\log_{10}\\omega_0 - 1 = " + formattaNumero(log10Omega0 - 1) + "$ e $\\log_{10}\\omega_b = " +
-        "\\log_{10}\\omega_0 + 1 = " + formattaNumero(log10Omega0 + 1) + "$ (una decade = ±1 in $\\log_{10}\\omega$)."
+        "Sull'asse logaritmico il punto di rottura cade in $\\log_{10}\\omega_0 = -\\log_{10}|\\tau| = " +
+        formattaNumero(log0) + "$. " +
+        "Fase da " + direzioneFase + ": l'approssimazione asintotica la fa variare linearmente fra gli " +
+        "estremi che si ottengono sommando e sottraendo 1, perché una decade vale esattamente $\\pm1$ " +
+        "in $\\log_{10}\\omega$: $\\log_{10}\\omega_a = \\log_{10}\\omega_0 - 1 = " +
+        formattaNumero(log0 - 1) + "$ e $\\log_{10}\\omega_b = \\log_{10}\\omega_0 + 1 = " +
+        formattaNumero(log0 + 1) + "$, passando per $\\pm45$° in $\\omega_0$. " +
+        "In pulsazioni: $\\omega_a = " + formattaNumero(omegaA) + "$ rad/s e $\\omega_b = " +
+        formattaNumero(omegaB) + "$ rad/s."
       );
     }
     const omegaN = t.omegan;
-    const larghezza = Math.pow(4.81, Math.abs(t.zeta));
-    const omegaA = omegaN / larghezza;
-    const omegaB = omegaN * larghezza;
-    const log10OmegaN = Math.log10(omegaN);
+    const logN = Math.log10(omegaN);
     // Nel termine reale la spezzata di fase è larga ±1 decade; qui la semi-larghezza non è
     // fissa ma vale |δ|·log10(4.81) ≈ 0.682·|δ| decadi (per δ=0 si annulla: la fase salta di
     // colpo, coerentemente con i poli sull'asse immaginario).
-    const semiLarghezzaDecadi = Math.abs(t.zeta) * Math.log10(4.81);
+    const semiLarghezza = Math.abs(t.zeta) * Math.log10(4.81);
+    const omegaA = omegaN / Math.pow(4.81, Math.abs(t.zeta));
+    const omegaB = omegaN * Math.pow(4.81, Math.abs(t.zeta));
     const pendenza = t.esponente * 40;
     const segnoFase = t.esponente * (t.zeta < 0 ? -1 : 1);
     const direzioneFase = segnoFase > 0 ? "0° a +180°" : "0° a −180°";
@@ -256,23 +257,54 @@
       tipoTxt + " complesso coniugato, $\\omega_n = " + formattaNumero(omegaN) + "$ rad/s, $\\delta = " +
       formattaNumero(t.zeta) + "$: ampiezza costante fino a $\\omega_n$, poi pendenza " +
       (pendenza > 0 ? "+" : "") + pendenza + " dB/dec. " +
-      "Fase da " + direzioneFase + ": qui il punto di rottura non basta a delimitare la spezzata, serve la " +
-      "larghezza di banda $4.81^{|\\delta|} = " + formattaNumero(larghezza) + "$: la fase varia tra $\\omega_a = " +
-      "\\omega_n/4.81^{|\\delta|} = " + formattaNumero(omegaA) + "$ rad/s e $\\omega_b = \\omega_n \\cdot " +
-      "4.81^{|\\delta|} = " + formattaNumero(omegaB) + "$ rad/s, passando per " +
+      "Sull'asse logaritmico il centro cade in $\\log_{10}\\omega_n = " + formattaNumero(logN) + "$. " +
+      "Fase da " + direzioneFase + ": qui la spezzata non è larga una decade fissa, quindi invece di " +
+      "$\\pm1$ si somma e si sottrae il logaritmo della larghezza di banda, " +
+      "$\\log_{10}4.81^{|\\delta|} = |\\delta|\\log_{10}4.81 = " + formattaNumero(semiLarghezza) + "$: " +
+      "$\\log_{10}\\omega_a = \\log_{10}\\omega_n - |\\delta|\\log_{10}4.81 = " +
+      formattaNumero(logN - semiLarghezza) + "$ e $\\log_{10}\\omega_b = \\log_{10}\\omega_n + " +
+      "|\\delta|\\log_{10}4.81 = " + formattaNumero(logN + semiLarghezza) + "$, passando per " +
       (segnoFase > 0 ? "+90°" : "−90°") + " in $\\omega_n$. " +
-      "Equivalentemente, in scala logaritmica: $\\log_{10}\\omega_a = \\log_{10}\\omega_n - |\\delta|\\log_{10}4.81 = " +
-      formattaNumero(log10OmegaN) + " - " + formattaNumero(semiLarghezzaDecadi) + " = " +
-      formattaNumero(log10OmegaN - semiLarghezzaDecadi) +
-      "$ e $\\log_{10}\\omega_b = \\log_{10}\\omega_n + |\\delta|\\log_{10}4.81 = " +
-      formattaNumero(log10OmegaN) + " + " + formattaNumero(semiLarghezzaDecadi) + " = " +
-      formattaNumero(log10OmegaN + semiLarghezzaDecadi) +
-      "$: la spezzata è larga $2|\\delta|\\log_{10}4.81 = " + formattaNumero(2 * semiLarghezzaDecadi) +
-      "$ decadi, centrata su $\\omega_n$ (nel termine reale era invece larga 2 decadi fisse)." +
-      (semiLarghezzaDecadi < 1e-9
+      "La spezzata è larga $2|\\delta|\\log_{10}4.81 = " + formattaNumero(2 * semiLarghezza) +
+      "$ decadi centrate su $\\omega_n$ (nel termine reale erano 2 decadi fisse). " +
+      "In pulsazioni: $\\omega_a = " + formattaNumero(omegaA) + "$ rad/s e $\\omega_b = " +
+      formattaNumero(omegaB) + "$ rad/s." +
+      (semiLarghezza < 1e-9
         ? " Con $\\delta = 0$ la larghezza si annulla: l'approssimazione asintotica fa saltare la fase di colpo in $\\omega_n$."
         : "")
     );
+  }
+
+  // ---------- Frequenze notevoli da segnare sul grafico ----------
+  // Etichettate col logaritmo, coerentemente con l'ascissa.
+  function etichettaLog(simbolo, omega) {
+    return "log<sub>10</sub>ω" + simbolo + " = " + formattaNumero(Math.log10(omega), 2);
+  }
+
+  function riferimentiTermine(t) {
+    if (t.tipo === "reale") {
+      const omega0 = 1 / Math.abs(t.T);
+      return [
+        { omega: omega0 / 10, etichetta: etichettaLog("<sub>a</sub>", omega0 / 10) },
+        { omega: omega0, etichetta: etichettaLog("<sub>0</sub>", omega0) },
+        { omega: omega0 * 10, etichetta: etichettaLog("<sub>b</sub>", omega0 * 10) },
+      ];
+    }
+    if (t.tipo === "complesso") {
+      const banda = Math.pow(4.81, Math.abs(t.zeta));
+      const rif = [{ omega: t.omegan, etichetta: etichettaLog("<sub>n</sub>", t.omegan) }];
+      // Con δ = 0 gli estremi coincidono con ω_n: una sola verticale.
+      if (banda > 1.001) {
+        rif.unshift({ omega: t.omegan / banda, etichetta: etichettaLog("<sub>a</sub>", t.omegan / banda) });
+        rif.push({ omega: t.omegan * banda, etichetta: etichettaLog("<sub>b</sub>", t.omegan * banda) });
+      }
+      return rif;
+    }
+    if (t.tipo === "origine") {
+      // La retta passa per 0 dB dove il logaritmo si annulla.
+      return [{ omega: 1, etichetta: "log<sub>10</sub>ω = 0" }];
+    }
+    return [];
   }
 
   function formulaTermineTex(t) {
@@ -328,7 +360,7 @@
       faseDiretta = sfasaContinuo(faseDiretta, faseTotEsatta[0]);
 
       mostraTermini(elencoTermini, w, contributi);
-      mostraTotale(w, magTotEsatto, faseTotEsatta, magTotAsint, faseTotAsint, magDiretta, faseDiretta);
+      mostraTotale(w, magTotEsatto, faseTotEsatta, magTotAsint, faseTotAsint, magDiretta, faseDiretta, elencoTermini);
     } catch (e) {
       divErrore.textContent = "Errore nei dati inseriti: " + e.message;
       divErrore.style.display = "block";
@@ -375,18 +407,30 @@
 
     elenco.forEach((t, i) => {
       const c = contributi[i];
-      CAPlot.plotBode("termine-" + i + "-plot", w, c.magDb, c.phaseDeg, [
-        { name: "asintotico", magDb: c.magAsintDb, phaseDeg: c.phaseAsintDeg },
-      ]);
+      CAPlot.plotBode(
+        "termine-" + i + "-plot", w, c.magDb, c.phaseDeg,
+        [{ name: "asintotico", magDb: c.magAsintDb, phaseDeg: c.phaseAsintDeg }],
+        riferimentiTermine(t)
+      );
     });
   }
 
   // ---------- Rendering diagramma totale ----------
-  function mostraTotale(w, magEsatto, faseEsatta, magAsint, faseAsint, magDiretta, faseDiretta) {
+  function mostraTotale(w, magEsatto, faseEsatta, magAsint, faseAsint, magDiretta, faseDiretta, elenco) {
+    const rotture = (elenco || [])
+      .map(function (t) {
+        if (t.tipo === "reale") return { omega: 1 / Math.abs(t.T), simbolo: "<sub>0</sub>" };
+        if (t.tipo === "complesso") return { omega: t.omegan, simbolo: "<sub>n</sub>" };
+        return null;
+      })
+      .filter(Boolean)
+      .sort(function (a, b) { return a.omega - b.omega; })
+      .map(function (r) { return { omega: r.omega, etichetta: etichettaLog(r.simbolo, r.omega) }; });
+
     CAPlot.plotBode("grafico-totale", w, magEsatto, faseEsatta, [
       { name: "asintotico", magDb: magAsint, phaseDeg: faseAsint },
       { name: "G(jω) diretto", magDb: magDiretta, phaseDeg: faseDiretta },
-    ]);
+    ], rotture);
     let scartoMax = 0;
     for (let i = 0; i < w.length; i++) {
       scartoMax = Math.max(scartoMax, Math.abs(magEsatto[i] - magDiretta[i]));

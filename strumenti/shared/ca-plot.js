@@ -338,8 +338,13 @@
   // w: pulsazioni (rad/s); magDb, phaseDeg: curva "reale".
   // extra (opzionale): [{name, magDb, phaseDeg}] curve aggiuntive (es. asintotiche),
   // disegnate tratteggiate.
-  function plotBode(divId, w, magDb, phaseDeg, extra) {
+  // riferimenti (opzionale): [{omega, etichetta}] — traccia una verticale
+  // tratteggiata su entrambi i riquadri in corrispondenza di una pulsazione
+  // notevole (punto di rottura, estremi della spezzata di fase) e la
+  // etichetta in cima.
+  function plotBode(divId, w, magDb, phaseDeg, extra, riferimenti) {
     extra = extra || [];
+    riferimenti = riferimenti || [];
     const tracce = [
       { x: w, y: magDb, mode: "lines", name: "ampiezza", xaxis: "x", yaxis: "y" },
       { x: w, y: phaseDeg, mode: "lines", name: "fase", xaxis: "x2", yaxis: "y2" },
@@ -366,7 +371,7 @@
       const tickvals = [], ticktext = [];
       for (let e = eMin; e <= eMax; e++) {
         tickvals.push(Math.pow(10, e));
-        ticktext.push("10<sup>" + e + "</sup>");
+        ticktext.push(String(e));
       }
       return { tickvals, ticktext };
     }
@@ -377,8 +382,17 @@
     const assiStileQuaderno = {
       showline: true, linecolor: "#45443d", linewidth: 1, mirror: false, zeroline: false,
     };
+    // Il range va fissato a mano: con le verticali di riferimento fra le
+    // forme, l'autorange di Plotly le includeva nel calcolo e spalancava
+    // l'asse, schiacciando la curva contro il bordo destro. L'intervallo
+    // e' comunque noto (lo sceglie l'utente) e su asse log si esprime in
+    // logaritmi.
+    const wMin = Math.min.apply(null, w);
+    const wMax = Math.max.apply(null, w);
     const assePulsazioniBase = Object.assign({}, assiStileQuaderno, {
       type: "log",
+      range: [Math.log10(wMin), Math.log10(wMax)],
+      autorange: false,
       tickmode: "array", tickvals, ticktext,
       gridcolor: "#d9d3c6", gridwidth: 1,
       minor: { showgrid: true, dtick: "D1", gridcolor: "#ece7dd", gridwidth: 1, ticks: "" },
@@ -393,12 +407,56 @@
       gridcolor: "#d9d3c6", gridwidth: 1,
       minor: { showgrid: true, gridcolor: "#ece7dd", gridwidth: 1, ticks: "" },
     });
+    // ATTENZIONE, le due famiglie NON usano la stessa convenzione su un
+    // asse "log": le annotazioni vogliono la x gia' in logaritmo, mentre
+    // le forme ancorate a un dominio (yref "y domain") vogliono la
+    // pulsazione. Verificato sul posto: passando il logaritmo alle forme,
+    // la verticale di omega_b finiva a log(2) invece che in 2.
+    const forme = [];
+    const note = [];
+    riferimenti.forEach(function (r, i) {
+      if (!(r.omega > 0)) return;
+      const xLog = Math.log10(r.omega);
+      ["", "2"].forEach(function (n) {
+        forme.push({
+          type: "line",
+          xref: "x" + n, yref: "y" + n + " domain",
+          x0: r.omega, x1: r.omega, y0: 0, y1: 1,
+          line: { color: "#b3261e", width: 1, dash: "dot" },
+          // Sopra la griglia: sotto, il tratteggio spariva fra le maglie
+          // della carta millimetrata.
+          layer: "above",
+        });
+      });
+      if (!r.etichetta) return;
+      // Una scritta centrata su un riferimento che cade sul bordo esce
+      // dal riquadro e viene tagliata: agli estremi la si ancora al lato.
+      const frazione = (xLog - Math.log10(wMin)) / (Math.log10(wMax) - Math.log10(wMin));
+      note.push({
+        xref: "x", yref: "y domain",
+        x: xLog, y: 0.98,
+        yanchor: "top",
+        xanchor: frazione > 0.85 ? "right" : frazione < 0.15 ? "left" : "center",
+        // Dentro il riquadro: sopra il bordo finivano sotto la legenda e
+        // il tasto "ingrandisci". Tre livelli sfalsati perche' con delta
+        // piccolo i tre riferimenti del secondo ordine cadono a meno di
+        // un quinto di decade l'uno dall'altro.
+        yshift: -13 * (i % 3),
+        text: r.etichetta,
+        showarrow: false,
+        font: { size: 9.5, color: "#b3261e" },
+        bgcolor: "rgba(251,249,245,0.85)",
+      });
+    });
+
     const layout = Object.assign({}, layoutBase, {
       grid: { rows: 2, columns: 1, pattern: "independent" },
       xaxis: assePulsazioniSenzaEtichetta,
       yaxis: Object.assign({ title: "ampiezza [dB]" }, assiVerticali),
       xaxis2: assePulsazioniConEtichetta,
       yaxis2: Object.assign({ title: "fase [°]" }, assiVerticali),
+      shapes: forme,
+      annotations: note,
     });
     disegna(divId, tracce, layout);
   }
