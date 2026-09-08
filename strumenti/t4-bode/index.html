@@ -23,6 +23,8 @@
     .scheda-termine { margin-bottom: 1.2rem; }
     .scheda-termine h3 { margin-bottom: 0.2rem; }
     .scheda-termine .descrizione { font-size: 0.9rem; color: var(--colore-muted); margin: 0.3rem 0 0.6rem; }
+    #tabella-somma th { white-space: nowrap; }
+    #tabella-somma td:nth-last-child(2) { font-weight: 600; }
   </style>
 </head>
 <body>
@@ -147,7 +149,11 @@
       <div class="pannello">
       <h2>Diagramma di Bode totale</h2>
       <div id="grafico-totale" style="width:100%; height:480px;"></div>
-      <p id="nota-verifica" style="font-size:0.85rem; color:var(--colore-muted);"></p>
+    </div>
+
+    <div class="pannello">
+      <h2>Somma pulsazione per pulsazione</h2>
+      <div id="tabella-somma"></div>
     </div>
       </div>
     </div>
@@ -155,6 +161,6 @@
 
   <script src="../shared/ca-core.js?v=20260807a"></script>
   <script src="../shared/ca-plot.js?v=20260908f"></script>
-  <script src="app.js?v=20260908a"></script>
+  <script src="app.js?v=20260908d"></script>
 </body>
 </html>

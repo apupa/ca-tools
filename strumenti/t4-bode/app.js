@@ -10,7 +10,7 @@
   const divErrore = document.getElementById("messaggio-errore");
   const divFdtTesto = document.getElementById("fdt-testo");
   const divListaTermini = document.getElementById("lista-termini");
-  const divNotaVerifica = document.getElementById("nota-verifica");
+  const divTabellaSomma = document.getElementById("tabella-somma");
 
   // ---------- Utilità numeriche ----------
   // Legge un polinomio da un campo di testo. Accetta due formati:
@@ -91,6 +91,29 @@
       w.push(Math.pow(10, logMin + ((logMax - logMin) * i) / (punti - 1)));
     }
     return w;
+  }
+
+  // Le pulsazioni su cui vale la pena tabulare la somma: gli estremi
+  // dell'intervallo, le decadi intere che ci stanno dentro e i punti di
+  // rottura di ogni termine. Sono le stesse che si userebbero per
+  // tracciare il diagramma a mano.
+  function pulsazioniNotevoli(omegaMin, omegaMax, termini, h) {
+    const punti = [omegaMin, omegaMax];
+    for (let e = Math.ceil(Math.log10(omegaMin)); e <= Math.floor(Math.log10(omegaMax)); e++) {
+      punti.push(Math.pow(10, e));
+    }
+    // Il termine nell'origine non ha punto di rottura: la sua retta passa
+    // per 0 dB in omega = 1, che e' gia' fra le decadi.
+    termini.forEach(function (t) {
+      const rottura = t.tipo === "reale" ? 1 / Math.abs(t.T) : t.omegan;
+      if (rottura >= omegaMin && rottura <= omegaMax) punti.push(rottura);
+    });
+    punti.sort(function (a, b) { return a - b; });
+    // Due punti a meno di un millesimo di decade l'uno dall'altro sono lo
+    // stesso punto (es. un polo esattamente su una decade).
+    return punti.filter(function (om, i) {
+      return i === 0 || Math.abs(Math.log10(om / punti[i - 1])) > 1e-3;
+    });
   }
 
   // =====================================================================
@@ -332,8 +355,16 @@
 
       mostraFdT(num, den);
 
-      const w = creaGrigliaOmega(omegaMin, omegaMax, 300);
       const { K, h, termini } = decomponiBode(num, den);
+      // Le pulsazioni notevoli entrano nella griglia invece di essere
+      // valutate a parte: cosi' la tabella legge esattamente gli stessi
+      // numeri dei grafici, e gli spigoli delle spezzate asintotiche
+      // cadono su punti campionati davvero.
+      const notevoli = pulsazioniNotevoli(omegaMin, omegaMax, termini, h);
+      const w = creaGrigliaOmega(omegaMin, omegaMax, 300)
+        .concat(notevoli)
+        .sort(function (a, b) { return a - b; })
+        .filter(function (om, i, arr) { return i === 0 || om > arr[i - 1]; });
 
       // Contributi di ciascun termine (guadagno e origine sempre inclusi nel totale, mostrati come
       // termini solo se non banali: K va sempre mostrato, h solo se diverso da zero)
@@ -361,12 +392,13 @@
 
       mostraTermini(elencoTermini, w, contributi);
       mostraTotale(w, magTotEsatto, faseTotEsatta, magTotAsint, faseTotAsint, magDiretta, faseDiretta, elencoTermini);
+      mostraTabellaSomma(w, notevoli, elencoTermini, contributi, magTotEsatto, faseTotEsatta, magDiretta, faseDiretta);
     } catch (e) {
       divErrore.textContent = "Errore nei dati inseriti: " + e.message;
       divErrore.style.display = "block";
       divFdtTesto.innerHTML = "";
       divListaTermini.innerHTML = "";
-      divNotaVerifica.textContent = "";
+      divTabellaSomma.innerHTML = "";
     }
   }
 
@@ -431,13 +463,59 @@
       { name: "asintotico", magDb: magAsint, phaseDeg: faseAsint },
       { name: "G(jω) diretto", magDb: magDiretta, phaseDeg: faseDiretta },
     ], rotture);
-    let scartoMax = 0;
-    for (let i = 0; i < w.length; i++) {
-      scartoMax = Math.max(scartoMax, Math.abs(magEsatto[i] - magDiretta[i]));
+  }
+
+
+  // ---------- Tabella: la somma dei termini, pulsazione per pulsazione ----------
+  // E' il conto che si fa a mano per tracciare il diagramma: incolonnare i
+  // contributi dei termini e sommarli. L'ultima colonna valuta G(jw)
+  // direttamente, quindi la verifica sta nella tabella invece che in una
+  // nota a parte.
+  function nomeBreveTermine(t, i) {
+    const n = (i + 1) + ". ";
+    if (t.tipo === "guadagno") return n + "K";
+    if (t.tipo === "origine") return n + "(jω)<sup>" + t.h + "</sup>";
+    return n + (t.esponente > 0 ? "zero" : "polo");
+  }
+
+  function mostraTabellaSomma(w, notevoli, elenco, contributi, magTot, faseTot, magDiretta, faseDiretta) {
+    // Ogni pulsazione notevole e' stata inserita nella griglia: qui se ne
+    // ritrova l'indice esatto, senza interpolare.
+    const indici = notevoli.map(function (om) {
+      let migliore = 0, scarto = Infinity;
+      for (let i = 0; i < w.length; i++) {
+        const d = Math.abs(Math.log10(w[i] / om));
+        if (d < scarto) { scarto = d; migliore = i; }
+      }
+      return migliore;
+    });
+
+    function costruisci(titolo, perTermine, totale, diretta, decimali) {
+      let html = "<h3>" + titolo + "</h3><table><thead><tr>" +
+        "<th>ω [rad/s]</th><th>log<sub>10</sub>ω</th>";
+      elenco.forEach(function (t, i) {
+        html += "<th>" + nomeBreveTermine(t, i) + "</th>";
+      });
+      html += "<th>Somma</th><th>G(jω)</th></tr></thead><tbody>";
+      indici.forEach(function (idx) {
+        html += "<tr><td>" + formattaNumero(w[idx], 3) + "</td><td>" +
+          formattaNumero(Math.log10(w[idx]), 2) + "</td>";
+        perTermine.forEach(function (serie) {
+          html += "<td>" + formattaNumero(serie[idx], decimali) + "</td>";
+        });
+        html += "<td><strong>" + formattaNumero(totale[idx], decimali) + "</strong></td>" +
+          "<td>" + formattaNumero(diretta[idx], decimali) + "</td></tr>";
+      });
+      return html + "</tbody></table>";
     }
-    divNotaVerifica.textContent =
-      "Verifica: scarto massimo tra la somma dei termini e la valutazione diretta di G(jω) = " +
-      formattaNumero(scartoMax, 6) + " dB (atteso ≈0, a meno di arrotondamenti numerici).";
+
+    divTabellaSomma.innerHTML =
+      '<p class="nota">Le colonne dei termini sono quelle elencate sopra, nello stesso ordine: ' +
+      "sommandole riga per riga si ottiene il totale. L'ultima colonna è la valutazione diretta " +
+      "di $G(j\\omega)$, che coincide con la somma a meno degli arrotondamenti mostrati.</p>" +
+      costruisci("Ampiezza [dB]", contributi.map(function (c) { return c.magDb; }), magTot, magDiretta, 2) +
+      costruisci("Fase [°]", contributi.map(function (c) { return c.phaseDeg; }), faseTot, faseDiretta, 1);
+    typeset(divTabellaSomma);
   }
 
   // ---------- Esempio precaricato: 10/((s+1)(s+10)) ----------
