@@ -338,8 +338,13 @@
   // w: pulsazioni (rad/s); magDb, phaseDeg: curva "reale".
   // extra (opzionale): [{name, magDb, phaseDeg}] curve aggiuntive (es. asintotiche),
   // disegnate tratteggiate.
-  function plotBode(divId, w, magDb, phaseDeg, extra) {
+  // riferimenti (opzionale): [{omega, y, riquadro, etichetta}] — segna un
+  // punto notevole sulla spezzata asintotica del riquadro indicato
+  // ("ampiezza" o "fase"), lo collega all'asse con un richiamo
+  // tratteggiato e scrive l'etichetta sotto le tacche.
+  function plotBode(divId, w, magDb, phaseDeg, extra, riferimenti) {
     extra = extra || [];
+    riferimenti = riferimenti || [];
     const tracce = [
       { x: w, y: magDb, mode: "lines", name: "ampiezza", xaxis: "x", yaxis: "y" },
       { x: w, y: phaseDeg, mode: "lines", name: "fase", xaxis: "x2", yaxis: "y2" },
@@ -366,7 +371,7 @@
       const tickvals = [], ticktext = [];
       for (let e = eMin; e <= eMax; e++) {
         tickvals.push(Math.pow(10, e));
-        ticktext.push("10<sup>" + e + "</sup>");
+        ticktext.push(String(e));
       }
       return { tickvals, ticktext };
     }
@@ -377,8 +382,15 @@
     const assiStileQuaderno = {
       showline: true, linecolor: "#45443d", linewidth: 1, mirror: false, zeroline: false,
     };
+    // Il range va fissato a mano: con l'autorange, i punti di richiamo
+    // aggiunti come tracce potrebbero allargare l'intervallo scelto
+    // dall'utente. Su asse log si esprime in logaritmi.
+    const wMin = Math.min.apply(null, w);
+    const wMax = Math.max.apply(null, w);
     const assePulsazioniBase = Object.assign({}, assiStileQuaderno, {
       type: "log",
+      range: [Math.log10(wMin), Math.log10(wMax)],
+      autorange: false,
       tickmode: "array", tickvals, ticktext,
       gridcolor: "#d9d3c6", gridwidth: 1,
       minor: { showgrid: true, dtick: "D1", gridcolor: "#ece7dd", gridwidth: 1, ticks: "" },
@@ -393,13 +405,104 @@
       gridcolor: "#d9d3c6", gridwidth: 1,
       minor: { showgrid: true, gridcolor: "#ece7dd", gridwidth: 1, ticks: "" },
     });
+
+    // ---------- Punti notevoli ----------
+    // Il richiamo scende dal punto fino al fondo del riquadro: serve il
+    // minimo dei dati di quel riquadro, perche' una forma ancorata al
+    // dominio non puo' partire da una quota espressa in unita' dei dati.
+    function minimoDi(serie) {
+      let m = Infinity;
+      serie.forEach(function (a) {
+        a.forEach(function (v) { if (Number.isFinite(v) && v < m) m = v; });
+      });
+      return m;
+    }
+    const fondo = {
+      ampiezza: minimoDi([magDb].concat(extra.map(function (e) { return e.magDb; }))),
+      fase: minimoDi([phaseDeg].concat(extra.map(function (e) { return e.phaseDeg; }))),
+    };
+    const note = [];
+    // Lo sfalsamento va calcolato DENTRO ciascun riquadro e in ordine di
+    // frequenza: contando sull'indice globale, due riferimenti vicini
+    // della fase finivano sullo stesso livello e si sovrapponevano.
+    // Ingombro orizzontale di un'etichetta, come frazione della larghezza
+    // dell'asse: ~85 px di scritta su un riquadro largo ~700 px.
+    const LARGHEZZA_ETICHETTA = 0.12;
+    ["ampiezza", "fase"].forEach(function (riquadro) {
+      const suFase = riquadro === "fase";
+      // Ultima frazione occupata su ciascuna riga di etichette.
+      const ultimoAlLivello = [];
+      const ascissa = suFase ? "x2" : "x";
+      const ordinata = suFase ? "y2" : "y";
+      riferimenti
+        .filter(function (r) {
+          return (r.riquadro === "fase") === suFase && r.omega > 0 && Number.isFinite(r.y);
+        })
+        .sort(function (a, b) { return a.omega - b.omega; })
+        .forEach(function (r) {
+          tracce.push({
+            x: [r.omega, r.omega], y: [fondo[riquadro], r.y],
+            mode: "lines", line: { color: "#b3261e", width: 1, dash: "dot" },
+            xaxis: ascissa, yaxis: ordinata,
+            showlegend: false, hoverinfo: "skip",
+          });
+          tracce.push({
+            x: [r.omega], y: [r.y],
+            mode: "markers", marker: { color: "#b3261e", size: 7 },
+            xaxis: ascissa, yaxis: ordinata,
+            showlegend: false, hoverinfo: "skip",
+          });
+          if (!r.etichetta) return;
+          // Le annotazioni, a differenza dei dati delle tracce, vogliono
+          // la x gia' in logaritmo quando l'asse e' di tipo "log".
+          const xLog = Math.log10(r.omega);
+          const frazione = (xLog - Math.log10(wMin)) / (Math.log10(wMax) - Math.log10(wMin));
+          // Di norma le scritte stanno tutte sulla stessa riga: sfalsarle
+          // sempre le faceva sembrare disallineate anche quando c'era
+          // spazio in abbondanza. Si scende di un livello solo quando la
+          // precedente e' troppo vicina per starci accanto (succede col
+          // secondo ordine a delta piccolo, dove i tre riferimenti
+          // distano meno di un quinto di decade).
+          let livello = 0;
+          while (
+            ultimoAlLivello[livello] !== undefined &&
+            frazione - ultimoAlLivello[livello] < LARGHEZZA_ETICHETTA
+          ) {
+            livello++;
+          }
+          ultimoAlLivello[livello] = frazione;
+          note.push({
+            xref: ascissa, yref: ordinata + " domain",
+            x: xLog, y: 0,
+            yanchor: "top",
+            yshift: -26 - 11 * livello,
+            xanchor: frazione > 0.85 ? "right" : frazione < 0.15 ? "left" : "center",
+            text: r.etichetta,
+            showarrow: false,
+            font: { size: 9.5, color: "#b3261e" },
+          });
+        });
+    });
+
+    // Le etichette dei riferimenti occupano la fascia sotto le tacche, che
+    // e' dove starebbe il titolo dell'asse: lo si allontana per non
+    // sovrapporli.
+    if (note.length) {
+      assePulsazioniConEtichetta.title = { text: "log₁₀(ω)  [decadi]", standoff: 60 };
+    }
+
     const layout = Object.assign({}, layoutBase, {
-      grid: { rows: 2, columns: 1, pattern: "independent" },
+      // Le etichette dei punti notevoli stanno sotto ciascun asse: senza
+      // un po' di respiro fra i due riquadri finirebbero sul grafico
+      // della fase.
+      grid: { rows: 2, columns: 1, pattern: "independent", ygap: note.length ? 0.42 : 0.22 },
       xaxis: assePulsazioniSenzaEtichetta,
       yaxis: Object.assign({ title: "ampiezza [dB]" }, assiVerticali),
       xaxis2: assePulsazioniConEtichetta,
       yaxis2: Object.assign({ title: "fase [°]" }, assiVerticali),
+      annotations: note,
     });
+    if (note.length) layout.margin = Object.assign({}, layout.margin, { b: 106 });
     disegna(divId, tracce, layout);
   }
 
