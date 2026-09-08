@@ -235,17 +235,6 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   height: auto;
 }
 
-.frontespizio-figura figcaption {
-  margin-top: .2rem;
-  text-align: left;
-  line-height: 1.5;
-  text-transform: none;
-  letter-spacing: .02em;
-  font-size: .66rem;
-}
-
-.frontespizio-figura figcaption .rif { color: var(--ca-rosso); font-weight: 600; }
-
 /* Carta millimetrata: due griglie sovrapposte, disegnate in CSS.
    Sfuma verso il basso per non competere col testo. */
 .frontespizio::before {
