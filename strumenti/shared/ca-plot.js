@@ -338,10 +338,10 @@
   // w: pulsazioni (rad/s); magDb, phaseDeg: curva "reale".
   // extra (opzionale): [{name, magDb, phaseDeg}] curve aggiuntive (es. asintotiche),
   // disegnate tratteggiate.
-  // riferimenti (opzionale): [{omega, etichetta}] — traccia una verticale
-  // tratteggiata su entrambi i riquadri in corrispondenza di una pulsazione
-  // notevole (punto di rottura, estremi della spezzata di fase) e la
-  // etichetta in cima.
+  // riferimenti (opzionale): [{omega, y, riquadro, etichetta}] — segna un
+  // punto notevole sulla spezzata asintotica del riquadro indicato
+  // ("ampiezza" o "fase"), lo collega all'asse con un richiamo
+  // tratteggiato e scrive l'etichetta sotto le tacche.
   function plotBode(divId, w, magDb, phaseDeg, extra, riferimenti) {
     extra = extra || [];
     riferimenti = riferimenti || [];
@@ -382,11 +382,9 @@
     const assiStileQuaderno = {
       showline: true, linecolor: "#45443d", linewidth: 1, mirror: false, zeroline: false,
     };
-    // Il range va fissato a mano: con le verticali di riferimento fra le
-    // forme, l'autorange di Plotly le includeva nel calcolo e spalancava
-    // l'asse, schiacciando la curva contro il bordo destro. L'intervallo
-    // e' comunque noto (lo sceglie l'utente) e su asse log si esprime in
-    // logaritmi.
+    // Il range va fissato a mano: con l'autorange, i punti di richiamo
+    // aggiunti come tracce potrebbero allargare l'intervallo scelto
+    // dall'utente. Su asse log si esprime in logaritmi.
     const wMin = Math.min.apply(null, w);
     const wMax = Math.max.apply(null, w);
     const assePulsazioniBase = Object.assign({}, assiStileQuaderno, {
@@ -407,57 +405,88 @@
       gridcolor: "#d9d3c6", gridwidth: 1,
       minor: { showgrid: true, gridcolor: "#ece7dd", gridwidth: 1, ticks: "" },
     });
-    // ATTENZIONE, le due famiglie NON usano la stessa convenzione su un
-    // asse "log": le annotazioni vogliono la x gia' in logaritmo, mentre
-    // le forme ancorate a un dominio (yref "y domain") vogliono la
-    // pulsazione. Verificato sul posto: passando il logaritmo alle forme,
-    // la verticale di omega_b finiva a log(2) invece che in 2.
-    const forme = [];
+
+    // ---------- Punti notevoli ----------
+    // Il richiamo scende dal punto fino al fondo del riquadro: serve il
+    // minimo dei dati di quel riquadro, perche' una forma ancorata al
+    // dominio non puo' partire da una quota espressa in unita' dei dati.
+    function minimoDi(serie) {
+      let m = Infinity;
+      serie.forEach(function (a) {
+        a.forEach(function (v) { if (Number.isFinite(v) && v < m) m = v; });
+      });
+      return m;
+    }
+    const fondo = {
+      ampiezza: minimoDi([magDb].concat(extra.map(function (e) { return e.magDb; }))),
+      fase: minimoDi([phaseDeg].concat(extra.map(function (e) { return e.phaseDeg; }))),
+    };
     const note = [];
-    riferimenti.forEach(function (r, i) {
-      if (!(r.omega > 0)) return;
-      const xLog = Math.log10(r.omega);
-      ["", "2"].forEach(function (n) {
-        forme.push({
-          type: "line",
-          xref: "x" + n, yref: "y" + n + " domain",
-          x0: r.omega, x1: r.omega, y0: 0, y1: 1,
-          line: { color: "#b3261e", width: 1, dash: "dot" },
-          // Sopra la griglia: sotto, il tratteggio spariva fra le maglie
-          // della carta millimetrata.
-          layer: "above",
+    // Lo sfalsamento va calcolato DENTRO ciascun riquadro e in ordine di
+    // frequenza: contando sull'indice globale, due riferimenti vicini
+    // della fase finivano sullo stesso livello e si sovrapponevano.
+    ["ampiezza", "fase"].forEach(function (riquadro) {
+      const suFase = riquadro === "fase";
+      const ascissa = suFase ? "x2" : "x";
+      const ordinata = suFase ? "y2" : "y";
+      riferimenti
+        .filter(function (r) {
+          return (r.riquadro === "fase") === suFase && r.omega > 0 && Number.isFinite(r.y);
+        })
+        .sort(function (a, b) { return a.omega - b.omega; })
+        .forEach(function (r, k) {
+          tracce.push({
+            x: [r.omega, r.omega], y: [fondo[riquadro], r.y],
+            mode: "lines", line: { color: "#b3261e", width: 1, dash: "dot" },
+            xaxis: ascissa, yaxis: ordinata,
+            showlegend: false, hoverinfo: "skip",
+          });
+          tracce.push({
+            x: [r.omega], y: [r.y],
+            mode: "markers", marker: { color: "#b3261e", size: 7 },
+            xaxis: ascissa, yaxis: ordinata,
+            showlegend: false, hoverinfo: "skip",
+          });
+          if (!r.etichetta) return;
+          // Le annotazioni, a differenza dei dati delle tracce, vogliono
+          // la x gia' in logaritmo quando l'asse e' di tipo "log".
+          const xLog = Math.log10(r.omega);
+          const frazione = (xLog - Math.log10(wMin)) / (Math.log10(wMax) - Math.log10(wMin));
+          note.push({
+            xref: ascissa, yref: ordinata + " domain",
+            x: xLog, y: 0,
+            yanchor: "top",
+            // Tre livelli sotto le tacche: con delta piccolo i riferimenti
+            // della fase distano meno di un quinto di decade, cioe' meno
+            // della larghezza di una scritta.
+            yshift: -26 - 11 * (k % 3),
+            xanchor: frazione > 0.85 ? "right" : frazione < 0.15 ? "left" : "center",
+            text: r.etichetta,
+            showarrow: false,
+            font: { size: 9.5, color: "#b3261e" },
+          });
         });
-      });
-      if (!r.etichetta) return;
-      // Una scritta centrata su un riferimento che cade sul bordo esce
-      // dal riquadro e viene tagliata: agli estremi la si ancora al lato.
-      const frazione = (xLog - Math.log10(wMin)) / (Math.log10(wMax) - Math.log10(wMin));
-      note.push({
-        xref: "x", yref: "y domain",
-        x: xLog, y: 0.98,
-        yanchor: "top",
-        xanchor: frazione > 0.85 ? "right" : frazione < 0.15 ? "left" : "center",
-        // Dentro il riquadro: sopra il bordo finivano sotto la legenda e
-        // il tasto "ingrandisci". Tre livelli sfalsati perche' con delta
-        // piccolo i tre riferimenti del secondo ordine cadono a meno di
-        // un quinto di decade l'uno dall'altro.
-        yshift: -13 * (i % 3),
-        text: r.etichetta,
-        showarrow: false,
-        font: { size: 9.5, color: "#b3261e" },
-        bgcolor: "rgba(251,249,245,0.85)",
-      });
     });
 
+    // Le etichette dei riferimenti occupano la fascia sotto le tacche, che
+    // e' dove starebbe il titolo dell'asse: lo si allontana per non
+    // sovrapporli.
+    if (note.length) {
+      assePulsazioniConEtichetta.title = { text: "log₁₀(ω)  [decadi]", standoff: 60 };
+    }
+
     const layout = Object.assign({}, layoutBase, {
-      grid: { rows: 2, columns: 1, pattern: "independent" },
+      // Le etichette dei punti notevoli stanno sotto ciascun asse: senza
+      // un po' di respiro fra i due riquadri finirebbero sul grafico
+      // della fase.
+      grid: { rows: 2, columns: 1, pattern: "independent", ygap: note.length ? 0.42 : 0.22 },
       xaxis: assePulsazioniSenzaEtichetta,
       yaxis: Object.assign({ title: "ampiezza [dB]" }, assiVerticali),
       xaxis2: assePulsazioniConEtichetta,
       yaxis2: Object.assign({ title: "fase [°]" }, assiVerticali),
-      shapes: forme,
       annotations: note,
     });
+    if (note.length) layout.margin = Object.assign({}, layout.margin, { b: 106 });
     disegna(divId, tracce, layout);
   }
 

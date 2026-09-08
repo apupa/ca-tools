@@ -298,8 +298,11 @@
     );
   }
 
-  // ---------- Frequenze notevoli da segnare sul grafico ----------
-  // Etichettate col logaritmo, coerentemente con l'ascissa.
+  // ---------- Punti notevoli da segnare sui grafici ----------
+  // Ognuno appartiene a UN riquadro: omega_a e omega_b sono gli estremi
+  // della spezzata di FASE e non hanno significato sull'ampiezza, dove
+  // conta solo il punto di rottura. La quota e' quella della spezzata
+  // asintotica, che e' la costruzione che questi punti definiscono.
   function etichettaLog(simbolo, omega) {
     return "log<sub>10</sub>ω" + simbolo + " = " + formattaNumero(Math.log10(omega), 2);
   }
@@ -307,25 +310,35 @@
   function riferimentiTermine(t) {
     if (t.tipo === "reale") {
       const omega0 = 1 / Math.abs(t.T);
+      const s = t.esponente * (t.T < 0 ? -1 : 1);
       return [
-        { omega: omega0 / 10, etichetta: etichettaLog("<sub>a</sub>", omega0 / 10) },
-        { omega: omega0, etichetta: etichettaLog("<sub>0</sub>", omega0) },
-        { omega: omega0 * 10, etichetta: etichettaLog("<sub>b</sub>", omega0 * 10) },
+        // ampiezza: solo lo spigolo della spezzata, a 0 dB
+        { omega: omega0, riquadro: "ampiezza", y: 0, etichetta: etichettaLog("<sub>0</sub>", omega0) },
+        // fase: inizio, meta' e fine della rampa
+        { omega: omega0 / 10, riquadro: "fase", y: 0, etichetta: etichettaLog("<sub>a</sub>", omega0 / 10) },
+        { omega: omega0, riquadro: "fase", y: s * 45, etichetta: etichettaLog("<sub>0</sub>", omega0) },
+        { omega: omega0 * 10, riquadro: "fase", y: s * 90, etichetta: etichettaLog("<sub>b</sub>", omega0 * 10) },
       ];
     }
     if (t.tipo === "complesso") {
       const banda = Math.pow(4.81, Math.abs(t.zeta));
-      const rif = [{ omega: t.omegan, etichetta: etichettaLog("<sub>n</sub>", t.omegan) }];
-      // Con δ = 0 gli estremi coincidono con ω_n: una sola verticale.
+      const s = t.esponente * (t.zeta < 0 ? -1 : 1);
+      const rif = [
+        { omega: t.omegan, riquadro: "ampiezza", y: 0, etichetta: etichettaLog("<sub>n</sub>", t.omegan) },
+        { omega: t.omegan, riquadro: "fase", y: s * 90, etichetta: etichettaLog("<sub>n</sub>", t.omegan) },
+      ];
+      // Con δ = 0 gli estremi collassano su ω_n: la fase salta di colpo e
+      // segnarli sarebbe tre volte lo stesso punto.
       if (banda > 1.001) {
-        rif.unshift({ omega: t.omegan / banda, etichetta: etichettaLog("<sub>a</sub>", t.omegan / banda) });
-        rif.push({ omega: t.omegan * banda, etichetta: etichettaLog("<sub>b</sub>", t.omegan * banda) });
+        rif.push({ omega: t.omegan / banda, riquadro: "fase", y: 0, etichetta: etichettaLog("<sub>a</sub>", t.omegan / banda) });
+        rif.push({ omega: t.omegan * banda, riquadro: "fase", y: s * 180, etichetta: etichettaLog("<sub>b</sub>", t.omegan * banda) });
       }
       return rif;
     }
     if (t.tipo === "origine") {
-      // La retta passa per 0 dB dove il logaritmo si annulla.
-      return [{ omega: 1, etichetta: "log<sub>10</sub>ω = 0" }];
+      // La retta passa per 0 dB dove il logaritmo si annulla; la fase e'
+      // costante e non ha punti notevoli.
+      return [{ omega: 1, riquadro: "ampiezza", y: 0, etichetta: "log<sub>10</sub>ω = 0" }];
     }
     return [];
   }
@@ -432,7 +445,7 @@
         '<div class="pannello scheda-termine"><h3>' + (i + 1) + ". " + titolo + "</h3>" +
         '<p class="descrizione">' + (t.tipo === "guadagno" || t.tipo === "origine" ? "$" + formula + "$" : formula) +
         "<br />" + descrizione + "</p>" +
-        '<div id="' + divId + '" style="width:100%; height:340px;"></div></div>';
+        '<div id="' + divId + '" style="width:100%; height:400px;"></div></div>';
     });
     divListaTermini.innerHTML = html;
     typeset(divListaTermini);
@@ -449,15 +462,17 @@
 
   // ---------- Rendering diagramma totale ----------
   function mostraTotale(w, magEsatto, faseEsatta, magAsint, faseAsint, magDiretta, faseDiretta, elenco) {
-    const rotture = (elenco || [])
-      .map(function (t) {
-        if (t.tipo === "reale") return { omega: 1 / Math.abs(t.T), simbolo: "<sub>0</sub>" };
-        if (t.tipo === "complesso") return { omega: t.omegan, simbolo: "<sub>n</sub>" };
-        return null;
-      })
-      .filter(Boolean)
-      .sort(function (a, b) { return a.omega - b.omega; })
-      .map(function (r) { return { omega: r.omega, etichetta: etichettaLog(r.simbolo, r.omega) }; });
+    const rotture = [];
+    (elenco || []).forEach(function (t) {
+      let omega = null, simbolo = "";
+      if (t.tipo === "reale") { omega = 1 / Math.abs(t.T); simbolo = "<sub>0</sub>"; }
+      else if (t.tipo === "complesso") { omega = t.omegan; simbolo = "<sub>n</sub>"; }
+      if (omega === null || omega < w[0] || omega > w[w.length - 1]) return;
+      const idx = indiceVicino(w, omega);
+      rotture.push({ omega: omega, riquadro: "ampiezza", y: magAsint[idx], etichetta: etichettaLog(simbolo, omega) });
+      rotture.push({ omega: omega, riquadro: "fase", y: faseAsint[idx], etichetta: etichettaLog(simbolo, omega) });
+    });
+    rotture.sort(function (a, b) { return a.omega - b.omega; });
 
     CAPlot.plotBode("grafico-totale", w, magEsatto, faseEsatta, [
       { name: "asintotico", magDb: magAsint, phaseDeg: faseAsint },
@@ -465,6 +480,17 @@
     ], rotture);
   }
 
+
+  // Indice del campione piu' vicino a una pulsazione (le pulsazioni
+  // notevoli sono nella griglia, quindi lo scarto e' nullo).
+  function indiceVicino(w, omega) {
+    let migliore = 0, scarto = Infinity;
+    for (let i = 0; i < w.length; i++) {
+      const d = Math.abs(Math.log10(w[i] / omega));
+      if (d < scarto) { scarto = d; migliore = i; }
+    }
+    return migliore;
+  }
 
   // ---------- Tabella: la somma dei termini, pulsazione per pulsazione ----------
   // E' il conto che si fa a mano per tracciare il diagramma: incolonnare i
@@ -481,14 +507,7 @@
   function mostraTabellaSomma(w, notevoli, elenco, contributi, magTot, faseTot, magDiretta, faseDiretta) {
     // Ogni pulsazione notevole e' stata inserita nella griglia: qui se ne
     // ritrova l'indice esatto, senza interpolare.
-    const indici = notevoli.map(function (om) {
-      let migliore = 0, scarto = Infinity;
-      for (let i = 0; i < w.length; i++) {
-        const d = Math.abs(Math.log10(w[i] / om));
-        if (d < scarto) { scarto = d; migliore = i; }
-      }
-      return migliore;
-    });
+    const indici = notevoli.map(function (om) { return indiceVicino(w, om); });
 
     function costruisci(titolo, perTermine, totale, diretta, decimali) {
       let html = "<h3>" + titolo + "</h3><table><thead><tr>" +
