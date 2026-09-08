@@ -214,8 +214,37 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
    ritratto) sono nel colophon in fondo, come in un libro. */
 .frontespizio {
   position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2.5rem;
+  align-items: end;
   padding: 3.6rem 0 2.4rem;
 }
+
+/* Il disegno sta nel margine destro, dove stava il ritratto: e' un
+   braccio robotico schematizzato come i disegni degli strumenti (linee
+   d'inchiostro, vincoli campiti, riferimento in rosso). */
+.frontespizio-figura {
+  margin: 0 0 .4rem;
+  width: 230px;
+}
+
+.figura-robot {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.frontespizio-figura figcaption {
+  margin-top: .2rem;
+  text-align: left;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: .02em;
+  font-size: .66rem;
+}
+
+.frontespizio-figura figcaption .rif { color: var(--ca-rosso); font-weight: 600; }
 
 /* Carta millimetrata: due griglie sovrapposte, disegnate in CSS.
    Sfuma verso il basso per non competere col testo. */
@@ -455,7 +484,15 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 
 /* ---------- Responsive ---------- */
 @media (max-width: 760px) {
-  .frontespizio { padding: 2.4rem 0 1.6rem; }
+  .frontespizio {
+    grid-template-columns: 1fr;
+    gap: 1.4rem;
+    align-items: start;
+    padding: 2.4rem 0 1.6rem;
+  }
+  /* In colonna il disegno passa sopra al titolo e si rimpicciolisce:
+     sotto al sommario spingerebbe l'indice troppo in basso. */
+  .frontespizio-figura { order: -1; width: 170px; }
 
   /* Il colophon va in colonna: affiancare un ritratto a un testo lungo
      su schermo stretto lascia due colonne entrambe illeggibili. */

@@ -142,6 +142,60 @@ ul.task-list li input[type="checkbox"] {
       <p class="frontespizio-firma etichetta">A cura di Andrea Pupa</p>
     </div>
 
+    <figure class="frontespizio-figura figure">
+      <svg class="figura-robot" viewbox="0 50 164 140" fill="none" role="img" aria-label="Schema di un braccio robotico a due giunti che insegue un riferimento">
+        <!-- pavimento e basamento: stesso segno di vincolo fisso usato nel
+             massa-molla-smorzatore (tratteggio a 45 gradi) -->
+        <g stroke="var(--ca-filetto)" stroke-width="1">
+          <path d="M10 179 l-7 7 M24 179 l-7 7 M38 179 l-7 7 M52 179 l-7 7 M66 179 l-7 7"></path>
+        </g>
+        <path d="M8 179 H72" stroke="var(--ca-inchiostro)" stroke-width="1.4"></path>
+        <path d="M28 179 L34 172 H46 L52 179" stroke="var(--ca-inchiostro)" stroke-width="1.6" stroke-linejoin="round"></path>
+
+        <!-- riferimenti tratteggiati: orizzontale al giunto 1 e
+             prolungamento del primo braccio oltre il gomito -->
+        <g stroke="var(--ca-filetto)" stroke-width="1" stroke-dasharray="3 3">
+          <path d="M40 172 H82"></path>
+          <path d="M73.9 117.7 L89.8 92.3"></path>
+        </g>
+
+        <!-- angoli di giunto -->
+        <g stroke="var(--ca-inchiostro-3)" stroke-width="1">
+          <path d="M66.0 172.0 A26.0 26.0 0 0 0 53.8 150.0"></path>
+          <path d="M85.6 99.1 A22.0 22.0 0 0 1 95.4 113.2"></path>
+        </g>
+
+        <!-- bracci -->
+        <g stroke="var(--ca-inchiostro)" stroke-width="3.4" stroke-linecap="round">
+          <path d="M40 172 L73.9 117.7"></path>
+          <path d="M73.9 117.7 L128.7 106.1"></path>
+        </g>
+
+        <!-- pinza a due dita -->
+        <g stroke="var(--ca-inchiostro)" stroke-width="2" stroke-linecap="round">
+          <path d="M127.2 99.2 L130.1 112.9"></path>
+          <path d="M127.2 99.2 L138.0 96.9"></path>
+          <path d="M130.1 112.9 L140.9 110.6"></path>
+        </g>
+
+        <!-- giunti -->
+        <g fill="var(--ca-carta)" stroke="var(--ca-inchiostro)" stroke-width="1.8">
+          <circle cx="40" cy="172" r="5.5"></circle>
+          <circle cx="73.9" cy="117.7" r="5"></circle>
+        </g>
+
+        <!-- riferimento da raggiungere: e' la "r" dello schema a blocchi -->
+        <path d="M139.5 103.5 Q150 92 154 74" stroke="var(--ca-rosso)" stroke-width="1" stroke-dasharray="3 3"></path>
+        <circle cx="154" cy="72" r="4.5" fill="var(--ca-rosso)"></circle>
+
+        <g font-family="var(--ca-mono)" font-size="10" fill="var(--ca-inchiostro-3)">
+          <text x="69.7" y="158.5">θ₁</text>
+          <text x="96.5" y="103.5">θ₂</text>
+        </g>
+        <text x="154" y="62" font-family="var(--ca-mono)" font-size="10" fill="var(--ca-rosso)" text-anchor="middle">r</text>
+      </svg>
+      <figcaption class="etichetta">Braccio a due giunti · riferimento <span class="rif">r</span></figcaption>
+    </figure>
   </header>
 
 
