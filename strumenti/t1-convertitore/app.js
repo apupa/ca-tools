@@ -319,13 +319,6 @@
       const zeri = CA.polyRoots(fdt.num);
       const guadagno = guadagnoStatico(fdt.num, fdt.den);
 
-      // Salva la FdT per riuso negli altri strumenti (es. T2 "Usa l'ultima FdT")
-      try {
-        localStorage.setItem("ca_ultima_fdt", JSON.stringify({ num: fdt.num, den: fdt.den }));
-      } catch (e) {
-        /* localStorage non disponibile: non blocca la conversione */
-      }
-
       mostraRisultati({ fdt, isu, iu, poli, zeri, guadagno });
     } catch (e) {
       divErrore.textContent = "Errore nei dati inseriti: " + e.message;

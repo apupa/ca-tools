@@ -531,7 +531,7 @@
     divTabellaSomma.innerHTML =
       '<p class="nota">Le colonne dei termini sono quelle elencate sopra, nello stesso ordine: ' +
       "sommandole riga per riga si ottiene il totale. L'ultima colonna è la valutazione diretta " +
-      "di $G(j\\omega)$, che coincide con la somma a meno degli arrotondamenti mostrati.</p>" +
+      "di $G(j\\omega)$.</p>" +
       costruisci("Ampiezza [dB]", contributi.map(function (c) { return c.magDb; }), magTot, magDiretta, 2) +
       costruisci("Fase [°]", contributi.map(function (c) { return c.phaseDeg; }), faseTot, faseDiretta, 1);
     typeset(divTabellaSomma);

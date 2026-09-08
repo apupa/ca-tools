@@ -94,7 +94,8 @@
   function matAddDiag(A, s) { const R = A.map((r) => r.slice()); for (let i = 0; i < R.length; i++) R[i][i] += s; return R; }
 
   // ---------- ISU -> FdT  (Faddeev–LeVerrier, uso INTERNO) ----------
-  // Ritorna {num, den}. NB: l'algoritmo NON va mostrato all'utente.
+  // Ritorna {num, den}. Faddeev-LeVerrier non e' fra i metodi del corso:
+  // serve solo a produrre il risultato, non e' un procedimento da esporre.
   function ssToTf(A, B, C, D) {
     const n = A.length;
     let Bk = matIdent(n);          // B_0 = I
