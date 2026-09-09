@@ -344,8 +344,6 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   color: var(--ca-inchiostro);
 }
 
-.testata-sezione .conteggio { margin-left: auto; white-space: nowrap; }
-
 /* ---------- Indice degli strumenti ----------
    Un sommario tipografico: righe separate da filetti, numero di sezione
    a sinistra, sigla della materia a destra. Niente griglia di schede. */
@@ -353,7 +351,10 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 
 .voce {
   display: grid;
-  grid-template-columns: 4.2rem 1fr auto;
+  /* La colonna delle sigle e' fissa, non "auto": ogni voce e' una griglia
+     a se', e con la larghezza automatica il filetto verticale cadeva a
+     un'ascissa diversa riga per riga. */
+  grid-template-columns: 4.2rem 1fr 7.4rem;
   align-items: baseline;
   gap: 0 1.4rem;
   padding: 1.15rem .6rem 1.15rem .4rem;
@@ -501,15 +502,13 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
     gap: .55rem;
     margin: 1.2rem 0 2.4rem;
   }
-  /* La testata di sezione va in colonna e il conteggio sparisce: su una
-     riga sola i tre elementi si spezzavano a meta' parola. */
+  /* La testata di sezione va in colonna: su una riga sola etichetta e
+     titolo si spezzavano a meta' parola. */
   .testata-sezione {
     flex-direction: column;
     align-items: flex-start;
     gap: .25rem;
   }
-  .testata-sezione .conteggio { display: none; }
-
 
   .voce {
     grid-template-columns: 3.1rem 1fr;
