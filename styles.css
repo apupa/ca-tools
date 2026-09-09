@@ -424,9 +424,10 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
    titolo e chi cerca il contatto lo trova dove si cercano i crediti. */
 .colophon {
   display: block;
-  margin: 3.4rem 0 4rem;
-  padding-top: 1.3rem;
-  border-top: 1px solid var(--ca-inchiostro);
+  /* Senza filetto in testa: l'indice si chiude gia' con la propria riga
+     orizzontale, e due filetti a poca distanza leggevano come un errore
+     di impaginazione. Lo stacco lo fa il bianco. */
+  margin: 4.7rem 0 4rem;
 }
 
 .colophon-corpo {
