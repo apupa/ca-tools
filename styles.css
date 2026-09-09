@@ -347,7 +347,10 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 /* ---------- Indice degli strumenti ----------
    Un sommario tipografico: righe separate da filetti, numero di sezione
    a sinistra, sigla della materia a destra. Niente griglia di schede. */
-.indice-strumenti { border-bottom: 1px solid var(--ca-inchiostro); }
+/* Nessun filetto di chiusura in fondo: l'elenco e' gia' aperto dalla riga
+   spessa della testata, e in coda la riga faceva solo da doppione allo
+   stacco che precede il colophon. */
+.indice-strumenti { border-bottom: none; }
 
 .voce {
   display: grid;
