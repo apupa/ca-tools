@@ -1,7 +1,6 @@
 // ===== app.js — Risposta nel tempo e modi =====
 (function () {
   const CA = window.CA;
-  const CHIAVE_LOCALSTORAGE = "ca_ultima_fdt";
 
   // ---------- Riferimenti DOM ----------
   const campoNum = document.getElementById("fdt-num");
@@ -236,25 +235,8 @@
     eseguiCalcolo();
   }
 
-  // ---------- Riusa l'ultima FdT calcolata nel Convertitore (T1), se presente ----------
-  function usaUltimaFdT() {
-    divErrore.style.display = "none";
-    try {
-      const salvata = localStorage.getItem(CHIAVE_LOCALSTORAGE);
-      if (!salvata) throw new Error("nessuna FdT salvata: usa prima il Convertitore ISU↔IU↔FdT");
-      const { num, den } = JSON.parse(salvata);
-      campoNum.value = num.join(" ");
-      campoDen.value = den.join(" ");
-      eseguiCalcolo();
-    } catch (e) {
-      divErrore.textContent = "Errore: " + e.message;
-      divErrore.style.display = "block";
-    }
-  }
-
   document.getElementById("btn-calcola").addEventListener("click", eseguiCalcolo);
   document.getElementById("btn-esempio").addEventListener("click", caricaEsempio);
-  document.getElementById("btn-ultima-fdt").addEventListener("click", usaUltimaFdT);
 
   // ---------- Stato iniziale della pagina ----------
   aggiornaVisibilitaOmega();

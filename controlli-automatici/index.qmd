@@ -129,7 +129,6 @@ search: false
         <text x="154" y="62" font-family="var(--ca-mono)" font-size="10"
               fill="var(--ca-rosso)" text-anchor="middle">r</text>
       </svg>
-      <figcaption class="etichetta">Braccio a due giunti &middot; riferimento <span class="rif">r</span></figcaption>
     </figure>
   </header>
 
@@ -148,7 +147,6 @@ search: false
   <div class="testata-sezione">
     <p class="etichetta">Indice</p>
     <h2>Strumenti interattivi</h2>
-    <span class="etichetta conteggio">Sette schede</span>
   </div>
 
   <nav class="indice-strumenti">
@@ -157,7 +155,7 @@ search: false
       <span class="voce-num">§ 1</span>
       <span class="voce-corpo">
         <span class="voce-titolo">Conversione delle rappresentazioni</span>
-        <span class="voce-desc">Passa tra rappresentazione di stato (ISU), ingresso-uscita (IU) e funzione di trasferimento.</span>
+        <span class="voce-desc">Passa tra stato (ISU), ingresso-uscita (IU) e funzione di trasferimento.</span>
       </span>
       <span class="voce-sigla">ISU → FdT</span>
     </a>
@@ -166,7 +164,7 @@ search: false
       <span class="voce-num">§ 2</span>
       <span class="voce-corpo">
         <span class="voce-titolo">Risposta nel tempo e modi</span>
-        <span class="voce-desc">Impulso, gradino, rampa e sinusoide, con la scomposizione della risposta nei modi.</span>
+        <span class="voce-desc">Impulso, gradino, rampa e sinusoide, con la scomposizione nei modi.</span>
       </span>
       <span class="voce-sigla">e<sup>σt</sup></span>
     </a>
@@ -184,7 +182,7 @@ search: false
       <span class="voce-num">§ 4</span>
       <span class="voce-corpo">
         <span class="voce-titolo">Diagrammi di Bode</span>
-        <span class="voce-desc">Decomposizione automatica nei termini elementari, ciascuno con grafico e spiegazione.</span>
+        <span class="voce-desc">Decomposizione nei termini elementari, ciascuno con grafico e spiegazione.</span>
       </span>
       <span class="voce-sigla">−20 dB/dec</span>
     </a>
@@ -202,7 +200,7 @@ search: false
       <span class="voce-num">§ 6</span>
       <span class="voce-corpo">
         <span class="voce-titolo">Progettazione del controllore</span>
-        <span class="voce-desc">Dalle specifiche statiche e dinamiche al progetto: controllore proporzionale o compensatore.</span>
+        <span class="voce-desc">Dalle specifiche statiche e dinamiche al proporzionale o al compensatore.</span>
       </span>
       <span class="voce-sigla">C(s)</span>
     </a>

@@ -226,7 +226,9 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
    d'inchiostro, vincoli campiti, riferimento in rosso). */
 .frontespizio-figura {
   margin: 0 0 .4rem;
-  width: 230px;
+  /* Piu' di cosi' e la colonna del testo scende sotto i 34rem del
+     sommario, che si riimpagina su quattro righe. */
+  width: 290px;
 }
 
 .figura-robot {
@@ -234,17 +236,6 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   width: 100%;
   height: auto;
 }
-
-.frontespizio-figura figcaption {
-  margin-top: .2rem;
-  text-align: left;
-  line-height: 1.5;
-  text-transform: none;
-  letter-spacing: .02em;
-  font-size: .66rem;
-}
-
-.frontespizio-figura figcaption .rif { color: var(--ca-rosso); font-weight: 600; }
 
 /* Carta millimetrata: due griglie sovrapposte, disegnate in CSS.
    Sfuma verso il basso per non competere col testo. */
@@ -265,7 +256,10 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   z-index: 0;
 }
 
-.frontespizio > div { position: relative; z-index: 1; }
+/* Anche la <figure> del robot, non solo i div: fuori dal contesto di
+   impilamento la griglia (un ::before posizionato) le passava sopra e
+   lasciava un filo chiaro attraverso il disegno. */
+.frontespizio > * { position: relative; z-index: 1; }
 
 .frontespizio-testo { max-width: 34rem; }
 
@@ -350,8 +344,6 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   color: var(--ca-inchiostro);
 }
 
-.testata-sezione .conteggio { margin-left: auto; white-space: nowrap; }
-
 /* ---------- Indice degli strumenti ----------
    Un sommario tipografico: righe separate da filetti, numero di sezione
    a sinistra, sigla della materia a destra. Niente griglia di schede. */
@@ -359,7 +351,10 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 
 .voce {
   display: grid;
-  grid-template-columns: 4.2rem 1fr auto;
+  /* La colonna delle sigle e' fissa, non "auto": ogni voce e' una griglia
+     a se', e con la larghezza automatica il filetto verticale cadeva a
+     un'ascissa diversa riga per riga. */
+  grid-template-columns: 4.2rem 1fr 7.4rem;
   align-items: baseline;
   gap: 0 1.4rem;
   padding: 1.15rem .6rem 1.15rem .4rem;
@@ -429,9 +424,10 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
    titolo e chi cerca il contatto lo trova dove si cercano i crediti. */
 .colophon {
   display: block;
-  margin: 3.4rem 0 4rem;
-  padding-top: 1.3rem;
-  border-top: 1px solid var(--ca-inchiostro);
+  /* Senza filetto in testa: l'indice si chiude gia' con la propria riga
+     orizzontale, e due filetti a poca distanza leggevano come un errore
+     di impaginazione. Lo stacco lo fa il bianco. */
+  margin: 4.7rem 0 4rem;
 }
 
 .colophon-corpo {
@@ -492,7 +488,7 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   }
   /* In colonna il disegno passa sopra al titolo e si rimpicciolisce:
      sotto al sommario spingerebbe l'indice troppo in basso. */
-  .frontespizio-figura { order: -1; width: 170px; }
+  .frontespizio-figura { order: -1; width: 205px; }
 
   /* Il colophon va in colonna: affiancare un ritratto a un testo lungo
      su schermo stretto lascia due colonne entrambe illeggibili. */
@@ -507,15 +503,13 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
     gap: .55rem;
     margin: 1.2rem 0 2.4rem;
   }
-  /* La testata di sezione va in colonna e il conteggio sparisce: su una
-     riga sola i tre elementi si spezzavano a meta' parola. */
+  /* La testata di sezione va in colonna: su una riga sola etichetta e
+     titolo si spezzavano a meta' parola. */
   .testata-sezione {
     flex-direction: column;
     align-items: flex-start;
     gap: .25rem;
   }
-  .testata-sezione .conteggio { display: none; }
-
 
   .voce {
     grid-template-columns: 3.1rem 1fr;
