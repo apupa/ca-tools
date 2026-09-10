@@ -1092,3 +1092,96 @@ details.teoria li,
     height: auto;
   }
 }
+
+/* ---------- Pillole teoriche (pagine in pillole/) ----------
+   Pagine di sola lettura: stessa colonna di margine degli strumenti, ma il
+   titolo di sezione resta nel testo invece di salire nel margine. Qui si
+   legge di seguito, e un'etichetta in monospaziato ogni due paragrafi
+   spezzerebbe la lettura; nel margine va il solo numero, che fa da filo
+   conduttore lungo la pagina. */
+/* Il codice della lezione fa da occhiello sopra al titolo, come sul
+   frontespizio della home: il titolo e' il contenuto, "CA04" e' solo la
+   collocazione nel corso. Rientra come l'h1 per restare in colonna. */
+.pillole-occhiello {
+  padding-left: var(--margine);
+  margin: 0 0 .55rem;
+}
+
+#pillole-contenuto { counter-reset: sezione; }
+
+.pillola {
+  position: relative;
+  padding: 1.9rem 0 .6rem var(--margine);
+  border-top: 1px solid var(--colore-filetto);
+  counter-increment: sezione;
+}
+
+/* La prima sezione non ripete il filetto: sopra c'e' gia' la riga spessa
+   che chiude la testata, e due righe a 30px l'una dall'altra sembrano un
+   errore di impaginazione. */
+.pillola:first-child {
+  border-top: none;
+  padding-top: .4rem;
+}
+
+.pillola:first-child::before { top: .85rem; }
+
+.pillola::before {
+  content: "§ " counter(sezione);
+  position: absolute;
+  left: 0;
+  top: 2.35rem;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: .08em;
+  color: var(--colore-muted);
+}
+
+.pillola > h2 {
+  margin: 0 0 .7rem;
+  font-family: var(--font-serif);
+  font-size: 1.22rem;
+  font-weight: 600;
+  line-height: 1.32;
+  letter-spacing: -.01em;
+  color: var(--colore-testo);
+}
+
+/* Misura di lettura: la colonna del testo e' larga il doppio di quanto
+   serva a un paragrafo, quindi la si stringe qui e non nel contenitore. */
+.pillola p {
+  margin: 0 0 1rem;
+  max-width: 34rem;
+  font-size: 1.02rem;
+  line-height: 1.72;
+  color: var(--colore-testo-2);
+}
+
+/* Le figure arrivano da MATLAB su fondo bianco: in multiply il bianco
+   sparisce nella carta e restano solo i tratti, senza il riquadro chiaro
+   che altrimenti spiccherebbe in mezzo al testo. */
+.pillola-immagine {
+  display: block;
+  /* Le figure possono uscire dalla misura del testo: sono tavole, e a
+     34rem i grafici piu' fitti diventavano illeggibili. */
+  max-width: min(100%, 40rem);
+  height: auto;
+  margin: 1.4rem 0 1.5rem;
+  mix-blend-mode: multiply;
+}
+
+.pillole-caricamento,
+.pillole-errore {
+  font-family: var(--font-mono);
+  font-size: .82rem;
+  color: var(--colore-muted);
+}
+
+.pillole-errore { color: var(--colore-errore); }
+
+@media (max-width: 860px) {
+  /* Qui --margine e' gia' 0: il numero non ha piu' una colonna in cui
+     stare e torna in linea, sopra al titolo. */
+  .pillola { padding-top: 1.5rem; }
+  .pillola::before { position: static; display: block; margin-bottom: .45rem; }
+}

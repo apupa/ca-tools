@@ -313,17 +313,24 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 .nota-apertura {
   display: grid;
   grid-template-columns: 9.5rem 1fr;
-  gap: 1.6rem;
+  /* Nessuno spazio fra le righe: i capoversi lo mettono da se' col
+     margine, altrimenti si sommerebbero i due. */
+  gap: 0 1.6rem;
   padding: 1.5rem 0;
   border-top: 1px solid var(--ca-inchiostro);
   margin: 1.5rem 0 3.4rem;
 }
 
+/* Tutti i paragrafi stanno nella seconda colonna: l'etichetta occupa la
+   prima da sola, e senza questo il secondo capoverso ci finirebbe sotto. */
 .nota-apertura p:not(.etichetta) {
-  margin: 0;
+  grid-column: 2;
+  margin: 0 0 .8rem;
   color: var(--ca-inchiostro-2);
   font-size: 1.03rem;
 }
+
+.nota-apertura p:not(.etichetta):last-child { margin-bottom: 0; }
 
 .nota-apertura strong { color: var(--ca-inchiostro); font-weight: 600; }
 
@@ -357,6 +364,7 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 .indice-strumenti { border-bottom: none; }
 
 .voce {
+  position: relative;
   display: grid;
   /* La colonna delle sigle e' fissa, non "auto": ogni voce e' una griglia
      a se', e con la larghezza automatica il filetto verticale cadeva a
@@ -395,6 +403,17 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   font-weight: 500;
   line-height: 1.3;
   margin-bottom: .18rem;
+  color: var(--ca-inchiostro);
+  text-decoration: none !important;
+}
+
+/* Il link del titolo si stende su tutta la riga: cliccare ovunque apre lo
+   strumento, come quando la voce era un <a>. Il rimando alla lezione resta
+   sopra (z-index), altrimenti non sarebbe piu' raggiungibile. */
+.voce-titolo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
 }
 
 .voce:hover .voce-titolo { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
@@ -409,19 +428,41 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 
 /* Sigla: la "firma" matematica dello strumento (e^{lambda t}, -20 dB/dec,
    ...). E' cio' che distingue una voce dall'altra a colpo d'occhio. */
-.voce-sigla {
+.voce-lato {
   grid-column: 3;
   grid-row: 1 / span 2;
   align-self: center;
-  font-family: var(--ca-mono);
-  font-size: .78rem;
-  color: var(--ca-inchiostro-3);
-  white-space: nowrap;
   padding-left: 1rem;
   border-left: 1px solid var(--ca-filetto);
 }
 
-.voce:hover .voce-sigla { color: var(--ca-blu); border-left-color: var(--ca-blu); }
+.voce-sigla {
+  display: block;
+  font-family: var(--ca-mono);
+  font-size: .78rem;
+  color: var(--ca-inchiostro-3);
+  white-space: nowrap;
+}
+
+/* Rimando alla pillola teorica della lezione: e' il primo termine di
+   "dalla teoria alla pratica", quindi sta accanto allo strumento invece
+   che in un elenco a parte. */
+.voce-teoria {
+  position: relative;
+  display: inline-block;
+  margin: .45rem .5rem 0 0;
+  font-family: var(--ca-mono);
+  font-size: .7rem;
+  letter-spacing: .04em;
+  color: var(--ca-inchiostro-3);
+  text-decoration: none !important;
+  border-bottom: 1px solid var(--ca-filetto);
+}
+
+.voce-teoria:hover { color: var(--ca-blu); border-bottom-color: var(--ca-blu); }
+
+.voce:hover .voce-lato { border-left-color: var(--ca-blu); }
+.voce:hover .voce-sigla { color: var(--ca-blu); }
 
 .voce-corpo { grid-column: 2; }
 .voce-num { grid-column: 1; }
@@ -542,15 +583,16 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
     grid-template-columns: 3.1rem 1fr;
     padding: .95rem .2rem;
   }
-  /* La sigla scende sotto la descrizione e perde il filetto: in colonna
-     stretta a destra non ci sta senza spezzare il titolo. */
-  .voce-sigla {
+  /* La colonna di destra scende sotto la descrizione e perde il filetto:
+     in colonna stretta non ci sta senza spezzare il titolo. */
+  .voce-lato {
     grid-column: 2;
     grid-row: auto;
     padding: .35rem 0 0;
     border-left: none;
-    font-size: .72rem;
   }
+  .voce-sigla { display: inline; font-size: .72rem; }
+  .voce-teoria { margin: 0 0 0 .7rem; }
   .voce:hover { padding-left: .5rem; }
   .voce-titolo { font-size: 1.05rem; }
 }
