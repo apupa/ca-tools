@@ -1139,6 +1139,9 @@ details.teoria li,
 
 .pillola > h2 {
   margin: 0 0 .7rem;
+  /* Stessa misura del testo: senza, i titoli lunghi correvano oltre la
+     colonna dei paragrafi e sembravano appartenere a un'altra griglia. */
+  max-width: 34rem;
   font-family: var(--font-serif);
   font-size: 1.22rem;
   font-weight: 600;
