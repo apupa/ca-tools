@@ -1174,6 +1174,21 @@ details.teoria li,
   overflow-y: hidden;
 }
 
+/* Tabella di consultazione: sta nella misura del testo e, se le colonne
+   non ci stanno, scorre per conto suo invece di allargare la pagina. */
+.pillola-tabella {
+  max-width: 34rem;
+  overflow-x: auto;
+  margin: 1.3rem 0 1.5rem;
+}
+
+.pillola-tabella table { margin: 0; }
+
+/* In riga di intestazione la matematica va lasciata in tondo: il
+   maiuscoletto spaziato del monospaziato non la tocca, ma il colore si'. */
+.pillola-tabella th { color: var(--colore-muted); white-space: nowrap; }
+.pillola-tabella td { color: var(--colore-testo-2); }
+
 /* Schemi ridisegnati per il sito: SVG in linea, quindi prendono caratteri
    e colori dalla pagina invece di portarsi dietro i propri. */
 .pillola-figura {

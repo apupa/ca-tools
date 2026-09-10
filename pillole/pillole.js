@@ -1,14 +1,34 @@
 // ===== pillole.js — carica e mostra le pillole teoriche di una lezione =====
 // Le pillole sono file markdown molto regolari (vedi CA0X.md): solo
 // intestazioni "## Titolo", paragrafi di testo semplice, formule isolate
-// "$$...$$" e occasionali immagini "![alt](percorso)". Non serve un parser
-// markdown completo: questo gestisce esattamente queste quattro cose.
+// "$$...$$", tabelle a barre verticali e occasionali immagini
+// "![alt](percorso)". Non serve un parser markdown completo: questo
+// gestisce esattamente queste cinque cose.
 (function () {
   function escapeHtml(testo) {
     return testo
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
+  }
+
+  // Tabella: ogni riga comincia con "|", la seconda e' la riga di separazione
+  // "| --- | --- |". Dentro una cella la barra va scritta "\\|", altrimenti
+  // spezzerebbe la colonna (serve per la matematica con i moduli).
+  function renderTabella(paragrafo) {
+    const righe = paragrafo.split("\n").filter(function (r) { return r.trim(); });
+    function celle(riga) {
+      return riga.trim().replace(/^\|/, "").replace(/\|$/, "")
+        .split(/(?<!\\)\|/)
+        .map(function (c) { return escapeHtml(c.trim().replace(/\\\|/g, "|")); });
+    }
+    const intestazione = celle(righe[0]);
+    const corpo = righe.slice(2).map(function (r) {
+      return "<tr>" + celle(r).map(function (c) { return "<td>" + c + "</td>"; }).join("") + "</tr>";
+    });
+    return '<div class="pillola-tabella"><table><thead><tr>' +
+      intestazione.map(function (c) { return "<th>" + c + "</th>"; }).join("") +
+      "</tr></thead><tbody>" + corpo.join("") + "</tbody></table></div>";
   }
 
   function renderBlocco(testo) {
@@ -35,6 +55,9 @@
             '<img class="pillola-immagine" src="' + immagine[2] + '" alt="' +
             escapeHtml(immagine[1]) + '" loading="lazy" />'
           );
+        }
+        if (/^\|/.test(p) && /^\|[\s|:-]+\|$/.test(p.split("\n")[1] || "")) {
+          return renderTabella(p);
         }
         // Formula isolata: resta un blocco a se', cosi' puo' avere la sua
         // spaziatura e scorrere da sola quando e' piu' larga della colonna.
