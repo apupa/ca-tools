@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="20 21 680 129" fill="none">
+  <defs>
+    <marker id="punta-ca08" viewBox="0 0 8 8" refX="7" refY="4"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L8 4 L0 8 z" fill="var(--colore-testo, #1a1a17)" />
+    </marker>
+  </defs>
+
+  <g stroke="var(--colore-testo, #1a1a17)" stroke-width="1.4">
+    <path d="M30 64 H128" marker-end="url(#punta-ca08)" />
+    <path d="M152 64 H208" marker-end="url(#punta-ca08)" />
+    <path d="M338 64 H406" marker-end="url(#punta-ca08)" />
+    <path d="M536 64 H690" marker-end="url(#punta-ca08)" />
+    <!-- ritorno unitario: nessun blocco sul ramo, il segnale rientra
+         direttamente nel nodo -->
+    <path d="M610 64 V150 H140 V79" marker-end="url(#punta-ca08)" />
+  </g>
+
+  <circle cx="610" cy="64" r="3.4" fill="var(--colore-testo, #1a1a17)" />
+  <circle cx="140" cy="64" r="12" fill="var(--colore-foglio, #fbf9f5)"
+          stroke="var(--colore-testo, #1a1a17)" stroke-width="1.4" />
+
+  <g fill="var(--colore-foglio, #fbf9f5)"
+     stroke="var(--colore-testo, #1a1a17)" stroke-width="1.6">
+    <rect x="208" y="40" width="130" height="48" />
+    <rect x="406" y="40" width="130" height="48" />
+  </g>
+
+  <g font-family="var(--font-serif, Georgia, serif)" font-size="19"
+     fill="var(--colore-testo, #1a1a17)" text-anchor="middle">
+    <text x="273" y="71">PID</text>
+    <text x="471" y="71" font-style="italic">G(s)</text>
+  </g>
+
+  <g font-family="var(--font-serif, Georgia, serif)" font-size="17"
+     font-style="italic" fill="var(--colore-testo, #1a1a17)" text-anchor="middle">
+    <text x="76" y="50">y<tspan font-size="11" dy="4">ref</tspan><tspan dy="-4">(t)</tspan></text>
+    <text x="180" y="50">e(t)</text>
+    <text x="372" y="50">u(t)</text>
+    <text x="648" y="50">y(t)</text>
+  </g>
+
+  <g font-family="var(--font-mono, monospace)" font-size="13"
+     fill="var(--colore-muted, #7d7a70)">
+    <text x="117" y="54">+</text>
+    <text x="148" y="93">&#8722;</text>
+  </g>
+</svg>

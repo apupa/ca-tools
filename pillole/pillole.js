@@ -57,9 +57,16 @@
       .join("\n");
   }
 
+  // Marca di versione condivisa: markdown e figure sono scaricati a parte,
+  // quindi senza di essa il browser continuerebbe a servire i vecchi anche
+  // dopo una pubblicazione. La imposta la pagina (window.CA_VERSIONE).
+  function conVersione(percorso) {
+    return window.CA_VERSIONE ? percorso + "?v=" + window.CA_VERSIONE : percorso;
+  }
+
   function inserisciSvg(radice) {
     radice.querySelectorAll("[data-svg]").forEach(function (posto) {
-      fetch(posto.getAttribute("data-svg"))
+      fetch(conVersione(posto.getAttribute("data-svg")))
         .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
         .then(function (svg) { posto.innerHTML = svg; })
         .catch(function () {
@@ -77,7 +84,7 @@
   const nomeFile = window.CA_LEZIONE_MD;
   if (!contenitore || !nomeFile) return;
 
-  fetch(nomeFile)
+  fetch(conVersione(nomeFile))
     .then((risposta) => {
       if (!risposta.ok) throw new Error("file non trovato (" + risposta.status + ")");
       return risposta.text();
