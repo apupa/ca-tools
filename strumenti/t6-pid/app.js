@@ -288,7 +288,7 @@
       ]);
 
       const errRegime = risultato.r[risultato.r.length - 1] - risultato.y[risultato.y.length - 1];
-      let html = "<table><tbody>";
+      let html = "<table class=\"tabella-costanti\"><tbody>";
       html += "<tr><th>Tipo regolatore</th><td>" + "P" + (azioneI ? "I" : "") + (azioneD ? "D" : "") + "</td></tr>";
       html += "<tr><th>$K_p$</th><td>" + formattaNumero(Kp) + "</td></tr>";
       html += "<tr><th>$K_i = K_p/T_i$</th><td>" + (azioneI ? formattaNumero(Kp / Ti) : "0 (disattivata)") + "</td></tr>";
