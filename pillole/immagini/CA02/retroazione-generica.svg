@@ -14,8 +14,8 @@
 
     <!-- ramo di retroazione: scende dal punto di diramazione, torna
          indietro attraverso G2 e rientra nel nodo sommatore -->
-    <path d="M470 70 V160 H408" marker-end="url(#punta-ca02)" />
-    <path d="M280 160 H155 V85" marker-end="url(#punta-ca02)" />
+    <path d="M470 70 V160 H348" marker-end="url(#punta-ca02)" />
+    <path d="M215 160 H155 V85" marker-end="url(#punta-ca02)" />
   </g>
 
   <!-- punto di diramazione -->
@@ -29,13 +29,13 @@
   <g fill="var(--colore-foglio, #fbf9f5)"
      stroke="var(--colore-testo, #1a1a17)" stroke-width="1.6">
     <rect x="215" y="48" width="130" height="44" />
-    <rect x="280" y="138" width="130" height="44" />
+    <rect x="215" y="138" width="130" height="44" />
   </g>
 
   <g font-family="var(--font-serif, Georgia, serif)" font-size="18"
      fill="var(--colore-testo, #1a1a17)" text-anchor="middle">
     <text x="280" y="76"><tspan font-style="italic">G</tspan><tspan font-size="12" dy="5">1</tspan><tspan dy="-5" font-style="italic">(s)</tspan></text>
-    <text x="345" y="166"><tspan font-style="italic">G</tspan><tspan font-size="12" dy="5">2</tspan><tspan dy="-5" font-style="italic">(s)</tspan></text>
+    <text x="280" y="166"><tspan font-style="italic">G</tspan><tspan font-size="12" dy="5">2</tspan><tspan dy="-5" font-style="italic">(s)</tspan></text>
   </g>
 
   <!-- segnali -->
