@@ -22,6 +22,16 @@
   --colore-rosso-tenue:rgba(179, 38, 30, .09);
   --colore-errore:     #b3261e;
 
+  /* Serie di un grafico a piu' curve (per ora solo la tavola dei termini
+     del secondo ordine). Non sono scelte a occhio: passano i controlli di
+     separazione per daltonismo e di contrasto sulla carta, sulla lista di
+     coppie adiacenti, che e' quella giusta per curve ordinate. */
+  --serie-1: #2a78d6;
+  --serie-2: #c1521f;
+  --serie-3: #12876a;
+  --serie-4: #b98200;
+  --serie-5: #a63d6e;
+
   --font-serif: "Spectral", Georgia, "Times New Roman", serif;
   --font-mono:  "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
