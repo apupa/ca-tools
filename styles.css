@@ -27,6 +27,10 @@
 
   /* Passo della carta millimetrata (usato nell'intestazione). */
   --ca-passo: 22px;
+
+  /* Altezza del ritratto nei contatti: la condivide la colonna di testo,
+     che vi allinea l'ultima riga. */
+  --ritratto-h: 116px;
 }
 
 /* ---------- Base ---------- */
@@ -427,10 +431,11 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
    titolo e chi cerca il contatto lo trova dove si cercano i crediti. */
 .colophon {
   display: block;
-  /* Senza filetto in testa: l'indice si chiude gia' con la propria riga
-     orizzontale, e due filetti a poca distanza leggevano come un errore
-     di impaginazione. Lo stacco lo fa il bianco. */
-  margin: 4.7rem 0 4rem;
+  /* Un filetto solo in tutta la zona, e sta qui: apre i contatti invece di
+     chiudere l'indice, cosi' resta attaccato all'etichetta che introduce. */
+  margin: 3.4rem 0 4rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--ca-inchiostro);
 }
 
 .colophon-corpo {
@@ -443,12 +448,19 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 .colophon-ritratto {
   flex: 0 0 auto;
   width: 96px;
-  height: 116px;
+  height: var(--ritratto-h);
   object-fit: cover;
   border: 1px solid var(--ca-inchiostro);
 }
 
-.colophon-testo { min-width: 0; }
+/* Colonna alta quanto il ritratto: l'invito a scrivere ha margin-top auto
+   e finisce cosi' appoggiato al bordo inferiore della foto. */
+.colophon-testo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: var(--ritratto-h);
+}
 
 .colophon-nome {
   margin: 0 0 .3rem;
@@ -469,6 +481,15 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 }
 
 .colophon-riga:last-child { margin-bottom: 0; }
+
+.colophon-invito {
+  margin: auto 0 0;
+  font-style: italic;
+  font-size: .93rem;
+  line-height: 1.55;
+  color: var(--ca-inchiostro-2);
+  max-width: 46rem;
+}
 
 /* ---------- Footer di Quarto ---------- */
 .nav-footer {
@@ -494,8 +515,11 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   .frontespizio-figura { order: -1; width: 205px; }
 
   /* Il colophon va in colonna: affiancare un ritratto a un testo lungo
-     su schermo stretto lascia due colonne entrambe illeggibili. */
+     su schermo stretto lascia due colonne entrambe illeggibili. Cadendo
+     l'affiancamento cade anche l'allineamento al bordo della foto. */
   .colophon-corpo { flex-direction: column; gap: 1rem; }
+  .colophon-testo { min-height: 0; }
+  .colophon-invito { margin-top: .9rem; }
 }
 
 @media (max-width: 560px) {
