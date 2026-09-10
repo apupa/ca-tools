@@ -1,8 +1,8 @@
 // ===== pillole.js — carica e mostra le pillole teoriche di una lezione =====
 // Le pillole sono file markdown molto regolari (vedi CA0X.md): solo
-// intestazioni "## Titolo", paragrafi di testo semplice e occasionali
-// immagini "![alt](percorso)". Non serve un parser markdown completo: questo
-// gestisce esattamente queste tre cose.
+// intestazioni "## Titolo", paragrafi di testo semplice, formule isolate
+// "$$...$$" e occasionali immagini "![alt](percorso)". Non serve un parser
+// markdown completo: questo gestisce esattamente queste quattro cose.
 (function () {
   function escapeHtml(testo) {
     return testo
@@ -22,10 +22,24 @@
         const p = paragrafo.trim();
         const immagine = p.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
         if (immagine) {
+          // Gli schemi ridisegnati per il sito sono SVG e vengono messi in
+          // linea (vedi inserisciSvg): dentro un <img> sarebbero un documento
+          // a se', senza i caratteri e i colori della pagina.
+          if (/\.svg$/i.test(immagine[2])) {
+            return (
+              '<div class="pillola-figura" role="img" data-svg="' + immagine[2] +
+              '" aria-label="' + escapeHtml(immagine[1]) + '"></div>'
+            );
+          }
           return (
             '<img class="pillola-immagine" src="' + immagine[2] + '" alt="' +
             escapeHtml(immagine[1]) + '" loading="lazy" />'
           );
+        }
+        // Formula isolata: resta un blocco a se', cosi' puo' avere la sua
+        // spaziatura e scorrere da sola quando e' piu' larga della colonna.
+        if (/^\$\$[\s\S]*\$\$$/.test(p)) {
+          return '<div class="pillola-formula">' + escapeHtml(p) + "</div>";
         }
         return "<p>" + escapeHtml(p).replace(/\n/g, " ") + "</p>";
       })
@@ -43,6 +57,22 @@
       .join("\n");
   }
 
+  function inserisciSvg(radice) {
+    radice.querySelectorAll("[data-svg]").forEach(function (posto) {
+      fetch(posto.getAttribute("data-svg"))
+        .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
+        .then(function (svg) { posto.innerHTML = svg; })
+        .catch(function () {
+          // Se la richiesta non va a buon fine il disegno resta comunque:
+          // dentro un <img> perde i caratteri della pagina, ma e' sempre
+          // meglio di una figura sparita senza dire niente.
+          posto.innerHTML =
+            '<img src="' + posto.getAttribute("data-svg") + '" alt="' +
+            (posto.getAttribute("aria-label") || "") + '" />';
+        });
+    });
+  }
+
   const contenitore = document.getElementById("pillole-contenuto");
   const nomeFile = window.CA_LEZIONE_MD;
   if (!contenitore || !nomeFile) return;
@@ -54,6 +84,7 @@
     })
     .then((testo) => {
       contenitore.innerHTML = renderMarkdown(testo);
+      inserisciSvg(contenitore);
       if (window.MathJax && window.MathJax.typesetPromise) {
         window.MathJax.typesetPromise([contenitore]);
       }

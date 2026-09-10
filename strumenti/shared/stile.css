@@ -1157,6 +1157,30 @@ details.teoria li,
   color: var(--colore-testo-2);
 }
 
+/* Formula isolata: piu' aria sopra e sotto che fra due capoversi, cosi'
+   si stacca dal testo. Se e' piu' larga della colonna scorre per conto
+   suo, invece di allargare la pagina. */
+.pillola-formula {
+  margin: 1.6rem 0;
+  max-width: 34rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Schemi ridisegnati per il sito: SVG in linea, quindi prendono caratteri
+   e colori dalla pagina invece di portarsi dietro i propri. */
+.pillola-figura {
+  margin: 1.5rem 0 1.6rem;
+  /* Come le tavole: possono uscire dalla misura del testo. */
+  max-width: min(100%, 40rem);
+}
+
+.pillola-figura svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* Le figure arrivano da MATLAB su fondo bianco: in multiply il bianco
    sparisce nella carta e restano solo i tratti, senza il riquadro chiaro
    che altrimenti spiccherebbe in mezzo al testo. */

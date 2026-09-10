@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 116" fill="none">
+  <defs>
+    <marker id="punta-ca01" viewBox="0 0 8 8" refX="7" refY="4"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L8 4 L0 8 z" fill="var(--colore-testo, #1a1a17)" />
+    </marker>
+  </defs>
+
+  <!-- Etichette delle variabili in monospaziato, come ogni annotazione
+       tecnica del sito. La cassa e' larga rispetto al testo: il carattere
+       effettivo dipende da cosa il browser riesce a caricare, e con il
+       viewBox stretto la riga di sinistra usciva dal disegno. -->
+  <g font-family="var(--font-mono, monospace)" font-size="13"
+     fill="var(--colore-muted, #7d7a70)">
+    <text x="200" y="53" text-anchor="end">variabili di ingresso</text>
+    <text x="470" y="53">variabili di uscita</text>
+  </g>
+
+  <g stroke="var(--colore-testo, #1a1a17)" stroke-width="1.4"
+     marker-end="url(#punta-ca01)">
+    <path d="M206 64 H250" />
+    <path d="M415 64 H461" />
+  </g>
+
+  <!-- Il sistema: riquadro squadrato, non arrotondato. -->
+  <rect x="255" y="40" width="160" height="48"
+        fill="var(--colore-foglio, #fbf9f5)"
+        stroke="var(--colore-testo, #1a1a17)" stroke-width="1.6" />
+  <text x="335" y="70" text-anchor="middle"
+        font-family="var(--font-serif, Georgia, serif)" font-size="18"
+        font-weight="600" fill="var(--colore-testo, #1a1a17)">Sistema</text>
+</svg>
