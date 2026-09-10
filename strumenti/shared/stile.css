@@ -1155,6 +1155,10 @@ details.teoria li,
   font-size: 1.02rem;
   line-height: 1.72;
   color: var(--colore-testo-2);
+  /* Giustificato con sillabazione: senza, l'italiano fa parole lunghe e
+     spazi enormi. La lingua la dichiara <html lang="it">. */
+  text-align: justify;
+  hyphens: auto;
 }
 
 /* Formula isolata: piu' aria sopra e sotto che fra due capoversi, cosi'
@@ -1171,8 +1175,8 @@ details.teoria li,
    e colori dalla pagina invece di portarsi dietro i propri. */
 .pillola-figura {
   margin: 1.5rem 0 1.6rem;
-  /* Come le tavole: possono uscire dalla misura del testo. */
-  max-width: min(100%, 40rem);
+  /* Larghe quanto il testo: sporgendo a destra sembravano fuori asse. */
+  max-width: min(100%, 34rem);
 }
 
 .pillola-figura svg {
@@ -1186,9 +1190,7 @@ details.teoria li,
    che altrimenti spiccherebbe in mezzo al testo. */
 .pillola-immagine {
   display: block;
-  /* Le figure possono uscire dalla misura del testo: sono tavole, e a
-     34rem i grafici piu' fitti diventavano illeggibili. */
-  max-width: min(100%, 40rem);
+  max-width: min(100%, 34rem);
   height: auto;
   margin: 1.4rem 0 1.5rem;
   mix-blend-mode: multiply;
