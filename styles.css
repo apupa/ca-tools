@@ -366,10 +366,11 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 .voce {
   position: relative;
   display: grid;
-  /* La colonna delle sigle e' fissa, non "auto": ogni voce e' una griglia
-     a se', e con la larghezza automatica il filetto verticale cadeva a
-     un'ascissa diversa riga per riga. */
-  grid-template-columns: 4.2rem 1fr 7.4rem;
+  /* La terza colonna e' fissa, non "auto": ogni voce e' una griglia a se',
+     e con la larghezza automatica il filetto verticale cadeva a un'ascissa
+     diversa riga per riga. La misura e' quella della riga piu' piena, il
+     §1, che rimanda a due lezioni. */
+  grid-template-columns: 4.2rem 1fr 6rem;
   align-items: baseline;
   gap: 0 1.4rem;
   padding: 1.15rem .6rem 1.15rem .4rem;
@@ -428,6 +429,9 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
 
 /* Sigla: la "firma" matematica dello strumento (e^{lambda t}, -20 dB/dec,
    ...). E' cio' che distingue una voce dall'altra a colpo d'occhio. */
+/* Colonna di destra: il rimando alla pillola teorica della lezione. E' il
+   primo termine di "dalla teoria alla pratica", quindi sta accanto allo
+   strumento invece che in un elenco a parte. */
 .voce-lato {
   grid-column: 3;
   grid-row: 1 / span 2;
@@ -436,33 +440,24 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
   border-left: 1px solid var(--ca-filetto);
 }
 
-.voce-sigla {
-  display: block;
+.voce-teoria {
+  position: relative;
+  display: inline-block;
+  margin-right: .55rem;
   font-family: var(--ca-mono);
   font-size: .78rem;
   color: var(--ca-inchiostro-3);
   white-space: nowrap;
-}
-
-/* Rimando alla pillola teorica della lezione: e' il primo termine di
-   "dalla teoria alla pratica", quindi sta accanto allo strumento invece
-   che in un elenco a parte. */
-.voce-teoria {
-  position: relative;
-  display: inline-block;
-  margin: .45rem .5rem 0 0;
-  font-family: var(--ca-mono);
-  font-size: .7rem;
-  letter-spacing: .04em;
-  color: var(--ca-inchiostro-3);
   text-decoration: none !important;
-  border-bottom: 1px solid var(--ca-filetto);
 }
 
-.voce-teoria:hover { color: var(--ca-blu); border-bottom-color: var(--ca-blu); }
+.voce-teoria:last-child { margin-right: 0; }
+
+/* Il blu resta al passaggio del mouse: a riposo la sigla e' grigia come
+   il resto delle annotazioni tecniche. */
+.voce-teoria:hover { color: var(--ca-blu); text-decoration: underline !important; text-underline-offset: 3px; }
 
 .voce:hover .voce-lato { border-left-color: var(--ca-blu); }
-.voce:hover .voce-sigla { color: var(--ca-blu); }
 
 .voce-corpo { grid-column: 2; }
 .voce-num { grid-column: 1; }
@@ -591,8 +586,7 @@ a:hover { color: var(--ca-blu); text-decoration: underline; text-underline-offse
     padding: .35rem 0 0;
     border-left: none;
   }
-  .voce-sigla { display: inline; font-size: .72rem; }
-  .voce-teoria { margin: 0 0 0 .7rem; }
+  .voce-teoria { font-size: .72rem; }
   .voce:hover { padding-left: .5rem; }
   .voce-titolo { font-size: 1.05rem; }
 }

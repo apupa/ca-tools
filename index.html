@@ -58,9 +58,13 @@ ul.task-list li input[type="checkbox"] {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap">
+<!-- Il foglio di stile e' collegato qui, e non con "css:", solo per
+     potergli attaccare la marca di versione: senza, il browser tiene
+     in cache il CSS vecchio e lo applica all'HTML nuovo. Va alzata a
+     ogni modifica di styles.css. -->
+<link rel="stylesheet" href="styles.css?v=20260910c">
 
 
-<link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="fullcontent quarto-light">
@@ -244,7 +248,6 @@ ul.task-list li input[type="checkbox"] {
         <span class="voce-desc">Passa tra stato (ISU), ingresso-uscita (IU) e funzione di trasferimento.</span>
       </span>
       <span class="voce-lato">
-        <span class="voce-sigla">ISU → FdT</span>
         <a class="voce-teoria" href="pillole/CA01.html" title="Pillola teorica: Sistemi e modelli">CA01</a>
         <a class="voce-teoria" href="pillole/CA02.html" title="Pillola teorica: Funzioni di trasferimento">CA02</a>
       </span>
@@ -257,7 +260,6 @@ ul.task-list li input[type="checkbox"] {
         <span class="voce-desc">Impulso, gradino, rampa e sinusoide, con la scomposizione nei modi.</span>
       </span>
       <span class="voce-lato">
-        <span class="voce-sigla">e<sup>σt</sup></span>
         <a class="voce-teoria" href="pillole/CA03.html" title="Pillola teorica: Antitrasformate e modi">CA03</a>
       </span>
     </div>
@@ -269,7 +271,6 @@ ul.task-list li input[type="checkbox"] {
         <span class="voce-desc">Poli e zeri con slider interattivi, più il massa-molla-smorzatore animato.</span>
       </span>
       <span class="voce-lato">
-        <span class="voce-sigla">δ, ω<sub>n</sub></span>
         <a class="voce-teoria" href="pillole/CA04.html" title="Pillola teorica: Sistemi elementari">CA04</a>
       </span>
     </div>
@@ -281,7 +282,6 @@ ul.task-list li input[type="checkbox"] {
         <span class="voce-desc">Decomposizione nei termini elementari, ciascuno con grafico e spiegazione.</span>
       </span>
       <span class="voce-lato">
-        <span class="voce-sigla">−20 dB/dec</span>
         <a class="voce-teoria" href="pillole/CA05.html" title="Pillola teorica: Analisi armonica">CA05</a>
       </span>
     </div>
@@ -293,7 +293,6 @@ ul.task-list li input[type="checkbox"] {
         <span class="voce-desc">Tracciamento al variare di K con tutte le regole di costruzione.</span>
       </span>
       <span class="voce-lato">
-        <span class="voce-sigla">1 + KG(s) = 0</span>
         <a class="voce-teoria" href="pillole/CA07.html" title="Pillola teorica: Luogo delle radici">CA07</a>
       </span>
     </div>
@@ -305,7 +304,6 @@ ul.task-list li input[type="checkbox"] {
         <span class="voce-desc">Dalle specifiche statiche e dinamiche al proporzionale o al compensatore.</span>
       </span>
       <span class="voce-lato">
-        <span class="voce-sigla">C(s)</span>
         <a class="voce-teoria" href="pillole/CA06.html" title="Pillola teorica: Controllo in retroazione">CA06</a>
       </span>
     </div>
@@ -317,7 +315,6 @@ ul.task-list li input[type="checkbox"] {
         <span class="voce-desc">Regola K<sub>p</sub>, T<sub>i</sub>, T<sub>d</sub> su un impianto e osserva l'effetto dei disturbi in retroazione.</span>
       </span>
       <span class="voce-lato">
-        <span class="voce-sigla">K<sub>p</sub> T<sub>i</sub> T<sub>d</sub></span>
         <a class="voce-teoria" href="pillole/CA08.html" title="Pillola teorica: PID">CA08</a>
       </span>
     </div>
