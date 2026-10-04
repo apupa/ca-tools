@@ -405,7 +405,7 @@
 
       mostraTermini(elencoTermini, w, contributi);
       mostraTotale(w, magTotEsatto, faseTotEsatta, magTotAsint, faseTotAsint, magDiretta, faseDiretta, elencoTermini);
-      mostraTabellaSomma(w, notevoli, elencoTermini, contributi, magTotAsint, faseTotAsint, magDiretta, faseDiretta);
+      mostraTabellaSomma(w, notevoli, elencoTermini, contributi);
     } catch (e) {
       divErrore.textContent = "Errore nei dati inseriti: " + e.message;
       divErrore.style.display = "block";
@@ -494,10 +494,7 @@
 
   // ---------- Tabella: la somma dei termini, pulsazione per pulsazione ----------
   // E' il conto che si fa a mano per tracciare il diagramma: incolonnare i
-  // contributi ASINTOTICI dei termini e sommarli. Accanto alla somma c'e'
-  // G(jw) valutata direttamente e lo scarto fra le due: e' l'errore
-  // dell'approssimazione asintotica (es. -3 dB nel punto di rottura di un
-  // polo reale), non un errore di calcolo.
+  // contributi ASINTOTICI dei termini e sommarli.
   function nomeBreveTermine(t, i) {
     const n = (i + 1) + ". ";
     if (t.tipo === "guadagno") return n + "K";
@@ -507,18 +504,18 @@
     return n + tipo + " ω<sub>n</sub>=" + formattaNumero(t.omegan, 3);
   }
 
-  function mostraTabellaSomma(w, notevoli, elenco, contributi, magAsint, faseAsint, magDiretta, faseDiretta) {
+  function mostraTabellaSomma(w, notevoli, elenco, contributi) {
     // Ogni pulsazione notevole e' stata inserita nella griglia: qui se ne
     // ritrova l'indice esatto, senza interpolare.
     const indici = notevoli.map(function (om) { return indiceVicino(w, om); });
 
-    function costruisci(titolo, perTermine, diretta, decimali) {
+    function costruisci(titolo, perTermine, decimali) {
       let html = "<h3>" + titolo + "</h3><div style=\"overflow-x:auto;\"><table><thead><tr>" +
         "<th>ω [rad/s]</th><th>log<sub>10</sub>ω</th>";
       elenco.forEach(function (t, i) {
         html += "<th>" + nomeBreveTermine(t, i) + "</th>";
       });
-      html += "<th>Somma</th><th>G(jω)</th><th>Scarto</th></tr></thead><tbody>";
+      html += "<th>Somma</th></tr></thead><tbody>";
       indici.forEach(function (idx) {
         html += "<tr><td>" + formattaNumero(w[idx], 3) + "</td><td>" +
           formattaNumero(Math.log10(w[idx]), 2) + "</td>";
@@ -530,21 +527,16 @@
           somma += v;
           html += "<td>" + v + "</td>";
         });
-        somma = formattaNumero(somma, decimali);
-        const esatto = formattaNumero(diretta[idx], decimali);
-        html += "<td><strong>" + somma + "</strong></td>" +
-          "<td>" + esatto + "</td><td>" + formattaNumero(esatto - somma, decimali) + "</td></tr>";
+        html += "<td><strong>" + formattaNumero(somma, decimali) + "</strong></td></tr>";
       });
       return html + "</tbody></table></div>";
     }
 
     divTabellaSomma.innerHTML =
       '<p class="nota">Le colonne dei termini sono i contributi <em>asintotici</em> di quelli elencati ' +
-      "sopra, nello stesso ordine: sommandole riga per riga si ottiene la spezzata asintotica. " +
-      "La colonna $G(j\\omega)$ è la valutazione diretta (esatta) e lo scarto è l'errore " +
-      "dell'approssimazione asintotica in quel punto.</p>" +
-      costruisci("Ampiezza [dB]", contributi.map(function (c) { return c.magAsintDb; }), magDiretta, 2) +
-      costruisci("Fase [°]", contributi.map(function (c) { return c.phaseAsintDeg; }), faseDiretta, 1);
+      "sopra, nello stesso ordine: sommandole riga per riga si ottiene la spezzata asintotica.</p>" +
+      costruisci("Ampiezza [dB]", contributi.map(function (c) { return c.magAsintDb; }), 2) +
+      costruisci("Fase [°]", contributi.map(function (c) { return c.phaseAsintDeg; }), 1);
     typeset(divTabellaSomma);
   }
 
