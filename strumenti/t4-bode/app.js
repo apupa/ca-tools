@@ -647,11 +647,15 @@
         html += "<th>" + nomeBreveTermine(t, i) + "</th>";
       });
       html += "<th>Somma</th></tr></thead><tbody>";
+      // Davanti ai numeri non negativi un segno invisibile, largo quanto
+      // il meno: nelle colonne centrate le cifre restano allineate con
+      // quelle dei numeri negativi.
+      const num = function (v) { return (v >= 0 ? '<span class="segno-fantasma">-</span>' : "") + v; };
       tab.righe.forEach(function (r) {
         html += (r.necessaria ? '<tr class="necessaria">' : "<tr>") +
-          "<td>" + r.omega + "</td><td>" + r.log + "</td>";
-        r.valori.forEach(function (v) { html += "<td>" + v + "</td>"; });
-        html += "<td><strong>" + r.somma + "</strong></td></tr>";
+          "<td>" + num(r.omega) + "</td><td>" + num(r.log) + "</td>";
+        r.valori.forEach(function (v) { html += "<td>" + num(v) + "</td>"; });
+        html += "<td><strong>" + num(r.somma) + "</strong></td></tr>";
       });
       return html + "</tbody></table></div>";
     }
@@ -867,10 +871,13 @@
       "\\begin{tabularx}{\\textwidth}{*{" + (elenco.length + 3) + "}{>{\\centering\\arraybackslash}X}}\n\\toprule\n" +
       "\\puntello $\\omega$ [rad/s] & $\\log_{10}\\omega$ & " +
       elenco.map(nomeBreveLatex).join(" & ") + " & \\textbf{Somma} \\\\\n\\midrule\n";
+    // \\phantom{+} davanti ai numeri non negativi: occupa quanto il segno
+    // meno, cosi' nelle colonne centrate le cifre restano allineate.
+    const segno = function (v) { return (v >= 0 ? "\\phantom{+}" : "") + v; };
     tab.righe.forEach(function (r) {
-      const num = function (v) { return "$" + v + "$"; };
+      const num = function (v) { return "$" + segno(v) + "$"; };
       tex += (r.necessaria ? "\\rowcolor{evidenziata} " : "") + "\\puntello " + num(r.omega) + " & " + num(r.log) + " & " +
-        r.valori.map(num).join(" & ") + " & $\\mathbf{" + r.somma + "}$ \\\\\n";
+        r.valori.map(num).join(" & ") + " & $\\mathbf{" + segno(r.somma) + "}$ \\\\\n";
     });
     return tex + "\\bottomrule\n\\end{tabularx}\n}\n";
   }
