@@ -28,7 +28,9 @@
     #tabella-somma td:last-child { font-weight: 600; }
     #tabella-somma tr.necessaria td { background: var(--colore-blu-tenue); }
     #tabella-somma .segno-fantasma { visibility: hidden; }
-    /* "Salva come PDF" va a capo sotto gli altri due: occupa tutta la riga, scritta al centro */
+    /* I pulsanti riempiono la colonna: "Calcola" e "Ripristina esempio" si
+       dividono la prima riga, "Salva come PDF" occupa tutta la seconda. */
+    #btn-calcola, #btn-esempio { flex: 1 1 auto; white-space: nowrap; }
     #btn-pdf { flex: 1 1 100%; }
   </style>
 </head>
