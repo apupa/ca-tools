@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20260905c" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20261022a" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -27,6 +27,45 @@
     #tabella-somma th, #tabella-somma td { text-align: center; }
     #tabella-somma td:last-child { font-weight: 600; }
     #tabella-somma tr.necessaria td { background: var(--colore-blu-tenue); }
+
+    /* ---------- Stampa / Salva come PDF ----------
+       La classe .stampa la mette app.js prima di stampare: resta la pagina
+       dei risultati com'e' sul sito, larga quanto un A4. Il foglio non ha
+       margini e lo spazio lo da' il contenitore: cosi' il colore carta
+       arriva fino al bordo, e "clone" ripete lo spazio in cima e in fondo
+       a ogni pagina, non solo alla prima e all'ultima. */
+    @page { size: A4; margin: 0; }
+    @media print {
+      html, body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;   /* stampa anche il colore carta e le righe evidenziate */
+      }
+    }
+    html.stampa .barra-sito,
+    html.stampa details.teoria,
+    html.stampa .banco-comandi,
+    html.stampa .grafico-espandi,
+    html.stampa .grafico-comandi,
+    html.stampa .grafico-suggerimento,
+    html.stampa .modebar-container { display: none !important; }
+    html.stampa .contenitore.banco-pagina {
+      max-width: 210mm; margin: 0; padding: 12mm;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+    html.stampa .banco { display: block; }
+    html.stampa .banco::before { display: none; }
+    /* Blocchi che non si spezzano fra due pagine: le sezioni brevi intere
+       (funzione di trasferimento, diagramma totale, tabelle), la testa di
+       ogni termine e ogni grafico. Una scheda intera invece puo' andare a
+       capo fra descrizione e grafico: tenerla unita lascerebbe mezza pagina
+       vuota, perche' due schede non stanno in un A4. I blocchi servono
+       anche a tenere i titoli attaccati a cio' che segue, dato che Firefox
+       ignora break-after: avoid. */
+    html.stampa .banco-esiti > .pannello,
+    html.stampa .testa-termine,
+    html.stampa .grafico-box,
+    html.stampa .blocco-tabella { break-inside: avoid; }
   </style>
 </head>
 <body>
@@ -180,6 +219,6 @@
 
   <script src="../shared/ca-core.js?v=20260807a"></script>
   <script src="../shared/ca-plot.js?v=20260908j"></script>
-  <script src="app.js?v=20261022e"></script>
+  <script src="app.js?v=20261022g"></script>
 </body>
 </html>
