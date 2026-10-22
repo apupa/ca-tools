@@ -53,25 +53,24 @@
     });
     return termini.length ? termini.join(" ") : "0";
   }
-  // s^p diviso per omega^p, scritto come lo si legge sul diagramma: il
-  // denominatore e' la pulsazione di rottura (per omega = 1 resta s^p).
-  function frazioneSTex(p, omega) {
+  // c·s^p con il coefficiente davanti, come si scrive nella forma di Bode
+  // (0.1 s, 0.25 s^2); con coefficiente 1 resta solo s^p.
+  function termineSTex(c, p) {
     const sp = "s" + (p === 1 ? "" : "^{" + p + "}");
-    const om = formattaNumero(omega);
-    if (om === 1) return sp;
-    return "\\dfrac{" + sp + "}{" + om + (p === 1 ? "" : "^{" + p + "}") + "}";
+    const k = formattaNumero(c);
+    return k === 1 ? sp : k + "\\," + sp;
   }
 
   // Fattore elementare in forma di Bode, senza l'esponente ±1:
-  // (1 ± s/omega_0) per il reale, (1 + 2 delta s/omega_n + s^2/omega_n^2) per il complesso.
+  // (1 ± τ s) per il reale, (1 ± 2δ/ω_n s + 1/ω_n^2 s^2) per il complesso,
+  // con i coefficienti gia' calcolati.
   function fattoreBodeTex(t) {
     if (t.tipo === "reale") {
-      return "\\left(1 " + (t.T > 0 ? "+" : "-") + " " + frazioneSTex(1, 1 / Math.abs(t.T)) + "\\right)";
+      return "\\left(1 " + (t.T > 0 ? "+" : "-") + " " + termineSTex(Math.abs(t.T), 1) + "\\right)";
     }
-    const d = formattaNumero(t.zeta);
-    const medio = d === 0 ? "" :
-      (d > 0 ? " + " : " - ") + "2\\cdot" + Math.abs(d) + "\\," + frazioneSTex(1, t.omegan);
-    return "\\left(1" + medio + " + " + frazioneSTex(2, t.omegan) + "\\right)";
+    const medio = formattaNumero((2 * t.zeta) / t.omegan);
+    const parteMedia = medio === 0 ? "" : (medio > 0 ? " + " : " - ") + termineSTex(Math.abs(medio), 1);
+    return "\\left(1" + parteMedia + " + " + termineSTex(1 / (t.omegan * t.omegan), 2) + "\\right)";
   }
 
   // Prodotto dei fattori, con quelli ripetuti raccolti in una potenza.
