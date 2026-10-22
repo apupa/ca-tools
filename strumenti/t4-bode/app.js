@@ -666,32 +666,159 @@
   // =====================================================================
   // SALVATAGGIO IN PDF
   // =====================================================================
-  // Il PDF e' la pagina stessa stampata: stessi font, colori, formule e
-  // grafici. Per la stampa la pagina passa in "modalita' stampa" (classe
-  // .stampa su <html>, vedi index.html): restano solo i risultati, larghi
-  // quanto un A4, e i grafici vengono ridisegnati a quella larghezza.
-  // Vale anche per Ctrl+P, non solo per il pulsante.
+  // Il PDF si genera nel browser e si scarica subito, senza passare dalla
+  // finestra di stampa. La pagina passa per un attimo in "modalita' stampa"
+  // (classe .stampa su <html>, vedi index.html): restano solo i risultati,
+  // larghi quanto un A4 senza margini, su fondo bianco, e i grafici vengono
+  // ridisegnati a quella larghezza. html2canvas la fotografa ad alta
+  // risoluzione e jsPDF ne fa le pagine A4, tagliando solo fra un blocco e
+  // l'altro: grafici, formule, tabelle e titoli non si spezzano mai.
+  // Le due librerie si scaricano solo al primo salvataggio.
+  const LIBRERIE_PDF = [
+    "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+  ];
+  const MARGINE_MM = 12;
+  const PAGINA_MM = { larghezza: 210, altezza: 297 };
+
+  const scriptCaricati = {};
+  function caricaScript(src) {
+    if (!scriptCaricati[src]) {
+      scriptCaricati[src] = new Promise(function (ok, ko) {
+        const el = document.createElement("script");
+        el.src = src;
+        el.onload = ok;
+        el.onerror = function () {
+          delete scriptCaricati[src];
+          ko(new Error("impossibile scaricare le librerie per il PDF (serve la connessione)"));
+        };
+        document.head.appendChild(el);
+      });
+    }
+    return scriptCaricati[src];
+  }
+
   function grafici() {
     return Array.prototype.slice.call(document.querySelectorAll(".js-plotly-plot"));
   }
-  window.addEventListener("beforeprint", function () {
+  function entraInStampa() {
     document.documentElement.classList.add("stampa");
-    grafici().forEach(function (g) {
-      Plotly.relayout(g, { width: g.parentElement.clientWidth });
-    });
-  });
-  window.addEventListener("afterprint", function () {
+    return Promise.all(grafici().map(function (g) {
+      return Plotly.relayout(g, { width: g.parentElement.clientWidth });
+    }));
+  }
+  function esciDaStampa() {
     document.documentElement.classList.remove("stampa");
-    grafici().forEach(function (g) {
-      Plotly.relayout(g, { width: null }).then(function () { Plotly.Plots.resize(g); });
-    });
-  });
+    return Promise.all(grafici().map(function (g) {
+      return Plotly.relayout(g, { width: null }).then(function () { return Plotly.Plots.resize(g); });
+    }));
+  }
 
-  function salvaPdf() {
+  // I tratti verticali (in px, dall'alto di radice) che non vanno spezzati.
+  // La testa di ogni sezione va dal filetto in cima fino al primo blocco
+  // dopo il titolo, cosi' un titolo non resta mai da solo in fondo a una
+  // pagina; le sezioni brevi (funzione di trasferimento, diagramma totale)
+  // sono un blocco unico.
+  function blocchiIndivisibili(radice) {
+    const origine = radice.getBoundingClientRect().top;
+    const tratto = function (alto, basso) {
+      return { alto: alto.getBoundingClientRect().top - origine, basso: basso.getBoundingClientRect().bottom - origine };
+    };
+    const blocchi = [];
+    radice.querySelectorAll(
+      ".contenitore > h1, .contenitore > .sottotitolo, .grafico-box, .blocco-tabella, #tabella-somma > p"
+    ).forEach(function (el) { blocchi.push(tratto(el, el)); });
+    radice.querySelectorAll(".banco-esiti .pannello").forEach(function (p) {
+      const testa = p.querySelector(".testa-termine") || (p.querySelector("h2") || p).nextElementSibling;
+      if (testa) blocchi.push(tratto(p, testa));
+    });
+    radice.querySelectorAll(".banco-esiti > .pannello").forEach(function (p) {
+      if (!p.querySelector("#tabella-somma")) blocchi.push(tratto(p, p));
+    });
+    return blocchi;
+  }
+
+  // Divide l'altezza totale in pagine: ogni taglio che attraversa un
+  // blocco viene anticipato all'inizio del blocco. Un blocco piu' alto di
+  // una pagina intera si spezza comunque (non c'e' alternativa).
+  function tagliaPagine(altezzaTotale, altezzaPagina, blocchi) {
+    const pagine = [];
+    let inizio = 0;
+    while (inizio < altezzaTotale - 1) {
+      let taglio = Math.min(inizio + altezzaPagina, altezzaTotale);
+      let spostato = taglio < altezzaTotale;
+      while (spostato) {
+        spostato = false;
+        blocchi.forEach(function (b) {
+          if (b.alto > inizio + 1 && b.alto < taglio && b.basso > taglio) {
+            taglio = b.alto;
+            spostato = true;
+          }
+        });
+      }
+      pagine.push({ inizio: inizio, fine: taglio });
+      inizio = taglio;
+    }
+    return pagine;
+  }
+
+  async function generaPdf() {
+    await Promise.all(LIBRERIE_PDF.map(caricaScript));
+    // Le formule devono essere gia' composte da MathJax.
+    if (window.MathJax && window.MathJax.startup) await window.MathJax.startup.promise;
+    await entraInStampa();
+    try {
+      const radice = document.querySelector(".contenitore");
+      const larghezzaUtileMm = PAGINA_MM.larghezza - 2 * MARGINE_MM;
+      const mmPerPx = larghezzaUtileMm / radice.offsetWidth;
+      const altezzaPaginaPx = (PAGINA_MM.altezza - 2 * MARGINE_MM) / mmPerPx;
+      const altezzaTotale = radice.scrollHeight;
+      const pagine = tagliaPagine(altezzaTotale, altezzaPaginaPx, blocchiIndivisibili(radice));
+
+      // Risoluzione circa 3x lo schermo, entro il limite di altezza dei canvas.
+      const scala = Math.min(3, 30000 / altezzaTotale);
+      const tela = await html2canvas(radice, {
+        scale: scala, backgroundColor: "#ffffff", useCORS: true, logging: false,
+        windowWidth: document.documentElement.clientWidth,
+      });
+
+      const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4", compress: true });
+      pagine.forEach(function (pg, i) {
+        const altezzaPx = pg.fine - pg.inizio;
+        const pezzo = document.createElement("canvas");
+        pezzo.width = tela.width;
+        pezzo.height = Math.ceil(altezzaPx * scala);
+        const ctx = pezzo.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, pezzo.width, pezzo.height);
+        ctx.drawImage(tela, 0, Math.round(pg.inizio * scala), tela.width, pezzo.height, 0, 0, tela.width, pezzo.height);
+        if (i > 0) pdf.addPage();
+        pdf.addImage(pezzo.toDataURL("image/jpeg", 0.92), "JPEG",
+          MARGINE_MM, MARGINE_MM, larghezzaUtileMm, altezzaPx * mmPerPx);
+      });
+      return pdf;
+    } finally {
+      await esciDaStampa();
+    }
+  }
+
+  async function salvaPdf() {
+    const btn = document.getElementById("btn-pdf");
+    const etichetta = btn.textContent;
     eseguiCalcolo(); // il PDF riflette sempre i campi come sono ora
-    // Si stampa solo quando MathJax ha finito di comporre le formule.
-    const formulePronte = window.MathJax && window.MathJax.startup ? window.MathJax.startup.promise : Promise.resolve();
-    formulePronte.then(function () { window.print(); });
+    if (divErrore.style.display === "block") return;
+    btn.disabled = true;
+    btn.textContent = "Creo il PDF…";
+    try {
+      const pdf = await generaPdf();
+      pdf.save("diagrammi-di-bode.pdf");
+    } catch (e) {
+      divErrore.textContent = "Impossibile creare il PDF: " + e.message;
+      divErrore.style.display = "block";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = etichetta;
+    }
   }
 
   // ---------- Esempio precaricato: 10/((s+1)(s+10)) ----------

@@ -15,9 +15,13 @@
         inlineMath: [['$', '$'], ['\\(', '\\)']],
         displayMath: [['$$', '$$'], ['\\[', '\\]']],
       },
+      // Formule in SVG, ognuna con i propri glifi: cosi' "Salva come PDF"
+      // (html2canvas) le fotografa fedeli; l'output HTML di MathJax usa
+      // glifi generati via CSS che html2canvas disegna sovrapposti.
+      svg: { fontCache: 'local' },
     };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
     .scheda-termine { margin-bottom: 1.2rem; }
@@ -28,44 +32,23 @@
     #tabella-somma td:last-child { font-weight: 600; }
     #tabella-somma tr.necessaria td { background: var(--colore-blu-tenue); }
 
-    /* ---------- Stampa / Salva come PDF ----------
-       La classe .stampa la mette app.js prima di stampare: resta la pagina
-       dei risultati com'e' sul sito, larga quanto un A4. Il foglio non ha
-       margini e lo spazio lo da' il contenitore: cosi' il colore carta
-       arriva fino al bordo, e "clone" ripete lo spazio in cima e in fondo
-       a ogni pagina, non solo alla prima e all'ultima. */
-    @page { size: A4; margin: 0; }
-    @media print {
-      html, body {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;   /* stampa anche il colore carta e le righe evidenziate */
-      }
-    }
+    /* ---------- Salva come PDF ----------
+       La classe .stampa la mette app.js solo mentre genera il PDF: resta la
+       pagina dei risultati com'e' sul sito, larga quanto un A4 senza
+       margini e su fondo bianco. Dove tagliare le pagine lo decide app.js. */
+    html.stampa,
+    html.stampa body { background: #ffffff; }
     html.stampa .barra-sito,
     html.stampa details.teoria,
     html.stampa .banco-comandi,
     html.stampa .grafico-espandi,
     html.stampa .grafico-comandi,
     html.stampa .grafico-suggerimento,
-    html.stampa .modebar-container { display: none !important; }
-    html.stampa .contenitore.banco-pagina {
-      max-width: 210mm; margin: 0; padding: 12mm;
-      -webkit-box-decoration-break: clone;
-      box-decoration-break: clone;
-    }
+    html.stampa .modebar-container,
+    html.stampa mjx-assistive-mml { display: none !important; }  /* copia nascosta delle formule per i lettori di schermo: html2canvas la disegnerebbe sovrapposta */
+    html.stampa .contenitore.banco-pagina { width: 186mm; max-width: none; margin: 0; padding: 0; }
     html.stampa .banco { display: block; }
     html.stampa .banco::before { display: none; }
-    /* Blocchi che non si spezzano fra due pagine: le sezioni brevi intere
-       (funzione di trasferimento, diagramma totale, tabelle), la testa di
-       ogni termine e ogni grafico. Una scheda intera invece puo' andare a
-       capo fra descrizione e grafico: tenerla unita lascerebbe mezza pagina
-       vuota, perche' due schede non stanno in un A4. I blocchi servono
-       anche a tenere i titoli attaccati a cio' che segue, dato che Firefox
-       ignora break-after: avoid. */
-    html.stampa .banco-esiti > .pannello,
-    html.stampa .testa-termine,
-    html.stampa .grafico-box,
-    html.stampa .blocco-tabella { break-inside: avoid; }
   </style>
 </head>
 <body>
@@ -219,6 +202,6 @@
 
   <script src="../shared/ca-core.js?v=20260807a"></script>
   <script src="../shared/ca-plot.js?v=20260908j"></script>
-  <script src="app.js?v=20261022g"></script>
+  <script src="app.js?v=20261022j"></script>
 </body>
 </html>
