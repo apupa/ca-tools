@@ -721,7 +721,9 @@
   // Stile comune dei due assi, come nel sito: assi a "L", griglia a due
   // livelli (decadi e suddivisioni), etichette in IBM Plex Mono.
   const STILE_ASSI =
-    "width=\\linewidth, scale only axis, axis lines*=left, axis line style={inchiostro, line width=0.6pt}, " +
+    // la larghezza e' quella del solo riquadro: numeri ed etichetta verticale a
+    // sinistra e l'ultima tacca a destra occupano ~2 cm, cosi' il grafico sta nei margini
+    "width=\\linewidth-2cm, scale only axis, axis lines*=left, axis line style={inchiostro, line width=0.6pt}, " +
     "tick style={inchiostro}, tick align=outside, major tick length=3pt, minor tick length=0pt, " +
     "grid=both, major grid style={grigliaA, line width=0.5pt}, minor grid style={grigliaB, line width=0.4pt}, " +
     "minor y tick num=4, enlarge y limits=0.06, unbounded coords=jump, " +
@@ -858,16 +860,19 @@
 
   function tabellaLatex(tab, elenco) {
     const titolo = tab.titolo.replace("°", "$^\\circ$");
-    let tex = "\\subsection*{" + titolo + "}\n\\begin{center}\n\\begin{adjustbox}{max width=\\textwidth}\n" +
-      "\\begin{tabular}{" + "c".repeat(elenco.length + 3) + "}\n\\toprule\n" +
-      "$\\omega$ [rad/s] & $\\log_{10}\\omega$ & " +
+    // Come nel sito: tabella a tutta larghezza, colonne uguali e righe
+    // alte con il contenuto centrato (il puntello invisibile \\puntello da' a
+    // ogni riga la stessa altezza sopra e sotto le cifre).
+    let tex = "\\subsection*{" + titolo + "}\n{\\small\n" +
+      "\\begin{tabularx}{\\textwidth}{*{" + (elenco.length + 3) + "}{>{\\centering\\arraybackslash}X}}\n\\toprule\n" +
+      "\\puntello $\\omega$ [rad/s] & $\\log_{10}\\omega$ & " +
       elenco.map(nomeBreveLatex).join(" & ") + " & \\textbf{Somma} \\\\\n\\midrule\n";
     tab.righe.forEach(function (r) {
       const num = function (v) { return "$" + v + "$"; };
-      tex += (r.necessaria ? "\\rowcolor{evidenziata} " : "") + num(r.omega) + " & " + num(r.log) + " & " +
+      tex += (r.necessaria ? "\\rowcolor{evidenziata} " : "") + "\\puntello " + num(r.omega) + " & " + num(r.log) + " & " +
         r.valori.map(num).join(" & ") + " & $\\mathbf{" + r.somma + "}$ \\\\\n";
     });
-    return tex + "\\bottomrule\n\\end{tabular}\n\\end{adjustbox}\n\\end{center}\n";
+    return tex + "\\bottomrule\n\\end{tabularx}\n}\n";
   }
 
   function documentoLatex(c) {
@@ -890,7 +895,9 @@
       "\\documentclass[11pt,a4paper]{article}\n" +
       "\\usepackage[T1]{fontenc}\n\\usepackage[utf8]{inputenc}\n\\usepackage[italian]{babel}\n" +
       "\\usepackage{lmodern}\n\\usepackage[scale=0.95]{plex-mono}\n\\usepackage[margin=2cm]{geometry}\n" +
-      "\\usepackage{amsmath}\n\\usepackage{booktabs}\n\\usepackage[table]{xcolor}\n\\usepackage{adjustbox}\n" +
+      "\\usepackage{amsmath}\n\\usepackage{booktabs}\n\\usepackage[table]{xcolor}\n\\usepackage{tabularx}\n" +
+      "\\newcommand{\\puntello}{\\rule[-6pt]{0pt}{17pt}}\n" +
+      "\\renewcommand{\\tabularxcolumn}[1]{m{#1}}\n" + // celle centrate anche in verticale
       "\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usetikzlibrary{calc}\n" +
       PREAMBOLO_COLORI +
       "\\setlength{\\parindent}{0pt}\n\\setlength{\\parskip}{0.5em}\n" +
