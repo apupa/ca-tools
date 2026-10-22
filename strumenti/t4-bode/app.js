@@ -94,9 +94,10 @@
   }
 
   // Le pulsazioni su cui vale la pena tabulare la somma: gli estremi
-  // dell'intervallo, le decadi intere che ci stanno dentro e i punti di
-  // rottura di ogni termine. Sono le stesse che si userebbero per
-  // tracciare il diagramma a mano.
+  // dell'intervallo, le decadi intere che ci stanno dentro, i punti di
+  // rottura di ogni termine (spigoli dell'ampiezza) e gli estremi delle
+  // rampe di fase (spigoli della fase). Sono le stesse che si userebbero
+  // per tracciare il diagramma a mano.
   function pulsazioniNotevoli(omegaMin, omegaMax, termini, h) {
     const punti = [omegaMin, omegaMax];
     for (let e = Math.ceil(Math.log10(omegaMin)); e <= Math.floor(Math.log10(omegaMax)); e++) {
@@ -106,7 +107,10 @@
     // per 0 dB in omega = 1, che e' gia' fra le decadi.
     termini.forEach(function (t) {
       const rottura = t.tipo === "reale" ? 1 / Math.abs(t.T) : t.omegan;
-      if (rottura >= omegaMin && rottura <= omegaMax) punti.push(rottura);
+      const banda = t.tipo === "reale" ? 10 : Math.pow(4.81, Math.abs(t.zeta));
+      [rottura / banda, rottura, rottura * banda].forEach(function (om) {
+        if (om >= omegaMin && om <= omegaMax) punti.push(om);
+      });
     });
     punti.sort(function (a, b) { return a - b; });
     // Due punti a meno di un millesimo di decade l'uno dall'altro sono lo
@@ -504,12 +508,36 @@
     return n + tipo + " ω<sub>n</sub>=" + formattaNumero(t.omegan, 3);
   }
 
+  // Somma asintotica (ampiezza o fase) valutata su pulsazioni qualsiasi.
+  function totaleAsintotico(elenco, ws, chiave) {
+    return sommaArray(elenco.map(function (t) {
+      if (t.tipo === "guadagno") return contributoGuadagno(t.K, ws)[chiave];
+      if (t.tipo === "origine") return contributoOrigine(t.h, ws)[chiave];
+      return contributoTermine(t, ws)[chiave];
+    }));
+  }
+
+  // Vero se la spezzata totale cambia pendenza in omega: confronta la
+  // pendenza un millesimo di decade prima e dopo. Cosi' uno zero e un polo
+  // nello stesso punto, che si compensano, non vengono evidenziati.
+  function cambiaPendenza(elenco, omega, chiave) {
+    const q = Math.pow(10, 1e-3);
+    const v = totaleAsintotico(elenco, [omega / q, omega, omega * q], chiave);
+    return Math.abs((v[2] - v[1]) - (v[1] - v[0])) / 1e-3 > 0.5;
+  }
+
   function mostraTabellaSomma(w, notevoli, elenco, contributi) {
     // Ogni pulsazione notevole e' stata inserita nella griglia: qui se ne
     // ritrova l'indice esatto, senza interpolare.
     const indici = notevoli.map(function (om) { return indiceVicino(w, om); });
 
-    function costruisci(titolo, perTermine, decimali) {
+    // Per disegnare la spezzata bastano gli estremi e i punti dove cambia
+    // pendenza: quelle righe vengono evidenziate, tabella per tabella.
+    function necessaria(idx, chiave) {
+      return idx === indici[0] || idx === indici[indici.length - 1] || cambiaPendenza(elenco, w[idx], chiave);
+    }
+
+    function costruisci(titolo, perTermine, decimali, chiave) {
       let html = "<h3>" + titolo + "</h3><div style=\"overflow-x:auto;\"><table><thead><tr>" +
         "<th>ω [rad/s]</th><th>log<sub>10</sub>ω</th>";
       elenco.forEach(function (t, i) {
@@ -517,7 +545,8 @@
       });
       html += "<th>Somma</th></tr></thead><tbody>";
       indici.forEach(function (idx) {
-        html += "<tr><td>" + formattaNumero(w[idx], 3) + "</td><td>" +
+        html += (necessaria(idx, chiave) ? '<tr class="necessaria">' : "<tr>") +
+          "<td>" + formattaNumero(w[idx], 3) + "</td><td>" +
           formattaNumero(Math.log10(w[idx]), 2) + "</td>";
         // La somma e' fatta sui valori gia' arrotondati, cosi' la riga
         // torna anche rifacendo il conto a mano su quello che si legge.
@@ -535,8 +564,10 @@
     divTabellaSomma.innerHTML =
       '<p class="nota">Le colonne dei termini sono i contributi <em>asintotici</em> di quelli elencati ' +
       "sopra, nello stesso ordine: sommandole riga per riga si ottiene la spezzata asintotica.</p>" +
-      costruisci("Ampiezza [dB]", contributi.map(function (c) { return c.magAsintDb; }), 2) +
-      costruisci("Fase [°]", contributi.map(function (c) { return c.phaseAsintDeg; }), 1);
+      costruisci("Ampiezza [dB]", contributi.map(function (c) { return c.magAsintDb; }), 2, "magAsintDb") +
+      costruisci("Fase [°]", contributi.map(function (c) { return c.phaseAsintDeg; }), 1, "phaseAsintDeg") +
+      '<p class="nota">Le righe evidenziate sono gli estremi e i punti dove la spezzata cambia ' +
+      "pendenza: sono le sole necessarie per disegnare il totale, unendole con segmenti.</p>";
     typeset(divTabellaSomma);
   }
 
