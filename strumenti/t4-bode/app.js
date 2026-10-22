@@ -53,10 +53,59 @@
     });
     return termini.length ? termini.join(" ") : "0";
   }
-  function mostraFdT(num, den) {
+  // s^p diviso per omega^p, scritto come lo si legge sul diagramma: il
+  // denominatore e' la pulsazione di rottura (per omega = 1 resta s^p).
+  function frazioneSTex(p, omega) {
+    const sp = "s" + (p === 1 ? "" : "^{" + p + "}");
+    const om = formattaNumero(omega);
+    if (om === 1) return sp;
+    return "\\dfrac{" + sp + "}{" + om + (p === 1 ? "" : "^{" + p + "}") + "}";
+  }
+
+  // Fattore elementare in forma di Bode, senza l'esponente ±1:
+  // (1 ± s/omega_0) per il reale, (1 + 2 delta s/omega_n + s^2/omega_n^2) per il complesso.
+  function fattoreBodeTex(t) {
+    if (t.tipo === "reale") {
+      return "\\left(1 " + (t.T > 0 ? "+" : "-") + " " + frazioneSTex(1, 1 / Math.abs(t.T)) + "\\right)";
+    }
+    const d = formattaNumero(t.zeta);
+    const medio = d === 0 ? "" :
+      (d > 0 ? " + " : " - ") + "2\\cdot" + Math.abs(d) + "\\," + frazioneSTex(1, t.omegan);
+    return "\\left(1" + medio + " + " + frazioneSTex(2, t.omegan) + "\\right)";
+  }
+
+  // Prodotto dei fattori, con quelli ripetuti raccolti in una potenza.
+  function prodottoFattoriTex(termini) {
+    const conteggio = [];
+    termini.forEach(function (t) {
+      const tex = fattoreBodeTex(t);
+      const gia = conteggio.find(function (c) { return c.tex === tex; });
+      if (gia) gia.n++;
+      else conteggio.push({ tex: tex, n: 1 });
+    });
+    return conteggio.map(function (c) { return c.tex + (c.n > 1 ? "^{" + c.n + "}" : ""); }).join("");
+  }
+
+  // G(s) come rapporto di polinomi e, sotto, scomposta nei termini
+  // elementari di Bode: K, s^h, zeri e poli reali e complessi.
+  function mostraFdT(num, den, K, h, termini) {
     const numTex = formattaPolinomioTex(num, "s");
     const denTex = formattaPolinomioTex(den, "s");
-    divFdtTesto.innerHTML = "<div style=\"overflow-x:auto;\">$$G(s) = \\dfrac{" + numTex + "}{" + denTex + "}$$</div>";
+    // Fattori in ordine di pulsazione di rottura, come compaiono sul diagramma.
+    const rottura = function (t) { return t.tipo === "reale" ? 1 / Math.abs(t.T) : t.omegan; };
+    const ordinati = termini.slice().sort(function (a, b) { return rottura(a) - rottura(b); });
+    const zeri = ordinati.filter(function (t) { return t.esponente > 0; });
+    const poli = ordinati.filter(function (t) { return t.esponente < 0; });
+    const potenzaS = function (p) { return p === 0 ? "" : "s" + (p === 1 ? "" : "^{" + p + "}"); };
+    const sopra = potenzaS(Math.max(h, 0)) + prodottoFattoriTex(zeri);
+    const sotto = potenzaS(Math.max(-h, 0)) + prodottoFattoriTex(poli);
+    const k = formattaNumero(K);
+    let fattorizzata = k === 1 ? "" : k === -1 ? "-" : k + "\\,";
+    if (sotto) fattorizzata += "\\dfrac{" + (sopra || "1") + "}{" + sotto + "}";
+    else fattorizzata += sopra || (k === 1 || k === -1 ? "1" : "");
+    divFdtTesto.innerHTML =
+      "<div style=\"overflow-x:auto;\">$$\\begin{aligned} G(s) &= \\dfrac{" + numTex + "}{" + denTex + "} \\\\[4pt] " +
+      "&= " + fattorizzata + "\\end{aligned}$$</div>";
     typeset(divFdtTesto);
   }
   function sommaArray(arrs) {
@@ -370,9 +419,8 @@
         throw new Error("intervallo di pulsazioni non valido (servono 0 < ω_min < ω_max)");
       }
 
-      mostraFdT(num, den);
-
       const { K, h, termini } = decomponiBode(num, den);
+      mostraFdT(num, den, K, h, termini);
       // Le pulsazioni notevoli entrano nella griglia invece di essere
       // valutate a parte: cosi' la tabella legge esattamente gli stessi
       // numeri dei grafici, e gli spigoli delle spezzate asintotiche
