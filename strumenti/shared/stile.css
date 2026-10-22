@@ -229,7 +229,7 @@ a:hover {
    numerano da soli ("1. Guadagno costante") e non incrementano il §. */
 .pannello.scheda-termine { counter-increment: none; }
 
-.pannello.scheda-termine h3 {
+.pannello.scheda-termine > h3 {
   position: absolute;
   left: 0;
   top: 2rem;
@@ -380,7 +380,7 @@ details.teoria .riferimento {
 /* Senza colonna di margine l'etichetta torna in linea, col numero di
    paragrafo davanti. */
 .banco .pannello > h2,
-.banco .pannello.scheda-termine h3 {
+.banco .pannello.scheda-termine > h3 {
   position: static;
   width: auto;
   margin: 0 0 .9rem;
@@ -1024,7 +1024,7 @@ details.teoria li,
   }
 
   .pannello > h2,
-  .pannello.scheda-termine h3 {
+  .pannello.scheda-termine > h3 {
     position: static;
     width: auto;
     margin: 0 0 .9rem;

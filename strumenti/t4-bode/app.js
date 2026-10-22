@@ -420,8 +420,12 @@
   }
 
   // ---------- Calcolo principale ----------
+  // L'ultimo calcolo riuscito, da cui "Salva come PDF" genera il documento.
+  let ultimoCalcolo = null;
+
   function eseguiCalcolo() {
     divErrore.style.display = "none";
+    ultimoCalcolo = null;
     try {
       const num = leggiVettoreCoeff(campoNum.value);
       const den = leggiVettoreCoeff(campoDen.value);
@@ -475,6 +479,7 @@
       mostraTermini(elencoTermini, w, contributi);
       mostraTotale(w, magTotEsatto, faseTotEsatta, magTotAsint, faseTotAsint, magDiretta, faseDiretta, elencoTermini);
       mostraTabellaSomma(w, notevoli, elencoTermini, contributi);
+      ultimoCalcolo = { num, den, K, h, termini, elencoTermini, omegaMin, omegaMax, notevoli, w, contributi };
     } catch (e) {
       divErrore.textContent = "Errore nei dati inseriti: " + e.message;
       divErrore.style.display = "block";
@@ -523,11 +528,9 @@
     elenco.forEach((t, i) => {
       const divId = "termine-" + i + "-plot";
       html +=
-        // La testa (titolo e descrizione) e' un blocco unico: in stampa non
-        // si separa mai, mentre il grafico puo' andare alla pagina dopo.
-        '<div class="pannello scheda-termine"><div class="testa-termine"><h3>' + (i + 1) + ". " + titoloTermine(t) + "</h3>" +
+        '<div class="pannello scheda-termine"><h3>' + (i + 1) + ". " + titoloTermine(t) + "</h3>" +
         '<p class="descrizione">$' + formulaSchedaTex(t) + "$" +
-        "<br />" + descrizioneScheda(t) + "</p></div>" +
+        "<br />" + descrizioneScheda(t) + "</p>" +
         '<div id="' + divId + '" style="width:100%; height:400px;"></div></div>';
     });
     divListaTermini.innerHTML = html;
@@ -638,8 +641,7 @@
 
   function mostraTabellaSomma(w, notevoli, elenco, contributi) {
     function costruisci(tab) {
-      // Titolo e tabella in un blocco unico, che in stampa non si spezza.
-      let html = "<div class=\"blocco-tabella\"><h3>" + tab.titolo + "</h3><div style=\"overflow-x:auto;\"><table><thead><tr>" +
+      let html = "<h3>" + tab.titolo + "</h3><div style=\"overflow-x:auto;\"><table><thead><tr>" +
         "<th>ω [rad/s]</th><th>log<sub>10</sub>ω</th>";
       elenco.forEach(function (t, i) {
         html += "<th>" + nomeBreveTermine(t, i) + "</th>";
@@ -651,7 +653,7 @@
         r.valori.forEach(function (v) { html += "<td>" + v + "</td>"; });
         html += "<td><strong>" + r.somma + "</strong></td></tr>";
       });
-      return html + "</tbody></table></div></div>";
+      return html + "</tbody></table></div>";
     }
 
     divTabellaSomma.innerHTML =
@@ -664,161 +666,320 @@
   }
 
   // =====================================================================
-  // SALVATAGGIO IN PDF
+  // SALVATAGGIO IN PDF (LaTeX)
   // =====================================================================
-  // Il PDF si genera nel browser e si scarica subito, senza passare dalla
-  // finestra di stampa. La pagina passa per un attimo in "modalita' stampa"
-  // (classe .stampa su <html>, vedi index.html): restano solo i risultati,
-  // larghi quanto un A4 senza margini, su fondo bianco, e i grafici vengono
-  // ridisegnati a quella larghezza. html2canvas la fotografa ad alta
-  // risoluzione e jsPDF ne fa le pagine A4, tagliando solo fra un blocco e
-  // l'altro: grafici, formule, tabelle e titoli non si spezzano mai.
-  // Le due librerie si scaricano solo al primo salvataggio.
-  const LIBRERIE_PDF = [
-    "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+  // Il sito e' statico, quindi il documento non si compila qui: si genera
+  // il sorgente LaTeX e lo si manda a texlive.net (il servizio di
+  // compilazione usato da learnlatex.org), che risponde con il PDF in una
+  // nuova scheda. I grafici sono disegnati da pgfplots con gli stessi
+  // numeri e lo stesso stile di quelli della pagina (vedi plotBode in
+  // ca-plot.js), ma su fondo bianco.
+
+  // Testo con la matematica fra $...$ (come le descrizioni delle schede)
+  // reso sicuro per LaTeX: i caratteri speciali fuori dalla matematica
+  // vengono protetti e i simboli Unicode diventano comandi.
+  const SIMBOLI_LATEX = [
+    ["log₁₀", "\\log_{10}"], ["₁₀", "_{10}"], ["₀", "_0"], ["ω", "\\omega"], ["δ", "\\delta"],
+    ["τ", "\\tau"], ["ζ", "\\zeta"], ["°", "^\\circ"], ["−", "-"], ["±", "\\pm"], ["·", "\\cdot"],
+    ["≈", "\\approx"], ["→", "\\to"], ["≤", "\\le"], ["≥", "\\ge"],
   ];
-  const MARGINE_MM = 12;
-  const PAGINA_MM = { larghezza: 210, altezza: 297 };
-
-  const scriptCaricati = {};
-  function caricaScript(src) {
-    if (!scriptCaricati[src]) {
-      scriptCaricati[src] = new Promise(function (ok, ko) {
-        const el = document.createElement("script");
-        el.src = src;
-        el.onload = ok;
-        el.onerror = function () {
-          delete scriptCaricati[src];
-          ko(new Error("impossibile scaricare le librerie per il PDF (serve la connessione)"));
-        };
-        document.head.appendChild(el);
+  function testoLatex(str) {
+    return String(str).split("$").map(function (pezzo, i) {
+      const inMatematica = i % 2 === 1;
+      if (!inMatematica) pezzo = pezzo.replace(/[\\{}]/g, "").replace(/([%&#_])/g, "\\$1");
+      SIMBOLI_LATEX.forEach(function (c) {
+        pezzo = pezzo.split(c[0]).join(inMatematica ? c[1] + " " : "\\ensuremath{" + c[1] + "}");
       });
-    }
-    return scriptCaricati[src];
+      return pezzo;
+    }).join("$");
   }
 
-  function grafici() {
-    return Array.prototype.slice.call(document.querySelectorAll(".js-plotly-plot"));
-  }
-  function entraInStampa() {
-    document.documentElement.classList.add("stampa");
-    return Promise.all(grafici().map(function (g) {
-      return Plotly.relayout(g, { width: g.parentElement.clientWidth });
-    }));
-  }
-  function esciDaStampa() {
-    document.documentElement.classList.remove("stampa");
-    return Promise.all(grafici().map(function (g) {
-      return Plotly.relayout(g, { width: null }).then(function () { return Plotly.Plots.resize(g); });
-    }));
+  // Etichetta HTML di un punto notevole ("log<sub>10</sub>ω<sub>0</sub> = 1")
+  // riscritta in LaTeX: monospaziata come nel sito, solo ω in matematica.
+  function etichettaLatex(html) {
+    return html.replace(/<sub>(.*?)<\/sub>/g, "\\textsubscript{$1}").replace("ω", "$\\omega$");
   }
 
-  // I tratti verticali (in px, dall'alto di radice) che non vanno spezzati.
-  // La testa di ogni sezione va dal filetto in cima fino al primo blocco
-  // dopo il titolo, cosi' un titolo non resta mai da solo in fondo a una
-  // pagina; le sezioni brevi (funzione di trasferimento, diagramma totale)
-  // sono un blocco unico.
-  function blocchiIndivisibili(radice) {
-    const origine = radice.getBoundingClientRect().top;
-    const tratto = function (alto, basso) {
-      return { alto: alto.getBoundingClientRect().top - origine, basso: basso.getBoundingClientRect().bottom - origine };
-    };
-    const blocchi = [];
-    radice.querySelectorAll(
-      ".contenitore > h1, .contenitore > .sottotitolo, .grafico-box, .blocco-tabella, #tabella-somma > p"
-    ).forEach(function (el) { blocchi.push(tratto(el, el)); });
-    radice.querySelectorAll(".banco-esiti .pannello").forEach(function (p) {
-      const testa = p.querySelector(".testa-termine") || (p.querySelector("h2") || p).nextElementSibling;
-      if (testa) blocchi.push(tratto(p, testa));
-    });
-    radice.querySelectorAll(".banco-esiti > .pannello").forEach(function (p) {
-      if (!p.querySelector("#tabella-somma")) blocchi.push(tratto(p, p));
-    });
-    return blocchi;
+  // Numero per le coordinate di pgfplots ("nan" interrompe la curva, per
+  // esempio l'ampiezza infinita di una coppia complessa con δ = 0).
+  function coordLatex(x) {
+    return Number.isFinite(x) ? String(Math.round(x * 1e4) / 1e4) : "nan";
   }
 
-  // Divide l'altezza totale in pagine: ogni taglio che attraversa un
-  // blocco viene anticipato all'inizio del blocco. Un blocco piu' alto di
-  // una pagina intera si spezza comunque (non c'e' alternativa).
-  function tagliaPagine(altezzaTotale, altezzaPagina, blocchi) {
-    const pagine = [];
-    let inizio = 0;
-    while (inizio < altezzaTotale - 1) {
-      let taglio = Math.min(inizio + altezzaPagina, altezzaTotale);
-      let spostato = taglio < altezzaTotale;
-      while (spostato) {
-        spostato = false;
-        blocchi.forEach(function (b) {
-          if (b.alto > inizio + 1 && b.alto < taglio && b.basso > taglio) {
-            taglio = b.alto;
-            spostato = true;
-          }
-        });
+  // Colori del sito: le curve seguono la sequenza di Plotly, nello stesso
+  // ordine in cui plotBode aggiunge le tracce (ampiezza, fase, poi per
+  // ogni curva in piu' una per l'ampiezza e una per la fase).
+  const PREAMBOLO_COLORI =
+    "\\definecolor{inchiostro}{HTML}{45443D}\n\\definecolor{grigliaA}{HTML}{D9D3C6}\n" +
+    "\\definecolor{grigliaB}{HTML}{ECE7DD}\n\\definecolor{rosso}{HTML}{B3261E}\n" +
+    "\\definecolor{plotlyA}{HTML}{1F77B4}\n\\definecolor{plotlyB}{HTML}{FF7F0E}\n" +
+    "\\definecolor{plotlyC}{HTML}{2CA02C}\n\\definecolor{plotlyD}{HTML}{D62728}\n" +
+    "\\definecolor{plotlyE}{HTML}{9467BD}\n\\definecolor{plotlyF}{HTML}{8C564B}\n" +
+    "\\definecolor{evidenziata}{RGB}{221,229,250}\n";
+  const COLORI_PLOTLY = ["plotlyA", "plotlyB", "plotlyC", "plotlyD", "plotlyE", "plotlyF"];
+
+  // Stile comune dei due assi, come nel sito: assi a "L", griglia a due
+  // livelli (decadi e suddivisioni), etichette in IBM Plex Mono.
+  const STILE_ASSI =
+    "width=\\linewidth, scale only axis, axis lines*=left, axis line style={inchiostro, line width=0.6pt}, " +
+    "tick style={inchiostro}, tick align=outside, major tick length=3pt, minor tick length=0pt, " +
+    "grid=both, major grid style={grigliaA, line width=0.5pt}, minor grid style={grigliaB, line width=0.4pt}, " +
+    "minor y tick num=4, enlarge y limits=0.06, unbounded coords=jump, " +
+    // si tagliano solo le curve: le etichette dei punti notevoli stanno
+    // fuori dal riquadro
+    "clip mode=individual, " +
+    "ticklabel style={font=\\ttfamily\\scriptsize, text=inchiostro}, " +
+    "label style={font=\\ttfamily\\footnotesize, text=inchiostro}, " +
+    "xticklabel={\\pgfmathprintnumber[assume math mode=true]{\\tick}}, " +
+    "yticklabel={\\pgfmathprintnumber[assume math mode=true]{\\tick}}, " +
+    "every axis plot/.append style={line width=1pt, line join=round}";
+
+  // Tacche principali sulle decadi intere, suddivisioni in 2..9 di ogni
+  // decade (in log10 ω, l'asse e' lineare).
+  function tacchePulsazioni(xmin, xmax) {
+    const principali = [], secondarie = [];
+    for (let e = Math.floor(xmin); e <= Math.ceil(xmax); e++) {
+      if (e >= xmin - 1e-9 && e <= xmax + 1e-9) principali.push(e);
+      for (let k = 2; k <= 9; k++) {
+        const v = e + Math.log10(k);
+        if (v > xmin && v < xmax) secondarie.push(coordLatex(v));
       }
-      pagine.push({ inizio: inizio, fine: taglio });
-      inizio = taglio;
     }
-    return pagine;
+    return "xtick={" + principali.join(",") + "}, minor xtick={" + secondarie.join(",") + "}";
   }
 
-  async function generaPdf() {
-    await Promise.all(LIBRERIE_PDF.map(caricaScript));
-    // Le formule devono essere gia' composte da MathJax.
-    if (window.MathJax && window.MathJax.startup) await window.MathJax.startup.promise;
-    await entraInStampa();
-    try {
-      const radice = document.querySelector(".contenitore");
-      const larghezzaUtileMm = PAGINA_MM.larghezza - 2 * MARGINE_MM;
-      const mmPerPx = larghezzaUtileMm / radice.offsetWidth;
-      const altezzaPaginaPx = (PAGINA_MM.altezza - 2 * MARGINE_MM) / mmPerPx;
-      const altezzaTotale = radice.scrollHeight;
-      const pagine = tagliaPagine(altezzaTotale, altezzaPaginaPx, blocchiIndivisibili(radice));
-
-      // Risoluzione circa 3x lo schermo, entro il limite di altezza dei canvas.
-      const scala = Math.min(3, 30000 / altezzaTotale);
-      const tela = await html2canvas(radice, {
-        scale: scala, backgroundColor: "#ffffff", useCORS: true, logging: false,
-        windowWidth: document.documentElement.clientWidth,
-      });
-
-      const pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4", compress: true });
-      pagine.forEach(function (pg, i) {
-        const altezzaPx = pg.fine - pg.inizio;
-        const pezzo = document.createElement("canvas");
-        pezzo.width = tela.width;
-        pezzo.height = Math.ceil(altezzaPx * scala);
-        const ctx = pezzo.getContext("2d");
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, pezzo.width, pezzo.height);
-        ctx.drawImage(tela, 0, Math.round(pg.inizio * scala), tela.width, pezzo.height, 0, 0, tela.width, pezzo.height);
-        if (i > 0) pdf.addPage();
-        pdf.addImage(pezzo.toDataURL("image/jpeg", 0.92), "JPEG",
-          MARGINE_MM, MARGINE_MM, larghezzaUtileMm, altezzaPx * mmPerPx);
-      });
-      return pdf;
-    } finally {
-      await esciDaStampa();
-    }
+  // Riga di ogni etichetta dei punti notevoli sotto l'asse: di norma tutte
+  // sulla stessa, si scende solo se la precedente e' troppo vicina (stessa
+  // regola di plotBode). Restituisce i riferimenti ordinati con la riga.
+  function righeEtichette(rif, xmin, xmax) {
+    const ultimoAllaRiga = [];
+    return rif.slice().sort(function (a, b) { return a.omega - b.omega; }).map(function (r) {
+      const frazione = (Math.log10(r.omega) - xmin) / (xmax - xmin);
+      let riga = 0;
+      while (ultimoAllaRiga[riga] !== undefined && frazione - ultimoAllaRiga[riga] < 0.12) riga++;
+      ultimoAllaRiga[riga] = frazione;
+      return { r: r, riga: riga, frazione: frazione };
+    });
+  }
+  function numeroRighe(rif, xmin, xmax) {
+    return righeEtichette(rif, xmin, xmax).reduce(function (m, e) { return Math.max(m, e.riga + 1); }, 0);
   }
 
-  async function salvaPdf() {
-    const btn = document.getElementById("btn-pdf");
-    const etichetta = btn.textContent;
+  // Un riquadro (ampiezza o fase) con le sue curve e i punti notevoli: un
+  // pallino rosso sulla spezzata, il richiamo tratteggiato fino all'asse e
+  // l'etichetta sotto le tacche.
+  function riquadroLatex(nome, ws, curve, rif, opzioni) {
+    const xmin = Math.log10(ws[0]), xmax = Math.log10(ws[ws.length - 1]);
+    let tex = "\\begin{axis}[" + STILE_ASSI + ", name=" + nome + ", " + opzioni +
+      ", xmin=" + coordLatex(xmin) + ", xmax=" + coordLatex(xmax) + ", " + tacchePulsazioni(xmin, xmax) + "]\n";
+    curve.forEach(function (c) {
+      let punti = "";
+      ws.forEach(function (om, i) { punti += "(" + coordLatex(Math.log10(om)) + "," + coordLatex(c.valori[i]) + ") "; });
+      tex += "\\addplot[" + c.colore + (c.tratteggio ? ", dash pattern=on 4pt off 3pt" : "") +
+        "] coordinates {" + punti + "};\n";
+    });
+    righeEtichette(rif, xmin, xmax).forEach(function (e) {
+      const r = e.r, frazione = e.frazione, livello = e.riga;
+      const x = coordLatex(Math.log10(r.omega));
+      const ancora = frazione > 0.85 ? "north east" : frazione < 0.15 ? "north west" : "north";
+      // Il piede del richiamo e' sull'asse: in coordinate relative la x e'
+      // proprio la frazione della larghezza.
+      const piede = "rel axis cs:" + coordLatex(frazione) + ",0";
+      tex += "\\draw[rosso, line width=0.5pt, dash pattern=on 1pt off 1.5pt] (" + piede + ") -- (axis cs:" + x + "," + coordLatex(r.y) + ");\n" +
+        "\\fill[rosso] (axis cs:" + x + "," + coordLatex(r.y) + ") circle[radius=1.6pt];\n" +
+        "\\node[anchor=" + ancora + ", text=rosso, font=\\ttfamily\\tiny, inner sep=0pt] at ([yshift=-" +
+        (14 + 9 * livello) + "pt]" + piede + ") {" + etichettaLatex(r.etichetta) + "};\n";
+    });
+    return tex + "\\end{axis}\n";
+  }
+
+  // Grafico di Bode come nel sito: ampiezza sopra, fase sotto, legenda
+  // orizzontale in alto, nome dell'asse delle pulsazioni solo in basso.
+  // serie: [{nome, mag, fase}]; la prima e' continua, le altre tratteggiate.
+  function graficoBodeLatex(ws, serie, riferimenti, altezza) {
+    const colore = function (i) { return COLORI_PLOTLY[i % COLORI_PLOTLY.length]; };
+    // Ordine delle tracce di plotBode: ampiezza, fase, poi le curve extra
+    // (ampiezza e fase di ciascuna).
+    const curveAmp = [{ valori: serie[0].mag, colore: colore(0) }];
+    const curveFase = [{ valori: serie[0].fase, colore: colore(1) }];
+    const legenda = [{ colore: colore(0), nome: "ampiezza" }, { colore: colore(1), nome: "fase" }];
+    serie.slice(1).forEach(function (c, k) {
+      curveAmp.push({ valori: c.mag, colore: colore(2 + 2 * k), tratteggio: true });
+      curveFase.push({ valori: c.fase, colore: colore(3 + 2 * k), tratteggio: true });
+      legenda.push({ colore: colore(2 + 2 * k), nome: c.nome, tratteggio: true });
+    });
+    // Due termini con lo stesso punto di rottura (es. un polo doppio)
+    // darebbero la stessa etichetta due volte: se ne tiene una.
+    const visti = {};
+    riferimenti = riferimenti.filter(function (r) {
+      const chiave = r.riquadro + "|" + r.etichetta + "|" + coordLatex(r.y);
+      if (visti[chiave]) return false;
+      visti[chiave] = true;
+      return true;
+    });
+    const perRiquadro = function (q) { return riferimenti.filter(function (r) { return r.riquadro === q; }); };
+    const xmin = Math.log10(ws[0]), xmax = Math.log10(ws[ws.length - 1]);
+    // Le etichette dei punti notevoli occupano la fascia sotto le tacche:
+    // il riquadro della fase scende e il nome dell'asse si allontana di
+    // conseguenza.
+    const righeAmp = numeroRighe(perRiquadro("ampiezza"), xmin, xmax);
+    const righeFase = numeroRighe(perRiquadro("fase"), xmin, xmax);
+    const amp = riquadroLatex("ampiezza", ws, curveAmp, perRiquadro("ampiezza"),
+      "height=" + altezza + ", ylabel={ampiezza [dB]}");
+    const fase = riquadroLatex("fase", ws, curveFase, perRiquadro("fase"),
+      "height=" + altezza + ", ylabel={fase [$^\\circ$]}, " +
+      "xlabel={log\\textsubscript{10}($\\omega$)\\enspace[decadi]}, " +
+      "xlabel style={yshift=-" + (righeFase ? 6 + 9 * righeFase : 0) + "pt}, " +
+      "at={($(ampiezza.south west)+(0,-" + (righeAmp ? 30 + 9 * righeAmp : 22) + "pt)$)}, anchor=north west");
+    // La legenda e' un nodo sopra il primo riquadro: le voci sono le
+    // stesse dei grafici del sito, con il campione di linea davanti.
+    let voci = "";
+    legenda.forEach(function (v) {
+      const tratto = "\\rule[0.55ex]{" + (v.tratteggio ? "2.4mm" : "6mm") + "}{1pt}";
+      voci += "\\textcolor{" + v.colore + "}{" + tratto + (v.tratteggio ? "\\hspace{1.2mm}" + tratto : "") + "}~" +
+        v.nome.replace("ω", "$\\omega$") + "\\qquad ";
+    });
+    return "\\begin{tikzpicture}\n" + amp + fase +
+      "\\node[anchor=south west, font=\\ttfamily\\scriptsize, text=inchiostro, inner sep=0pt] at ([yshift=6pt]ampiezza.north west) {" +
+      voci + "};\n\\end{tikzpicture}\n";
+  }
+
+  function nomeBreveLatex(t, i) {
+    const n = (i + 1) + ".~";
+    if (t.tipo === "guadagno") return n + "$K$";
+    if (t.tipo === "origine") {
+      const sh = "s" + (Math.abs(t.h) === 1 ? "" : "^{" + Math.abs(t.h) + "}");
+      return n + "$" + (t.h > 0 ? sh : "1/" + sh) + "$";
+    }
+    const tipo = t.esponente > 0 ? "zero" : "polo";
+    if (t.tipo === "reale") return n + tipo + " $\\omega_0=" + formattaNumero(1 / Math.abs(t.T), 3) + "$";
+    return n + tipo + " $\\omega_n=" + formattaNumero(t.omegan, 3) + "$";
+  }
+
+  function tabellaLatex(tab, elenco) {
+    const titolo = tab.titolo.replace("°", "$^\\circ$");
+    let tex = "\\subsection*{" + titolo + "}\n\\begin{center}\n\\begin{adjustbox}{max width=\\textwidth}\n" +
+      "\\begin{tabular}{" + "c".repeat(elenco.length + 3) + "}\n\\toprule\n" +
+      "$\\omega$ [rad/s] & $\\log_{10}\\omega$ & " +
+      elenco.map(nomeBreveLatex).join(" & ") + " & \\textbf{Somma} \\\\\n\\midrule\n";
+    tab.righe.forEach(function (r) {
+      const num = function (v) { return "$" + v + "$"; };
+      tex += (r.necessaria ? "\\rowcolor{evidenziata} " : "") + num(r.omega) + " & " + num(r.log) + " & " +
+        r.valori.map(num).join(" & ") + " & $\\mathbf{" + r.somma + "}$ \\\\\n";
+    });
+    return tex + "\\bottomrule\n\\end{tabular}\n\\end{adjustbox}\n\\end{center}\n";
+  }
+
+  function documentoLatex(c) {
+    // Griglia propria, piu' rada di quella della pagina (a pgfplots non
+    // serve), con dentro le pulsazioni notevoli perche' gli spigoli delle
+    // spezzate cadano su punti veri.
+    const ws = creaGrigliaOmega(c.omegaMin, c.omegaMax, 160)
+      .concat(c.notevoli)
+      .sort(function (a, b) { return a - b; })
+      .filter(function (om, i, arr) { return i === 0 || om > arr[i - 1]; });
+    const contributo = function (t) {
+      if (t.tipo === "guadagno") return contributoGuadagno(t.K, ws);
+      if (t.tipo === "origine") return contributoOrigine(t.h, ws);
+      return contributoTermine(t, ws);
+    };
+    const contributi = c.elencoTermini.map(contributo);
+    const dentro = function (r) { return r.omega >= c.omegaMin && r.omega <= c.omegaMax; };
+
+    let tex =
+      "\\documentclass[11pt,a4paper]{article}\n" +
+      "\\usepackage[T1]{fontenc}\n\\usepackage[utf8]{inputenc}\n\\usepackage[italian]{babel}\n" +
+      "\\usepackage{lmodern}\n\\usepackage[scale=0.95]{plex-mono}\n\\usepackage[margin=2cm]{geometry}\n" +
+      "\\usepackage{amsmath}\n\\usepackage{booktabs}\n\\usepackage[table]{xcolor}\n\\usepackage{adjustbox}\n" +
+      "\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usetikzlibrary{calc}\n" +
+      PREAMBOLO_COLORI +
+      "\\setlength{\\parindent}{0pt}\n\\setlength{\\parskip}{0.5em}\n" +
+      "\\title{Diagrammi di Bode}\n\\author{Controlli Automatici}\n\\date{\\today}\n" +
+      "\\begin{document}\n\\maketitle\n\n";
+
+    tex += "\\section*{Funzione di trasferimento}\n\\[ G(s) = \\dfrac{" + formattaPolinomioTex(c.num, "s") + "}{" +
+      formattaPolinomioTex(c.den, "s") + "} = " + formaFattorizzataTex(c.K, c.h, c.termini) + " \\]\n" +
+      "Pulsazioni da $" + formattaNumero(c.omegaMin) + "$ a $" + formattaNumero(c.omegaMax) + "$~rad/s.\n\n";
+
+    tex += "\\section*{Termini elementari}\n";
+    c.elencoTermini.forEach(function (t, i) {
+      const k = contributi[i];
+      // Ogni termine e' un blocco unico: titolo, descrizione e grafico non
+      // si separano mai fra due pagine.
+      tex += "\\noindent\\begin{minipage}{\\linewidth}\n\\setlength{\\parskip}{0.5em}\n" +
+        "\\subsection*{" + (i + 1) + ". " + titoloTermine(t) + "}\n" +
+        "\\[ " + formulaSchedaTex(t) + " \\]\n" + testoLatex(descrizioneScheda(t)) + "\n\n" +
+        "\\begin{center}\n" +
+        graficoBodeLatex(ws, [
+          { mag: k.magDb, fase: k.phaseDeg },
+          { nome: "asintotico", mag: k.magAsintDb, fase: k.phaseAsintDeg },
+        ], riferimentiTermine(t).filter(dentro), "3.6cm") +
+        "\\end{center}\n\\end{minipage}\n\n\\bigskip\n\n";
+    });
+
+    // Nel totale si segnano i punti di rottura di tutti i termini, sulla
+    // spezzata asintotica totale (come mostraTotale).
+    const magAsint = sommaArray(contributi.map(function (k) { return k.magAsintDb; }));
+    const faseAsint = sommaArray(contributi.map(function (k) { return k.phaseAsintDeg; }));
+    const rotture = [];
+    c.elencoTermini.forEach(function (t) {
+      let omega = null, simbolo = "";
+      if (t.tipo === "reale") { omega = 1 / Math.abs(t.T); simbolo = "<sub>0</sub>"; }
+      else if (t.tipo === "complesso") { omega = t.omegan; simbolo = "<sub>n</sub>"; }
+      if (omega === null || omega < c.omegaMin || omega > c.omegaMax) return;
+      const idx = indiceVicino(ws, omega);
+      rotture.push({ omega: omega, riquadro: "ampiezza", y: magAsint[idx], etichetta: etichettaLog(simbolo, omega) });
+      rotture.push({ omega: omega, riquadro: "fase", y: faseAsint[idx], etichetta: etichettaLog(simbolo, omega) });
+    });
+    const diretta = ws.map(function (om) { return CA.freqResp(c.num, c.den, om); });
+    const faseEsatta = sommaArray(contributi.map(function (k) { return k.phaseDeg; }));
+    tex += "\\clearpage\n\\section*{Diagramma di Bode totale}\n\\begin{center}\n" +
+      graficoBodeLatex(ws, [
+        { mag: sommaArray(contributi.map(function (k) { return k.magDb; })), fase: faseEsatta },
+        { nome: "asintotico", mag: magAsint, fase: faseAsint },
+        { nome: "G(jω) diretto",
+          mag: diretta.map(function (z) { return 20 * Math.log10(CA.Cx.abs(z)); }),
+          fase: sfasaContinuo(diretta.map(function (z) { return (CA.Cx.arg(z) * 180) / Math.PI; }), faseEsatta[0]) },
+      ], rotture, "5cm") +
+      "\\end{center}\n\n";
+
+    tex += "\\clearpage\n\\section*{Somma pulsazione per pulsazione}\n" +
+      "Le colonne dei termini sono i contributi \\emph{asintotici} di quelli elencati sopra, nello stesso " +
+      "ordine: sommandole riga per riga si ottiene la spezzata asintotica.\n" +
+      datiTabelle(c.w, c.notevoli, c.elencoTermini, c.contributi)
+        .map(function (tab) { return tabellaLatex(tab, c.elencoTermini); }).join("\n") +
+      "\nLe righe evidenziate sono gli estremi e i punti dove la spezzata cambia pendenza: sono le sole " +
+      "necessarie per disegnare il totale, unendole con segmenti.\n";
+
+    return tex + "\\end{document}\n";
+  }
+
+  // Invia il sorgente a texlive.net con un form in una nuova scheda: il
+  // servizio compila con pdflatex e reindirizza al PDF.
+  function salvaPdf() {
     eseguiCalcolo(); // il PDF riflette sempre i campi come sono ora
-    if (divErrore.style.display === "block") return;
-    btn.disabled = true;
-    btn.textContent = "Creo il PDF…";
-    try {
-      const pdf = await generaPdf();
-      pdf.save("diagrammi-di-bode.pdf");
-    } catch (e) {
-      divErrore.textContent = "Impossibile creare il PDF: " + e.message;
-      divErrore.style.display = "block";
-    } finally {
-      btn.disabled = false;
-      btn.textContent = etichetta;
-    }
+    if (!ultimoCalcolo) return;
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "https://texlive.net/cgi-bin/latexcgi";
+    form.enctype = "multipart/form-data";
+    form.target = "_blank";
+    const campi = {
+      "filecontents[]": documentoLatex(ultimoCalcolo),
+      "filename[]": "document.tex",
+      engine: "pdflatex",
+      return: "pdf",
+    };
+    Object.keys(campi).forEach(function (nome) {
+      const campo = document.createElement("textarea");
+      campo.name = nome;
+      campo.value = campi[nome];
+      form.appendChild(campo);
+    });
+    form.style.display = "none";
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
   }
 
   // ---------- Esempio precaricato: 10/((s+1)(s+10)) ----------

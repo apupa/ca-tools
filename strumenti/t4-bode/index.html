@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20261022a" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20260905c" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -15,13 +15,9 @@
         inlineMath: [['$', '$'], ['\\(', '\\)']],
         displayMath: [['$$', '$$'], ['\\[', '\\]']],
       },
-      // Formule in SVG, ognuna con i propri glifi: cosi' "Salva come PDF"
-      // (html2canvas) le fotografa fedeli; l'output HTML di MathJax usa
-      // glifi generati via CSS che html2canvas disegna sovrapposti.
-      svg: { fontCache: 'local' },
     };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" id="MathJax-script" async></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
     .scheda-termine { margin-bottom: 1.2rem; }
@@ -31,24 +27,6 @@
     #tabella-somma th, #tabella-somma td { text-align: center; }
     #tabella-somma td:last-child { font-weight: 600; }
     #tabella-somma tr.necessaria td { background: var(--colore-blu-tenue); }
-
-    /* ---------- Salva come PDF ----------
-       La classe .stampa la mette app.js solo mentre genera il PDF: resta la
-       pagina dei risultati com'e' sul sito, larga quanto un A4 senza
-       margini e su fondo bianco. Dove tagliare le pagine lo decide app.js. */
-    html.stampa,
-    html.stampa body { background: #ffffff; }
-    html.stampa .barra-sito,
-    html.stampa details.teoria,
-    html.stampa .banco-comandi,
-    html.stampa .grafico-espandi,
-    html.stampa .grafico-comandi,
-    html.stampa .grafico-suggerimento,
-    html.stampa .modebar-container,
-    html.stampa mjx-assistive-mml { display: none !important; }  /* copia nascosta delle formule per i lettori di schermo: html2canvas la disegnerebbe sovrapposta */
-    html.stampa .contenitore.banco-pagina { width: 186mm; max-width: none; margin: 0; padding: 0; }
-    html.stampa .banco { display: block; }
-    html.stampa .banco::before { display: none; }
   </style>
 </head>
 <body>
@@ -202,6 +180,6 @@
 
   <script src="../shared/ca-core.js?v=20260807a"></script>
   <script src="../shared/ca-plot.js?v=20260908j"></script>
-  <script src="app.js?v=20261022j"></script>
+  <script src="app.js?v=20261022l"></script>
 </body>
 </html>
