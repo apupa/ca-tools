@@ -86,16 +86,12 @@
     return conteggio.map(function (c) { return c.tex + (c.n > 1 ? "^{" + c.n + "}" : ""); }).join("");
   }
 
-  // G(s) come rapporto di polinomi e, sotto, scomposta nei termini
-  // elementari di Bode: K, s^h, zeri e poli reali e complessi.
-  function mostraFdT(num, den, K, h, termini) {
-    const numTex = formattaPolinomioTex(num, "s");
-    const denTex = formattaPolinomioTex(den, "s");
-    // Fattori in ordine di pulsazione di rottura, come compaiono sul diagramma.
-    const rottura = function (t) { return t.tipo === "reale" ? 1 / Math.abs(t.T) : t.omegan; };
-    const ordinati = termini.slice().sort(function (a, b) { return rottura(a) - rottura(b); });
-    const zeri = ordinati.filter(function (t) { return t.esponente > 0; });
-    const poli = ordinati.filter(function (t) { return t.esponente < 0; });
+  // G(s) scomposta nei termini elementari di Bode: K, s^h, zeri e poli
+  // reali e complessi.
+  function formaFattorizzataTex(K, h, termini) {
+    // I termini arrivano gia' ordinati da decomponiBode.
+    const zeri = termini.filter(function (t) { return t.esponente > 0; });
+    const poli = termini.filter(function (t) { return t.esponente < 0; });
     const potenzaS = function (p) { return p === 0 ? "" : "s" + (p === 1 ? "" : "^{" + p + "}"); };
     const sopra = potenzaS(Math.max(h, 0)) + prodottoFattoriTex(zeri);
     const sotto = potenzaS(Math.max(-h, 0)) + prodottoFattoriTex(poli);
@@ -103,9 +99,24 @@
     let fattorizzata = k === 1 ? "" : k === -1 ? "-" : k + "\\,";
     if (sotto) fattorizzata += "\\dfrac{" + (sopra || "1") + "}{" + sotto + "}";
     else fattorizzata += sopra || (k === 1 || k === -1 ? "1" : "");
+    return fattorizzata;
+  }
+
+  // G(s) come rapporto di polinomi e, accanto, in forma fattorizzata.
+  function mostraFdT(num, den, K, h, termini) {
+    const numTex = formattaPolinomioTex(num, "s");
+    const denTex = formattaPolinomioTex(den, "s");
+    const fattorizzata = formaFattorizzataTex(K, h, termini);
+    // Le due forme sono due blocchi affiancati: stanno sulla stessa riga
+    // finche' c'e' spazio e vanno a capo solo su schermi stretti.
+    const blocco = function (tex) {
+      return "<div style=\"max-width:100%; overflow-x:auto;\">\\(\\displaystyle " + tex + "\\)</div>";
+    };
     divFdtTesto.innerHTML =
-      "<div style=\"overflow-x:auto;\">$$\\begin{aligned} G(s) &= \\dfrac{" + numTex + "}{" + denTex + "} \\\\[4pt] " +
-      "&= " + fattorizzata + "\\end{aligned}$$</div>";
+      "<div style=\"display:flex; flex-wrap:wrap; justify-content:center; align-items:center; " +
+      "column-gap:0.5em; row-gap:0.8em; margin:1em 0;\">" +
+      blocco("G(s) = \\dfrac{" + numTex + "}{" + denTex + "}") +
+      blocco("= " + fattorizzata) + "</div>";
     typeset(divFdtTesto);
   }
   function sommaArray(arrs) {
@@ -223,7 +234,12 @@
     const terminiZeri = raggruppaRadici(CA.polyRoots(nR), 1);
     const terminiPoli = raggruppaRadici(CA.polyRoots(dR), -1);
 
-    return { K, h, termini: terminiZeri.concat(terminiPoli) };
+    // Prima gli zeri e poi i poli, ciascuno in ordine di pulsazione di
+    // rottura: e' l'ordine in cui si legge la forma fattorizzata di G(s), e
+    // le schede dei termini e le colonne della tabella lo seguono.
+    const rottura = function (t) { return t.tipo === "reale" ? 1 / Math.abs(t.T) : t.omegan; };
+    const perRottura = function (a, b) { return rottura(a) - rottura(b); };
+    return { K, h, termini: terminiZeri.sort(perRottura).concat(terminiPoli.sort(perRottura)) };
   }
 
   // ---------- Contributo (ampiezza dB, fase gradi, reale e asintotico) di ciascun tipo di termine ----------
@@ -396,20 +412,20 @@
     return [];
   }
 
+  // Stessa scrittura della forma fattorizzata di G(s): lo zero e' il
+  // fattore, il polo e' uno fratto il fattore.
   function formulaTermineTex(t) {
-    if (t.tipo === "reale") {
-      const base = "\\left(1 + " + formattaNumero(t.T) + "\\,s\\right)";
-      return t.esponente > 0 ? base : base + "^{-1}";
-    }
-    const base =
-      "\\left(1 + " + formattaNumero((2 * t.zeta) / t.omegan) + "\\,s + " +
-      formattaNumero(1 / (t.omegan * t.omegan)) + "\\,s^2\\right)";
-    return t.esponente > 0 ? base : base + "^{-1}";
+    const base = fattoreBodeTex(t);
+    return t.esponente > 0 ? base : "\\dfrac{1}{" + base + "}";
   }
 
   // ---------- Calcolo principale ----------
+  // L'ultimo calcolo riuscito, da cui il pulsante PDF genera il documento.
+  let ultimoCalcolo = null;
+
   function eseguiCalcolo() {
     divErrore.style.display = "none";
+    ultimoCalcolo = null;
     try {
       const num = leggiVettoreCoeff(campoNum.value);
       const den = leggiVettoreCoeff(campoDen.value);
@@ -435,14 +451,19 @@
       // termini solo se non banali: K va sempre mostrato, h solo se diverso da zero)
       const contributi = [contributoGuadagno(K, w)];
       const elencoTermini = [{ tipo: "guadagno", K }];
-      if (h !== 0) {
+      // Stesso ordine della forma fattorizzata: K, poi il numeratore (s^h se
+      // h > 0, zeri), poi il denominatore (s^|h| se h < 0, poli).
+      const aggiungiOrigine = () => {
         contributi.push(contributoOrigine(h, w));
         elencoTermini.push({ tipo: "origine", h });
-      }
-      termini.forEach((t) => {
+      };
+      if (h > 0) aggiungiOrigine();
+      termini.forEach((t, i) => {
+        if (h < 0 && t.esponente < 0 && (i === 0 || termini[i - 1].esponente > 0)) aggiungiOrigine();
         contributi.push(contributoTermine(t, w));
         elencoTermini.push(t);
       });
+      if (h < 0 && !termini.some((t) => t.esponente < 0)) aggiungiOrigine();
 
       const magTotEsatto = sommaArray(contributi.map((c) => c.magDb));
       const faseTotEsatta = sommaArray(contributi.map((c) => c.phaseDeg));
@@ -458,6 +479,7 @@
       mostraTermini(elencoTermini, w, contributi);
       mostraTotale(w, magTotEsatto, faseTotEsatta, magTotAsint, faseTotAsint, magDiretta, faseDiretta, elencoTermini);
       mostraTabellaSomma(w, notevoli, elencoTermini, contributi);
+      ultimoCalcolo = { num, den, K, h, termini, elencoTermini, omegaMin, omegaMax, notevoli, w, contributi };
     } catch (e) {
       divErrore.textContent = "Errore nei dati inseriti: " + e.message;
       divErrore.style.display = "block";
@@ -467,36 +489,48 @@
     }
   }
 
+  // ---------- Titolo, formula e descrizione di ogni scheda ----------
+  // Servono sia alla pagina sia al PDF: la formula e' TeX puro (senza $),
+  // la descrizione e' testo con la matematica fra $...$.
+  function titoloTermine(t) {
+    if (t.tipo === "guadagno") return "Guadagno costante";
+    if (t.tipo === "origine") return t.h > 0 ? "Zero nell'origine" : "Polo nell'origine";
+    return (t.esponente > 0 ? "Zero" : "Polo") + (t.tipo === "reale" ? " reale" : " complesso coniugato");
+  }
+
+  function formulaSchedaTex(t) {
+    if (t.tipo === "guadagno") return "K = " + formattaNumero(t.K);
+    if (t.tipo === "origine") {
+      const sh = "s" + (Math.abs(t.h) === 1 ? "" : "^{" + Math.abs(t.h) + "}");
+      return t.h > 0 ? sh : "\\dfrac{1}{" + sh + "}";
+    }
+    return formulaTermineTex(t);
+  }
+
+  function descrizioneScheda(t) {
+    if (t.tipo === "guadagno") {
+      return "Contributo costante: ampiezza 20·log₁₀|K| = " + formattaNumero(20 * Math.log10(Math.abs(t.K))) +
+        " dB su tutte le pulsazioni; fase " + (t.K >= 0 ? "0°" : "180°") + ".";
+    }
+    if (t.tipo === "origine") {
+      return "Retta di pendenza " + 20 * t.h + " dB/dec passante per 0 dB a ω=1 rad/s; fase costante " + t.h * 90 + "°. " +
+        "In scala logaritmica $|G|_{dB} = " + 20 * t.h + "\\log_{10}\\omega$: è una retta esatta (non " +
+        "un'approssimazione asintotica), che " + (t.h > 0 ? "sale" : "scende") + " di " +
+        Math.abs(20 * t.h) + " dB ogni volta che $\\log_{10}\\omega$ aumenta di 1, e vale 0 dB in " +
+        "$\\log_{10}\\omega = 0$, cioè in $\\omega = 1$ rad/s.";
+    }
+    return descriviTermine(t);
+  }
+
   // ---------- Rendering elenco termini ----------
   function mostraTermini(elenco, w, contributi) {
     let html = "";
     elenco.forEach((t, i) => {
       const divId = "termine-" + i + "-plot";
-      let titolo, formula, descrizione;
-      if (t.tipo === "guadagno") {
-        titolo = "Guadagno costante";
-        formula = "K = " + formattaNumero(t.K);
-        descrizione =
-          "Contributo costante: ampiezza 20·log₁₀|K| = " + formattaNumero(20 * Math.log10(Math.abs(t.K))) +
-          " dB su tutte le pulsazioni; fase " + (t.K >= 0 ? "0°" : "180°") + ".";
-      } else if (t.tipo === "origine") {
-        titolo = t.h > 0 ? "Zero nell'origine" : "Polo nell'origine";
-        formula = "(j\\omega)^{" + t.h + "}";
-        descrizione =
-          "Retta di pendenza " + 20 * t.h + " dB/dec passante per 0 dB a ω=1 rad/s; fase costante " + t.h * 90 + "°. " +
-          "In scala logaritmica $|G|_{dB} = " + 20 * t.h + "\\log_{10}\\omega$: è una retta esatta (non " +
-          "un'approssimazione asintotica), che " + (t.h > 0 ? "sale" : "scende") + " di " +
-          Math.abs(20 * t.h) + " dB ogni volta che $\\log_{10}\\omega$ aumenta di 1, e vale 0 dB in " +
-          "$\\log_{10}\\omega = 0$, cioè in $\\omega = 1$ rad/s.";
-      } else {
-        titolo = (t.esponente > 0 ? "Zero" : "Polo") + (t.tipo === "reale" ? " reale" : " complesso coniugato");
-        formula = "$" + formulaTermineTex(t) + "$";
-        descrizione = descriviTermine(t);
-      }
       html +=
-        '<div class="pannello scheda-termine"><h3>' + (i + 1) + ". " + titolo + "</h3>" +
-        '<p class="descrizione">' + (t.tipo === "guadagno" || t.tipo === "origine" ? "$" + formula + "$" : formula) +
-        "<br />" + descrizione + "</p>" +
+        '<div class="pannello scheda-termine"><h3>' + (i + 1) + ". " + titoloTermine(t) + "</h3>" +
+        '<p class="descrizione">$' + formulaSchedaTex(t) + "$" +
+        "<br />" + descrizioneScheda(t) + "</p>" +
         '<div id="' + divId + '" style="width:100%; height:400px;"></div></div>';
     });
     divListaTermini.innerHTML = html;
@@ -550,7 +584,10 @@
   function nomeBreveTermine(t, i) {
     const n = (i + 1) + ". ";
     if (t.tipo === "guadagno") return n + "K";
-    if (t.tipo === "origine") return n + "(jω)<sup>" + t.h + "</sup>";
+    if (t.tipo === "origine") {
+      const sh = "s" + (Math.abs(t.h) === 1 ? "" : "<sup>" + Math.abs(t.h) + "</sup>");
+      return n + (t.h > 0 ? sh : "1/" + sh);
+    }
     const tipo = t.esponente > 0 ? "zero" : "polo";
     if (t.tipo === "reale") return n + tipo + " ω<sub>0</sub>=" + formattaNumero(1 / Math.abs(t.T), 3);
     return n + tipo + " ω<sub>n</sub>=" + formattaNumero(t.omegan, 3);
@@ -574,37 +611,47 @@
     return Math.abs((v[2] - v[1]) - (v[1] - v[0])) / 1e-3 > 0.5;
   }
 
-  function mostraTabellaSomma(w, notevoli, elenco, contributi) {
+  // I numeri delle due tabelle (ampiezza e fase), gia' arrotondati: la
+  // pagina e il PDF li impaginano ciascuno a modo suo.
+  function datiTabelle(w, notevoli, elenco, contributi) {
     // Ogni pulsazione notevole e' stata inserita nella griglia: qui se ne
     // ritrova l'indice esatto, senza interpolare.
     const indici = notevoli.map(function (om) { return indiceVicino(w, om); });
 
-    // Per disegnare la spezzata bastano gli estremi e i punti dove cambia
-    // pendenza: quelle righe vengono evidenziate, tabella per tabella.
-    function necessaria(idx, chiave) {
-      return idx === indici[0] || idx === indici[indici.length - 1] || cambiaPendenza(elenco, w[idx], chiave);
+    function tabella(titolo, chiave, decimali) {
+      const righe = indici.map(function (idx) {
+        // Per disegnare la spezzata bastano gli estremi e i punti dove
+        // cambia pendenza: quelle righe vengono evidenziate.
+        const necessaria = idx === indici[0] || idx === indici[indici.length - 1] ||
+          cambiaPendenza(elenco, w[idx], chiave);
+        const valori = contributi.map(function (c) { return formattaNumero(c[chiave][idx], decimali); });
+        // La somma e' fatta sui valori gia' arrotondati, cosi' la riga
+        // torna anche rifacendo il conto a mano su quello che si legge.
+        const somma = formattaNumero(valori.reduce(function (a, v) { return a + v; }, 0), decimali);
+        return {
+          omega: formattaNumero(w[idx], 3), log: formattaNumero(Math.log10(w[idx]), 2),
+          valori: valori, somma: somma, necessaria: necessaria,
+        };
+      });
+      return { titolo: titolo, righe: righe };
     }
 
-    function costruisci(titolo, perTermine, decimali, chiave) {
-      let html = "<h3>" + titolo + "</h3><div style=\"overflow-x:auto;\"><table><thead><tr>" +
+    return [tabella("Ampiezza [dB]", "magAsintDb", 2), tabella("Fase [°]", "phaseAsintDeg", 1)];
+  }
+
+  function mostraTabellaSomma(w, notevoli, elenco, contributi) {
+    function costruisci(tab) {
+      let html = "<h3>" + tab.titolo + "</h3><div style=\"overflow-x:auto;\"><table><thead><tr>" +
         "<th>ω [rad/s]</th><th>log<sub>10</sub>ω</th>";
       elenco.forEach(function (t, i) {
         html += "<th>" + nomeBreveTermine(t, i) + "</th>";
       });
       html += "<th>Somma</th></tr></thead><tbody>";
-      indici.forEach(function (idx) {
-        html += (necessaria(idx, chiave) ? '<tr class="necessaria">' : "<tr>") +
-          "<td>" + formattaNumero(w[idx], 3) + "</td><td>" +
-          formattaNumero(Math.log10(w[idx]), 2) + "</td>";
-        // La somma e' fatta sui valori gia' arrotondati, cosi' la riga
-        // torna anche rifacendo il conto a mano su quello che si legge.
-        let somma = 0;
-        perTermine.forEach(function (serie) {
-          const v = formattaNumero(serie[idx], decimali);
-          somma += v;
-          html += "<td>" + v + "</td>";
-        });
-        html += "<td><strong>" + formattaNumero(somma, decimali) + "</strong></td></tr>";
+      tab.righe.forEach(function (r) {
+        html += (r.necessaria ? '<tr class="necessaria">' : "<tr>") +
+          "<td>" + r.omega + "</td><td>" + r.log + "</td>";
+        r.valori.forEach(function (v) { html += "<td>" + v + "</td>"; });
+        html += "<td><strong>" + r.somma + "</strong></td></tr>";
       });
       return html + "</tbody></table></div>";
     }
@@ -612,11 +659,206 @@
     divTabellaSomma.innerHTML =
       '<p class="nota">Le colonne dei termini sono i contributi <em>asintotici</em> di quelli elencati ' +
       "sopra, nello stesso ordine: sommandole riga per riga si ottiene la spezzata asintotica.</p>" +
-      costruisci("Ampiezza [dB]", contributi.map(function (c) { return c.magAsintDb; }), 2, "magAsintDb") +
-      costruisci("Fase [°]", contributi.map(function (c) { return c.phaseAsintDeg; }), 1, "phaseAsintDeg") +
+      datiTabelle(w, notevoli, elenco, contributi).map(costruisci).join("") +
       '<p class="nota">Le righe evidenziate sono gli estremi e i punti dove la spezzata cambia ' +
       "pendenza: sono le sole necessarie per disegnare il totale, unendole con segmenti.</p>";
     typeset(divTabellaSomma);
+  }
+
+  // =====================================================================
+  // ESPORTAZIONE IN PDF (LaTeX)
+  // =====================================================================
+  // Il sito e' statico, quindi il documento non si compila qui: si genera
+  // il sorgente LaTeX e lo si manda a texlive.net (il servizio di
+  // compilazione usato da learnlatex.org), che risponde con il PDF in una
+  // nuova scheda. I grafici sono disegnati da pgfplots con gli stessi
+  // numeri della pagina.
+
+  // Testo con la matematica fra $...$ (come le descrizioni delle schede)
+  // reso sicuro per LaTeX: i caratteri speciali fuori dalla matematica
+  // vengono protetti e i simboli Unicode diventano comandi.
+  const SIMBOLI_LATEX = [
+    ["log₁₀", "\\log_{10}"], ["₁₀", "_{10}"], ["₀", "_0"], ["ω", "\\omega"], ["δ", "\\delta"],
+    ["τ", "\\tau"], ["ζ", "\\zeta"], ["°", "^\\circ"], ["−", "-"], ["±", "\\pm"], ["·", "\\cdot"],
+    ["≈", "\\approx"], ["→", "\\to"], ["≤", "\\le"], ["≥", "\\ge"],
+  ];
+  function testoLatex(str) {
+    return String(str).split("$").map(function (pezzo, i) {
+      const inMatematica = i % 2 === 1;
+      if (!inMatematica) pezzo = pezzo.replace(/[\\{}]/g, "").replace(/([%&#_])/g, "\\$1");
+      SIMBOLI_LATEX.forEach(function (c) {
+        pezzo = pezzo.split(c[0]).join(inMatematica ? c[1] + " " : "\\ensuremath{" + c[1] + "}");
+      });
+      return pezzo;
+    }).join("$");
+  }
+
+  // Numero per le coordinate di pgfplots ("nan" interrompe la curva, per
+  // esempio l'ampiezza infinita di una coppia complessa con δ = 0).
+  function coordLatex(x) {
+    return Number.isFinite(x) ? String(Math.round(x * 1e4) / 1e4) : "nan";
+  }
+  function curvaLatex(ws, valori, stile, legenda) {
+    let punti = "";
+    ws.forEach(function (om, i) { punti += "(" + coordLatex(Math.log10(om)) + "," + coordLatex(valori[i]) + ") "; });
+    return "\\addplot[" + stile + "] coordinates {" + punti + "};\n" +
+      (legenda ? "\\addlegendentry{" + legenda + "}\n" : "");
+  }
+
+  // Coppia di assi ampiezza/fase: affiancati per le schede dei termini,
+  // uno sotto l'altro (e piu' grandi) per il diagramma totale. Le linee
+  // verticali tratteggiate sono i punti notevoli, come nella pagina.
+  function graficoBodeLatex(ws, serie, rifAmpiezza, rifFase, affiancati) {
+    const xmin = Math.log10(ws[0]), xmax = Math.log10(ws[ws.length - 1]);
+    const assi = function (rif) {
+      return "xmin=" + coordLatex(xmin) + ", xmax=" + coordLatex(xmax) +
+        (rif.length ? ", extra x ticks={" + rif.map(function (om) { return coordLatex(Math.log10(om)); }).join(",") +
+          "}, extra x tick labels={}, extra x tick style={grid=major, major grid style={dashed, red!70}}" : "");
+    };
+    const larghezza = affiancati ? "0.43\\textwidth" : "0.92\\textwidth";
+    const altezza = affiancati ? "4.6cm" : "5.6cm";
+    let tex = "\\begin{tikzpicture}\n\\begin{groupplot}[group style={group size=" +
+      (affiancati ? "2 by 1, horizontal sep=2.2cm" : "1 by 2, vertical sep=1.4cm") + "}, " +
+      "width=" + larghezza + ", height=" + altezza + ", grid=major, xtick distance=1, unbounded coords=jump, " +
+      "xlabel={$\\log_{10}\\omega$ [decadi]}, legend style={font=\\scriptsize}, " +
+      "every axis plot/.append style={line width=0.9pt}]\n";
+    tex += "\\nextgroupplot[ylabel={ampiezza [dB]}, " + assi(rifAmpiezza) + ", legend pos=south west]\n";
+    serie.forEach(function (c) { tex += curvaLatex(ws, c.mag, c.stile, c.legenda); });
+    tex += "\\nextgroupplot[ylabel={fase [$^\\circ$]}, " + assi(rifFase) + "]\n";
+    serie.forEach(function (c) { tex += curvaLatex(ws, c.fase, c.stile); });
+    return tex + "\\end{groupplot}\n\\end{tikzpicture}\n";
+  }
+
+  // Le pulsazioni da segnare per ciascun termine, separate per riquadro.
+  function rifLatex(t, riquadro, omegaMin, omegaMax) {
+    return riferimentiTermine(t)
+      .filter(function (r) { return r.riquadro === riquadro && r.omega >= omegaMin && r.omega <= omegaMax; })
+      .map(function (r) { return r.omega; });
+  }
+
+  function nomeBreveLatex(t, i) {
+    const n = (i + 1) + ".~";
+    if (t.tipo === "guadagno") return n + "$K$";
+    if (t.tipo === "origine") {
+      const sh = "s" + (Math.abs(t.h) === 1 ? "" : "^{" + Math.abs(t.h) + "}");
+      return n + "$" + (t.h > 0 ? sh : "1/" + sh) + "$";
+    }
+    const tipo = t.esponente > 0 ? "zero" : "polo";
+    if (t.tipo === "reale") return n + tipo + " $\\omega_0=" + formattaNumero(1 / Math.abs(t.T), 3) + "$";
+    return n + tipo + " $\\omega_n=" + formattaNumero(t.omegan, 3) + "$";
+  }
+
+  function tabellaLatex(tab, elenco) {
+    const titolo = tab.titolo.replace("°", "$^\\circ$");
+    let tex = "\\subsection*{" + titolo + "}\n\\begin{center}\n\\begin{adjustbox}{max width=\\textwidth}\n" +
+      "\\begin{tabular}{" + "c".repeat(elenco.length + 3) + "}\n\\toprule\n" +
+      "$\\omega$ [rad/s] & $\\log_{10}\\omega$ & " +
+      elenco.map(nomeBreveLatex).join(" & ") + " & \\textbf{Somma} \\\\\n\\midrule\n";
+    tab.righe.forEach(function (r) {
+      const num = function (v) { return "$" + v + "$"; };
+      tex += (r.necessaria ? "\\rowcolor{evidenziata} " : "") + num(r.omega) + " & " + num(r.log) + " & " +
+        r.valori.map(num).join(" & ") + " & $\\mathbf{" + r.somma + "}$ \\\\\n";
+    });
+    return tex + "\\bottomrule\n\\end{tabular}\n\\end{adjustbox}\n\\end{center}\n";
+  }
+
+  function documentoLatex(c) {
+    // Griglia propria, piu' rada di quella della pagina (i grafici di
+    // pgfplots non ne hanno bisogno), con dentro le pulsazioni notevoli
+    // perche' gli spigoli delle spezzate cadano su punti veri.
+    const ws = creaGrigliaOmega(c.omegaMin, c.omegaMax, 160)
+      .concat(c.notevoli)
+      .sort(function (a, b) { return a - b; })
+      .filter(function (om, i, arr) { return i === 0 || om > arr[i - 1]; });
+    const contributo = function (t) {
+      if (t.tipo === "guadagno") return contributoGuadagno(t.K, ws);
+      if (t.tipo === "origine") return contributoOrigine(t.h, ws);
+      return contributoTermine(t, ws);
+    };
+    const contributi = c.elencoTermini.map(contributo);
+    const esatto = "blue!70!black", asintotico = "red!75!black, dashed";
+
+    let tex =
+      "\\documentclass[11pt,a4paper]{article}\n" +
+      "\\usepackage[T1]{fontenc}\n\\usepackage[utf8]{inputenc}\n\\usepackage[italian]{babel}\n" +
+      "\\usepackage{lmodern}\n\\usepackage[margin=2cm]{geometry}\n\\usepackage{amsmath}\n" +
+      "\\usepackage{booktabs}\n\\usepackage[table]{xcolor}\n\\usepackage{adjustbox}\n\\usepackage{needspace}\n" +
+      "\\usepackage{pgfplots}\n\\pgfplotsset{compat=1.18}\n\\usepgfplotslibrary{groupplots}\n" +
+      "\\definecolor{evidenziata}{RGB}{221,229,250}\n" +
+      "\\setlength{\\parindent}{0pt}\n\\setlength{\\parskip}{0.5em}\n" +
+      "\\title{Diagrammi di Bode}\n\\author{Controlli Automatici}\n\\date{\\today}\n" +
+      "\\begin{document}\n\\maketitle\n\n";
+
+    tex += "\\section*{Funzione di trasferimento}\n\\[ G(s) = \\dfrac{" + formattaPolinomioTex(c.num, "s") + "}{" +
+      formattaPolinomioTex(c.den, "s") + "} = " + formaFattorizzataTex(c.K, c.h, c.termini) + " \\]\n" +
+      "Pulsazioni da $" + formattaNumero(c.omegaMin) + "$ a $" + formattaNumero(c.omegaMax) + "$~rad/s.\n\n";
+
+    tex += "\\section*{Termini elementari}\n";
+    c.elencoTermini.forEach(function (t, i) {
+      const k = contributi[i];
+      // Titolo, descrizione e grafico di un termine restano sulla stessa pagina.
+      tex += "\\needspace{0.45\\textheight}\n\\subsection*{" + (i + 1) + ". " + titoloTermine(t) + "}\n" +
+        "\\[ " + formulaSchedaTex(t) + " \\]\n" + testoLatex(descrizioneScheda(t)) + "\n\n" +
+        "\\begin{center}\n" +
+        graficoBodeLatex(ws, [
+          { mag: k.magDb, fase: k.phaseDeg, stile: esatto, legenda: "esatto" },
+          { mag: k.magAsintDb, fase: k.phaseAsintDeg, stile: asintotico, legenda: "asintotico" },
+        ], rifLatex(t, "ampiezza", c.omegaMin, c.omegaMax), rifLatex(t, "fase", c.omegaMin, c.omegaMax), true) +
+        "\\end{center}\n\n";
+    });
+
+    // Nel totale si segnano i punti di rottura di tutti i termini.
+    const rotture = [];
+    c.elencoTermini.forEach(function (t) {
+      const om = t.tipo === "reale" ? 1 / Math.abs(t.T) : t.tipo === "complesso" ? t.omegan : null;
+      if (om !== null && om >= c.omegaMin && om <= c.omegaMax) rotture.push(om);
+    });
+    tex += "\\clearpage\n\\section*{Diagramma di Bode totale}\n\\begin{center}\n" +
+      graficoBodeLatex(ws, [
+        { mag: sommaArray(contributi.map(function (k) { return k.magDb; })),
+          fase: sommaArray(contributi.map(function (k) { return k.phaseDeg; })), stile: esatto, legenda: "esatto" },
+        { mag: sommaArray(contributi.map(function (k) { return k.magAsintDb; })),
+          fase: sommaArray(contributi.map(function (k) { return k.phaseAsintDeg; })), stile: asintotico, legenda: "asintotico" },
+      ], rotture, rotture, false) +
+      "\\end{center}\n\n";
+
+    tex += "\\clearpage\n\\section*{Somma pulsazione per pulsazione}\n" +
+      "Le colonne dei termini sono i contributi \\emph{asintotici} di quelli elencati sopra, nello stesso " +
+      "ordine: sommandole riga per riga si ottiene la spezzata asintotica.\n" +
+      datiTabelle(c.w, c.notevoli, c.elencoTermini, c.contributi)
+        .map(function (tab) { return tabellaLatex(tab, c.elencoTermini); }).join("\n") +
+      "\nLe righe evidenziate sono gli estremi e i punti dove la spezzata cambia pendenza: sono le sole " +
+      "necessarie per disegnare il totale, unendole con segmenti.\n";
+
+    return tex + "\\end{document}\n";
+  }
+
+  // Invia il sorgente a texlive.net con un form in una nuova scheda: il
+  // servizio compila con pdflatex e reindirizza al PDF.
+  function salvaPdf() {
+    eseguiCalcolo(); // il PDF riflette sempre i campi come sono ora
+    if (!ultimoCalcolo) return;
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "https://texlive.net/cgi-bin/latexcgi";
+    form.enctype = "multipart/form-data";
+    form.target = "_blank";
+    const campi = {
+      "filecontents[]": documentoLatex(ultimoCalcolo),
+      "filename[]": "document.tex",
+      engine: "pdflatex",
+      return: "pdf",
+    };
+    Object.keys(campi).forEach(function (nome) {
+      const campo = document.createElement("textarea");
+      campo.name = nome;
+      campo.value = campi[nome];
+      form.appendChild(campo);
+    });
+    form.style.display = "none";
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
   }
 
   // ---------- Esempio precaricato: 10/((s+1)(s+10)) ----------
@@ -630,6 +872,7 @@
 
   document.getElementById("btn-calcola").addEventListener("click", eseguiCalcolo);
   document.getElementById("btn-esempio").addEventListener("click", caricaEsempio);
+  document.getElementById("btn-pdf").addEventListener("click", salvaPdf);
 
   // ---------- Stato iniziale della pagina ----------
   caricaEsempio(); // la pagina non è mai vuota all'apertura
