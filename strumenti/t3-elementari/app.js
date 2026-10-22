@@ -67,7 +67,9 @@
     // Assi fissi (indipendenti da tau): con tau in [0.1,5] il polo -1/tau varia in [-10,-0.2].
     CAPlot.plotComplex("a-grafico-polo", [{ re: polo, im: 0 }], { xrange: [-11, 1], yrange: [-6, 6] });
 
-    aFdtTesto.innerHTML = "$G(s) = \\dfrac{" + formattaNumero(mu) + "}{" + formattaNumero(tau) + "s+1}$";
+    // "s+1" e non "1s+1" quando tau vale 1
+    aFdtTesto.innerHTML = "$G(s) = \\dfrac{" + formattaNumero(mu) + "}{" +
+      (formattaNumero(tau) === 1 ? "" : formattaNumero(tau)) + "s+1}$";
     document.getElementById("a-polo-testo").textContent = formattaNumero(polo);
     document.getElementById("a-regime-testo").textContent = formattaNumero(mu);
     document.getElementById("a-ta-testo").textContent = formattaNumero(3 * tau) + " s";

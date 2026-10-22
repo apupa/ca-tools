@@ -47,6 +47,12 @@
     const absIm = Math.abs(im);
     return re + " " + segno + " " + (absIm === 1 ? "j" : absIm + "j");
   }
+  // Poli in ordine di parte reale crescente (e, a parita', di parte
+  // immaginaria): il calcolo delle radici li restituisce in ordine sparso.
+  function ordinaPoli(poli) {
+    return poli.slice().sort(function (a, b) { return a.re - b.re || a.im - b.im; });
+  }
+
   function typeset(el) {
     if (window.MathJax && window.MathJax.typesetPromise) window.MathJax.typesetPromise([el]);
   }
@@ -223,20 +229,34 @@
     const idGraficoRisposta = "grafico-risposta-" + suffisso;
     let stato = null; // { num, den, poliAperti, zeriAperti, puntiLuogo, asintoti, kMax, assi, vincoli, tResp }
 
-    function mostraFdT(num, den) {
-      const numTex = formattaPolinomioTex(num, "s");
-      const denTex = formattaPolinomioTex(den, "s");
-      divFdtTesto.innerHTML =
-        "<div style=\"overflow-x:auto;\">$$" + simboloL + "(s) = \\dfrac{" + numTex + "}{" + denTex + "}$$</div>";
+    // L(s) come prodotto dei polinomi e, se un polo e uno zero coincidono
+    // (il controllore cancella un polo dell'impianto), anche semplificata:
+    // e' la forma su cui sono calcolati luogo, poli e specifiche qui sotto.
+    function mostraFdT(numCostruito, denCostruito, num, den) {
+      const fdt = function (n, d) {
+        return "\\dfrac{" + formattaPolinomioTex(n, "s") + "}{" + formattaPolinomioTex(d, "s") + "}";
+      };
+      const semplificata = den.length < denCostruito.length;
+      let html = '<div class="formula-a-capo"><div>\\(\\displaystyle ' + simboloL + "(s) = " +
+        fdt(numCostruito, denCostruito) + "\\)</div>";
+      if (semplificata) html += "<div>\\(\\displaystyle = " + fdt(num, den) + "\\)</div>";
+      html += "</div>";
+      if (semplificata) {
+        html += '<p class="nota">Numeratore e denominatore hanno un fattore in comune, che si semplifica ' +
+          "(cancellazione polo-zero): luogo, poli ad anello chiuso e specifiche usano la forma semplificata.</p>";
+      }
+      divFdtTesto.innerHTML = html;
       typeset(divFdtTesto);
     }
 
     function mostraGeq(numChiuso, denChiuso, K) {
       const numTex = formattaPolinomioTex(numChiuso, "s");
       const denTex = formattaPolinomioTex(denChiuso, "s");
-      divGeq.innerHTML =
-        "<div style=\"overflow-x:auto;\">$$G_{eq}(s) = \\dfrac{K \\cdot " + simboloL + "(s)}{1+K \\cdot " + simboloL +
-        "(s)} = \\dfrac{" + numTex + "}{" + denTex + "} \\qquad (K=" + formattaNumero(K) + ")$$</div>";
+      // Tre membri che vanno a capo da soli su schermi stretti (vedi .formula-a-capo).
+      divGeq.innerHTML = '<div class="formula-a-capo">' +
+        "<div>\\(\\displaystyle G_{eq}(s) = \\dfrac{K \\cdot " + simboloL + "(s)}{1+K \\cdot " + simboloL + "(s)}\\)</div>" +
+        "<div>\\(\\displaystyle = \\dfrac{" + numTex + "}{" + denTex + "}\\)</div>" +
+        "<div>\\(\\displaystyle \\quad (K=" + formattaNumero(K) + ")\\)</div></div>";
       typeset(divGeq);
     }
 
@@ -379,7 +399,7 @@
 
       divPoliChiusi.innerHTML =
         "<table><tbody><tr><th>K</th><td>" + formattaNumero(K) + "</td></tr><tr><th>Poli</th><td>" +
-        poliChiusi.map(formattaComplesso).join(", ") + "</td></tr></tbody></table>";
+        ordinaPoli(poliChiusi).map(formattaComplesso).join(", ") + "</td></tr></tbody></table>";
 
       const numChiuso = num.map((c) => c * K);
       const denChiuso = CA.polyAdd(den, numChiuso);
@@ -409,7 +429,7 @@
       if (parseFloat(sliderK.value) > kMax) sliderK.value = "0";
       sliderKVal.textContent = formattaNumero(parseFloat(sliderK.value));
 
-      mostraFdT(numCostruito, denCostruito);
+      mostraFdT(numCostruito, denCostruito, num, den);
       mostraSpecifiche(den, specStaticaVal);
       disegnaGrafico(parseFloat(sliderK.value));
     }

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20260905c" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20261022b" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -25,6 +25,11 @@
     .campo-inline { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
     .campo-inline label { font-family: var(--font-serif); text-transform: none; letter-spacing: 0; color: var(--colore-testo); font-weight: normal; font-size: 0.9rem; white-space: nowrap; }
     .campo-inline input[type="text"] { width: 90px; }
+    /* le etichette in riga non hanno il margine sotto di quelle normali,
+       altrimenti l'unita' ("s", "%") risultava piu' in alto del campo */
+    .campo-inline label { margin-bottom: 0; }
+    /* campo e unita' vanno a capo insieme, mai separati */
+    .campo-inline .gruppo { display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
     .verdetto-ok { color: #15803d; font-weight: 600; }
     .verdetto-no { color: var(--colore-errore); font-weight: 600; }
     h2.titolo-sezione { border-bottom: 2px solid var(--colore-testo); padding-bottom: 0.4rem; margin-top: 2.5rem; }
@@ -149,13 +154,13 @@
       <h2>Specifiche di progetto</h2>
       <fieldset class="specifica">
         <legend>Errore a regime (specifica statica)</legend>
-        <div class="campo" style="max-width:340px;">
+        <div class="campo">
           <label for="spec-statica">Tipo di riferimento con errore a regime nullo</label>
           <select id="spec-statica">
             <option value="nessuna" selected>Nessuna specifica</option>
-            <option value="posizione">Gradino (errore di posizione nullo)</option>
-            <option value="velocita">Rampa (errore di velocità nullo)</option>
-            <option value="accelerazione">Parabola (errore di accelerazione nullo)</option>
+            <option value="posizione">Gradino (posizione)</option>
+            <option value="velocita">Rampa (velocità)</option>
+            <option value="accelerazione">Parabola (accelerazione)</option>
           </select>
         </div>
       </fieldset>
@@ -164,14 +169,14 @@
         <div class="campo-inline">
           <input type="checkbox" id="ta-attivo" />
           <label for="ta-attivo">Tempo di assestamento massimo $T_a$ ≤</label>
-          <input type="text" id="ta-valore" value="5" />
-          <label for="ta-valore">s</label>
+          <span class="gruppo"><input type="text" id="ta-valore" value="5" />
+          <label for="ta-valore">s</label></span>
         </div>
         <div class="campo-inline">
           <input type="checkbox" id="s-attivo" />
           <label for="s-attivo">Sovraelongazione massima $S\%$ ≤</label>
-          <input type="text" id="s-valore" value="20" />
-          <label for="s-valore">%</label>
+          <span class="gruppo"><input type="text" id="s-valore" value="20" />
+          <label for="s-valore">%</label></span>
         </div>
       </fieldset>
     </div>
@@ -195,11 +200,11 @@
       </div>
       <p class="nota-formato">Anche qui puoi usare i <strong>coefficienti</strong> (<code>1 10</code>) o l'<strong>espressione</strong> in $s$ (<code>s+10</code>).</p>
       <div class="riga-campi">
-        <div class="campo" style="max-width:260px;">
+        <div class="campo">
           <label for="k-max">$K$ massimo tracciato</label>
           <input type="text" id="k-max" value="50" />
         </div>
-        <div class="campo" style="max-width:260px;">
+        <div class="campo">
           <label for="t-risposta">Finestra risposta al gradino $T$ [s]</label>
           <input type="text" id="t-risposta" value="10" />
         </div>
@@ -284,7 +289,8 @@
   </div>
 
   <script src="../shared/ca-core.js?v=20260807a"></script>
+  <script src="../shared/segno-meno.js?v=20261022a"></script>
   <script src="../shared/ca-plot.js?v=20260908j"></script>
-  <script src="app.js?v=20260807a"></script>
+  <script src="app.js?v=20261022r"></script>
 </body>
 </html>

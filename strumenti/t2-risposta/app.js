@@ -119,6 +119,16 @@
     return gruppi;
   }
 
+  // c·t scritto come a mano: "t" e "-t" invece di "1t" e "-1t".
+  function prodottoT(c) {
+    const k = formattaNumero(c);
+    return (k === 1 ? "" : k === -1 ? "-" : k) + "t";
+  }
+  // e^{σt}, che sparisce (vale 1) quando σ = 0.
+  function esponenziale(sigma) {
+    return formattaNumero(sigma) === 0 ? "" : "e^{" + prodottoT(sigma) + "}";
+  }
+
   function classificaModo(gruppo) {
     const sigma = gruppo.polo.re;
     if (gruppo.tipo === "reale") {
@@ -127,7 +137,7 @@
       else if (sigma > 1e-9) descrizione = "esponenziale divergente";
       else descrizione = "modo costante";
       const poloTxt = String(formattaNumero(sigma));
-      const formula = "e^{" + formattaNumero(sigma) + "t}";
+      const formula = esponenziale(sigma) || "1";
       const residuoTxt = String(formattaNumero(gruppo.residuo.re));
       return { poloTxt, descrizione, formula, residuoTxt };
     }
@@ -136,8 +146,8 @@
     if (sigma < -1e-9) descrizione = "oscillazione smorzata";
     else if (sigma > 1e-9) descrizione = "oscillazione divergente";
     else descrizione = "oscillazione persistente (ampiezza costante)";
-    const poloTxt = formattaNumero(sigma) + " \\pm j" + formattaNumero(omega);
-    const formula = "e^{" + formattaNumero(sigma) + "t}\\cos(" + formattaNumero(omega) + "t + \\varphi)";
+    const poloTxt = formattaNumero(sigma) + " \\pm j" + (formattaNumero(omega) === 1 ? "" : formattaNumero(omega));
+    const formula = esponenziale(sigma) + "\\cos(" + prodottoT(omega) + " + \\varphi)";
     const residuoTxt = formattaComplesso(gruppo.residuo);
     return { poloTxt, descrizione, formula, residuoTxt };
   }

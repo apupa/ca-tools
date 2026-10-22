@@ -238,8 +238,8 @@
     cKpVal.textContent = formattaNumero(Kp);
     cTiVal.textContent = formattaNumero(Ti);
     cTdVal.textContent = formattaNumero(Td);
-    cKiVal.textContent = cAzioneI.checked ? formattaNumero(Kp / Ti) : "0 (I disattivata)";
-    cKdVal.textContent = cAzioneD.checked ? formattaNumero(Kp * Td) : "0 (D disattivata)";
+    cKiVal.textContent = cAzioneI.checked ? formattaNumero(Kp / Ti) : "0, I disattivata";
+    cKdVal.textContent = cAzioneD.checked ? formattaNumero(Kp * Td) : "0, D disattivata";
     cTi.disabled = !cAzioneI.checked;
     cTd.disabled = !cAzioneD.checked;
   }

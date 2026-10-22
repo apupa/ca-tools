@@ -40,6 +40,12 @@
     const absIm = Math.abs(im);
     return re + " " + segno + " " + (absIm === 1 ? "j" : absIm + "j");
   }
+  // Poli in ordine di parte reale crescente (e, a parita', di parte
+  // immaginaria): il calcolo delle radici li restituisce in ordine sparso.
+  function ordinaPoli(poli) {
+    return poli.slice().sort(function (a, b) { return a.re - b.re || a.im - b.im; });
+  }
+
   function valutaPolinomioReale(p, x) {
     let acc = 0;
     for (const c of p) acc = acc * x + c;
@@ -287,7 +293,7 @@
 
     divPoliChiusi.innerHTML =
       "<table><tbody><tr><th>K</th><td>" + formattaNumero(K) + "</td></tr><tr><th>Poli</th><td>" +
-      poliChiusi.map(formattaComplesso).join(", ") + "</td></tr></tbody></table>";
+      ordinaPoli(poliChiusi).map(formattaComplesso).join(", ") + "</td></tr></tbody></table>";
 
     mostraGeq(num, den, K);
   }
@@ -299,9 +305,11 @@
     const denChiuso = CA.polyAdd(den, numChiuso);
     const numTex = formattaPolinomioTex(numChiuso, "s");
     const denTex = formattaPolinomioTex(denChiuso, "s");
-    divGeq.innerHTML =
-      "<div style=\"overflow-x:auto;\">$$G_{eq}(s) = \\dfrac{K \\cdot L(s)}{1+K \\cdot L(s)} = \\dfrac{" + numTex +
-      "}{" + denTex + "} \\qquad (K=" + formattaNumero(K) + ")$$</div>";
+    // Tre membri che vanno a capo da soli su schermi stretti (vedi .formula-a-capo).
+    divGeq.innerHTML = '<div class="formula-a-capo">' +
+      "<div>\\(\\displaystyle G_{eq}(s) = \\dfrac{K \\cdot L(s)}{1+K \\cdot L(s)}\\)</div>" +
+      "<div>\\(\\displaystyle = \\dfrac{" + numTex + "}{" + denTex + "}\\)</div>" +
+      "<div>\\(\\displaystyle \\quad (K=" + formattaNumero(K) + ")\\)</div></div>";
     typeset(divGeq);
   }
 
@@ -319,8 +327,9 @@
       ? regole.segmenti
           .map(
             (s) =>
-              "[" + (s[0] === -Infinity ? "−∞" : formattaNumero(s[0])) + ", " +
-              (s[1] === Infinity ? "+∞" : formattaNumero(s[1])) + "]"
+              // all'infinito l'intervallo e' aperto: (−∞, a] e non [−∞, a]
+              (s[0] === -Infinity ? "(−∞" : "[" + formattaNumero(s[0])) + ", " +
+              (s[1] === Infinity ? "+∞)" : formattaNumero(s[1]) + "]")
           )
           .join(", ")
       : "nessuno";

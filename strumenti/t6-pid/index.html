@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-  <link rel="stylesheet" href="../shared/stile.css?v=20260905c" />
+  <link rel="stylesheet" href="../shared/stile.css?v=20261022b" />
   <script>
     // Abilita anche il singolo $...$ per la matematica inline (non attivo di default in MathJax v3)
     window.MathJax = {
@@ -30,6 +30,12 @@
     .campo-inline { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
     .campo-inline label { font-family: var(--font-serif); text-transform: none; letter-spacing: 0; color: var(--colore-testo); font-weight: normal; font-size: 0.9rem; white-space: nowrap; }
     .campo-inline input[type="text"] { width: 90px; }
+    /* le etichette in riga non hanno il margine sotto di quelle normali,
+       altrimenti l'unita' ("s") risultava piu' in alto del campo */
+    .campo-inline label { margin-bottom: 0; }
+    /* etichetta, campo e unita' vanno a capo insieme, mai separati */
+    .campo-inline .gruppo { display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
+    .senza-a-capo { white-space: nowrap; }
     /* Larghezze di colonna congelate: in layout automatico la colonna dei
        valori si allarga per contenere "0 (disattivata)" e, spegnendo o
        accendendo I e D, i numeri traslavano orizzontalmente. La quota e'
@@ -135,7 +141,7 @@
       <aside class="banco-comandi">
       <div class="pannello">
       <h2>Impianto</h2>
-      <div class="campo" style="max-width:260px;">
+      <div class="campo">
         <label for="impianto-tipo">Tipo di impianto</label>
         <select id="impianto-tipo">
           <option value="massa" selected>Massa-molla-smorzatore</option>
@@ -173,7 +179,7 @@
 
       <div class="pannello">
       <h2>Regolatore</h2>
-      <div class="barra-azioni">
+      <div class="barra-azioni griglia-2">
         <button id="preset-p" class="secondario">Preset P</button>
         <button id="preset-pi" class="secondario">Preset PI</button>
         <button id="preset-pd" class="secondario">Preset PD</button>
@@ -188,7 +194,7 @@
         <label for="c-azione-i">Azione integrale (I)</label>
       </div>
       <div class="campo-slider">
-        <label for="c-ti">Costante di tempo integrale $T_i$ = <span id="c-ti-val">1</span> s ($K_i=K_p/T_i$ = <span id="c-ki-val">1</span>)</label>
+        <label for="c-ti">Costante di tempo integrale $T_i$ = <span id="c-ti-val">1</span> s <span class="senza-a-capo">($K_i=K_p/T_i$ = <span id="c-ki-val">1</span>)</span></label>
         <input type="range" id="c-ti" min="0.1" max="20" step="0.1" value="1" />
       </div>
       <div class="campo-inline">
@@ -196,7 +202,7 @@
         <label for="c-azione-d">Azione derivativa (D)</label>
       </div>
       <div class="campo-slider">
-        <label for="c-td">Costante di tempo derivativa $T_d$ = <span id="c-td-val">0.1</span> s ($K_d=K_p\,T_d$ = <span id="c-kd-val">0.1</span>)</label>
+        <label for="c-td">Costante di tempo derivativa $T_d$ = <span id="c-td-val">0.1</span> s <span class="senza-a-capo">($K_d=K_p\,T_d$ = <span id="c-kd-val">0.1</span>)</span></label>
         <input type="range" id="c-td" min="0" max="5" step="0.05" value="0.1" />
       </div>
     </div>
@@ -222,11 +228,11 @@
         <div class="campo-inline">
           <input type="checkbox" id="du-attivo" />
           <label for="du-attivo">Attivo</label>
-          <label for="du-ampiezza">ampiezza</label>
-          <input type="text" id="du-ampiezza" value="1" />
-          <label for="du-istante">a partire da t=</label>
+          <span class="gruppo"><label for="du-ampiezza">ampiezza</label>
+          <input type="text" id="du-ampiezza" value="1" /></span>
+          <span class="gruppo"><label for="du-istante">a partire da t =</label>
           <input type="text" id="du-istante" value="10" />
-          <label for="du-istante">s</label>
+          <label for="du-istante">s</label></span>
         </div>
       </fieldset>
       <fieldset class="disturbo">
@@ -234,11 +240,11 @@
         <div class="campo-inline">
           <input type="checkbox" id="dy-attivo" />
           <label for="dy-attivo">Attivo</label>
-          <label for="dy-ampiezza">ampiezza</label>
-          <input type="text" id="dy-ampiezza" value="1" />
-          <label for="dy-istante">a partire da t=</label>
+          <span class="gruppo"><label for="dy-ampiezza">ampiezza</label>
+          <input type="text" id="dy-ampiezza" value="1" /></span>
+          <span class="gruppo"><label for="dy-istante">a partire da t =</label>
           <input type="text" id="dy-istante" value="10" />
-          <label for="dy-istante">s</label>
+          <label for="dy-istante">s</label></span>
         </div>
       </fieldset>
       <fieldset class="disturbo">
@@ -250,11 +256,11 @@
             <option value="gradino">gradino</option>
             <option value="sinusoide">sinusoide</option>
           </select>
-          <label for="n-ampiezza">ampiezza</label>
-          <input type="text" id="n-ampiezza" value="0.05" />
-          <label for="n-istante">a partire da t=</label>
+          <span class="gruppo"><label for="n-ampiezza">ampiezza</label>
+          <input type="text" id="n-ampiezza" value="0.05" /></span>
+          <span class="gruppo"><label for="n-istante">a partire da t =</label>
           <input type="text" id="n-istante" value="10" />
-          <label for="n-istante">s</label>
+          <label for="n-istante">s</label></span>
           <span id="n-omega-campo" style="display:none;">
             <label for="n-omega">ω</label>
             <input type="text" id="n-omega" value="10" />
@@ -385,7 +391,8 @@
   </div>
 
   <script src="../shared/ca-core.js?v=20260807a"></script>
+  <script src="../shared/segno-meno.js?v=20261022a"></script>
   <script src="../shared/ca-plot.js?v=20260908j"></script>
-  <script src="app.js?v=20260910a"></script>
+  <script src="app.js?v=20261022q"></script>
 </body>
 </html>

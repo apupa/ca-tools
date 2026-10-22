@@ -108,12 +108,8 @@
     const fattorizzata = formaFattorizzataTex(K, h, termini);
     // Le due forme sono due blocchi affiancati: stanno sulla stessa riga
     // finche' c'e' spazio e vanno a capo solo su schermi stretti.
-    const blocco = function (tex) {
-      return "<div style=\"max-width:100%; overflow-x:auto;\">\\(\\displaystyle " + tex + "\\)</div>";
-    };
-    divFdtTesto.innerHTML =
-      "<div style=\"display:flex; flex-wrap:wrap; justify-content:center; align-items:center; " +
-      "column-gap:0.5em; row-gap:0.8em; margin:1em 0;\">" +
+    const blocco = function (tex) { return "<div>\\(\\displaystyle " + tex + "\\)</div>"; };
+    divFdtTesto.innerHTML = '<div class="formula-a-capo">' +
       blocco("G(s) = \\dfrac{" + numTex + "}{" + denTex + "}") +
       blocco("= " + fattorizzata) + "</div>";
     typeset(divFdtTesto);
@@ -649,7 +645,8 @@
       // Davanti ai numeri non negativi un segno invisibile, largo quanto
       // il meno: nelle colonne centrate le cifre restano allineate con
       // quelle dei numeri negativi.
-      const num = function (v) { return (v >= 0 ? '<span class="segno-fantasma">-</span>' : "") + v; };
+      // (il "-" visibile diventa "−" con segno-meno.js: il segno invisibile e' lo stesso carattere)
+      const num = function (v) { return (v >= 0 ? '<span class="segno-fantasma">\u2212</span>' : "") + v; };
       tab.righe.forEach(function (r) {
         html += (r.necessaria ? '<tr class="necessaria">' : "<tr>") +
           "<td>" + num(r.omega) + "</td><td>" + num(r.log) + "</td>";
@@ -689,7 +686,11 @@
   function testoLatex(str) {
     return String(str).split("$").map(function (pezzo, i) {
       const inMatematica = i % 2 === 1;
-      if (!inMatematica) pezzo = pezzo.replace(/[\\{}]/g, "").replace(/([%&#_])/g, "\\$1");
+      if (!inMatematica) {
+        pezzo = pezzo.replace(/[\\{}]/g, "").replace(/([%&#_])/g, "\\$1")
+          // trattino che fa da segno davanti a un numero: meno matematico
+          .replace(/(^|[\s(\[,;:=<>\/])-(?=[0-9.])/g, "$1\\ensuremath{-}");
+      }
       SIMBOLI_LATEX.forEach(function (c) {
         pezzo = pezzo.split(c[0]).join(inMatematica ? c[1] + " " : "\\ensuremath{" + c[1] + "}");
       });

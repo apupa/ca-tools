@@ -564,6 +564,20 @@ button.secondario:hover {
   margin: 1.4rem 0 1.3rem;
 }
 
+/* Nella colonna dei comandi i pulsanti riempiono la riga: partono dalla
+   larghezza della scritta (senza andare a capo) e si allargano insieme. */
+.banco-comandi .barra-azioni button {
+  flex: 1 1 auto;
+  white-space: nowrap;
+}
+
+/* Gruppi di pulsanti equivalenti (es. i preset del PID): griglia a due
+   colonne uguali, invece di righe di lunghezza diversa. */
+.banco-comandi .barra-azioni.griglia-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
 /* ---------- Tabelle ----------
    Filetti orizzontali soltanto, testatina in monospaziato: tabella da
    dispensa, non da dashboard. */
@@ -588,6 +602,30 @@ th {
   letter-spacing: .03em;
   color: var(--colore-muted);
   border-bottom: 1px solid var(--colore-testo);
+}
+
+/* Formula lunga spezzata nei suoi membri: stanno sulla stessa riga finche'
+   c'e' spazio e vanno a capo solo su schermi stretti, invece di uscire dal
+   riquadro. Ogni membro e' un <div> con dentro la sua formula. */
+.formula-a-capo {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  column-gap: .5em;
+  row-gap: .8em;
+  margin: 1em 0;
+}
+.formula-a-capo > div {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Nelle tabelle etichetta-valore il th e' l'etichetta di riga, non la
+   testatina: stesso filetto chiaro del valore accanto, altrimenti ogni
+   riga aveva una linea scura sotto l'etichetta e una chiara sotto il valore. */
+tbody th {
+  border-bottom-color: var(--colore-filetto-2);
 }
 
 /* ---------- Tab (schede) ---------- */
